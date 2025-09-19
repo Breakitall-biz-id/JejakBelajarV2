@@ -1,0 +1,451 @@
+"use server"
+
+import { z } from "zod"
+import { and, asc, eq, gt, inArray } from "drizzle-orm"
+
+import { db } from "@/db"
+import {
+  groupMembers,
+  groups,
+  projectStageInstruments,
+  projectStageProgress,
+  projectStages,
+  projects,
+  submissions,
+  userClassAssignments,
+} from "@/db/schema/jejak"
+import { user } from "@/db/schema/auth"
+import {
+  ForbiddenError,
+  UnauthorizedError,
+  requireStudentUser,
+} from "@/lib/auth/session"
+
+type ActionResult<T = void> =
+  | { success: true; data?: T }
+  | { success: false; error: string; fieldErrors?: Record<string, string[]> }
+
+const studentInstrumentSchema = z.enum([
+  "JOURNAL",
+  "SELF_ASSESSMENT",
+  "PEER_ASSESSMENT",
+  "DAILY_NOTE",
+] as const)
+
+const submissionSchema = z.object({
+  projectId: z.string().uuid(),
+  stageId: z.string().uuid(),
+  instrumentType: studentInstrumentSchema,
+  content: z.object({ text: z.string().trim().min(1, "Response is required") }),
+  targetStudentId: z.string().uuid().optional().nullable(),
+})
+
+const studentInstrumentTypes = new Set([
+  "JOURNAL",
+  "SELF_ASSESSMENT",
+  "PEER_ASSESSMENT",
+  "DAILY_NOTE",
+])
+
+export async function submitStageInstrument(
+  values: z.input<typeof submissionSchema>,
+): Promise<ActionResult> {
+  const parsed = submissionSchema.safeParse(values)
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Please review your submission.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    }
+  }
+
+  const { projectId, stageId, instrumentType, content, targetStudentId } = parsed.data
+
+  if (instrumentType === "PEER_ASSESSMENT" && !targetStudentId) {
+    return {
+      success: false,
+      error: "Please select a peer to assess.",
+    }
+  }
+
+  try {
+    const { user: student } = await requireStudentUser()
+
+    await db.transaction(async (tx) => {
+      const projectRecord = await tx
+        .select({
+          id: projects.id,
+          classId: projects.classId,
+          status: projects.status,
+        })
+        .from(projects)
+        .where(eq(projects.id, projectId))
+        .limit(1)
+        .then((rows) => rows[0])
+
+      if (!projectRecord || projectRecord.status !== "PUBLISHED") {
+        throw new ForbiddenError("Project not available.")
+      }
+
+      const classAssignment = await tx
+        .select({ userId: userClassAssignments.userId })
+        .from(userClassAssignments)
+        .where(
+          and(
+            eq(userClassAssignments.userId, student.id),
+            eq(userClassAssignments.classId, projectRecord.classId),
+          ),
+        )
+        .limit(1)
+        .then((rows) => rows[0])
+
+      if (!classAssignment) {
+        throw new ForbiddenError("You are not assigned to this project.")
+      }
+
+      const stageRecord = await tx
+        .select({
+          id: projectStages.id,
+          projectId: projectStages.projectId,
+          order: projectStages.order,
+          name: projectStages.name,
+        })
+        .from(projectStages)
+        .where(
+          and(
+            eq(projectStages.id, stageId),
+            eq(projectStages.projectId, projectId),
+          ),
+        )
+        .limit(1)
+        .then((rows) => rows[0])
+
+      if (!stageRecord) {
+        throw new ForbiddenError("Stage not found.")
+      }
+
+      const stageInstruments = await tx
+        .select({
+          instrumentType: projectStageInstruments.instrumentType,
+          isRequired: projectStageInstruments.isRequired,
+        })
+        .from(projectStageInstruments)
+        .where(eq(projectStageInstruments.projectStageId, stageId))
+
+      const instrumentTypesForStage = new Set(stageInstruments.map((instrument) => instrument.instrumentType))
+
+      if (!instrumentTypesForStage.has(instrumentType)) {
+        throw new ForbiddenError("This instrument is not required for the selected stage.")
+      }
+
+      const progress = await ensureStageProgress(tx, student.id, projectId, stageRecord)
+
+      if (progress.status === "LOCKED") {
+        throw new ForbiddenError("This stage is locked. Complete previous stages first.")
+      }
+
+      if (instrumentType === "PEER_ASSESSMENT" && targetStudentId) {
+        await validatePeerTarget(tx, student.id, projectId, targetStudentId)
+      }
+
+      const existingSubmission = await tx
+        .select({ id: submissions.id })
+        .from(submissions)
+        .where(
+          and(
+            eq(submissions.studentId, student.id),
+            eq(submissions.projectId, projectId),
+            eq(submissions.projectStageId, stageId),
+            eq(submissions.instrumentType, instrumentType),
+            ...(instrumentType === "PEER_ASSESSMENT" && targetStudentId
+              ? [eq(submissions.targetStudentId, targetStudentId)]
+              : []),
+          ),
+        )
+        .limit(1)
+        .then((rows) => rows[0])
+
+      if (existingSubmission) {
+        await tx
+          .update(submissions)
+          .set({
+            content,
+            submittedAt: new Date(),
+            targetStudentId: targetStudentId ?? null,
+            updatedAt: new Date(),
+          })
+          .where(eq(submissions.id, existingSubmission.id))
+      } else {
+        await tx.insert(submissions).values({
+          studentId: student.id,
+          projectId,
+          projectStageId: stageId,
+          projectStageName: stageRecord.name ?? stageRecord.id,
+          instrumentType,
+          content,
+          targetStudentId: targetStudentId ?? null,
+        })
+      }
+
+      await evaluateStageCompletion(tx, student.id, projectId, stageRecord.id)
+    })
+
+    return { success: true }
+  } catch (error) {
+    return handleError(error, "Unable to save your response.")
+  }
+}
+
+function handleError(error: unknown, fallback: string): ActionResult {
+  if (error instanceof UnauthorizedError) {
+    return { success: false, error: "You must be signed in to continue." }
+  }
+
+  if (error instanceof ForbiddenError) {
+    return { success: false, error: error.message }
+  }
+
+  console.error(fallback, error)
+  return { success: false, error: fallback }
+}
+
+async function ensureStageProgress(
+  tx: any,
+  studentId: string,
+  projectId: string,
+  stage: { id: string; order: number },
+) {
+  const existing = await tx
+    .select()
+    .from(projectStageProgress)
+    .where(
+      and(
+        eq(projectStageProgress.projectStageId, stage.id),
+        eq(projectStageProgress.studentId, studentId),
+      ),
+    )
+    .limit(1)
+    .then((rows) => rows[0])
+
+  if (existing) {
+    return existing
+  }
+
+  const [created] = await tx
+    .insert(projectStageProgress)
+    .values({
+      projectStageId: stage.id,
+      studentId,
+      status: stage.order === 1 ? "IN_PROGRESS" : "LOCKED",
+      unlockedAt: stage.order === 1 ? new Date() : null,
+    })
+    .returning()
+
+  return created
+}
+
+async function validatePeerTarget(
+  tx: any,
+  studentId: string,
+  projectId: string,
+  targetStudentId: string,
+) {
+  if (studentId === targetStudentId) {
+    throw new ForbiddenError("You cannot assess yourself.")
+  }
+
+  const studentGroup = await tx
+    .select({ groupId: groups.id })
+    .from(groups)
+    .innerJoin(groupMembers, eq(groups.id, groupMembers.groupId))
+    .where(
+      and(
+        eq(groups.projectId, projectId),
+        eq(groupMembers.studentId, studentId),
+      ),
+    )
+    .limit(1)
+    .then((rows) => rows[0])
+
+  if (!studentGroup) {
+    throw new ForbiddenError("You are not assigned to a group for this project.")
+  }
+
+  const peer = await tx
+    .select({ studentId: groupMembers.studentId })
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.groupId, studentGroup.groupId),
+        eq(groupMembers.studentId, targetStudentId),
+      ),
+    )
+    .limit(1)
+    .then((rows) => rows[0])
+
+  if (!peer) {
+    throw new ForbiddenError("Peer not found in your group.")
+  }
+}
+
+async function evaluateStageCompletion(
+  tx: any,
+  studentId: string,
+  projectId: string,
+  stageId: string,
+) {
+  const stage = await tx
+    .select({
+      id: projectStages.id,
+      order: projectStages.order,
+      projectId: projectStages.projectId,
+    })
+    .from(projectStages)
+    .where(eq(projectStages.id, stageId))
+    .limit(1)
+    .then((rows) => rows[0])
+
+  if (!stage) {
+    return
+  }
+
+  const progress = await tx
+    .select()
+    .from(projectStageProgress)
+    .where(
+      and(
+        eq(projectStageProgress.projectStageId, stageId),
+        eq(projectStageProgress.studentId, studentId),
+      ),
+    )
+    .limit(1)
+    .then((rows) => rows[0])
+
+  if (!progress) {
+    return
+  }
+
+  const stageInstruments = await tx
+    .select({
+      instrumentType: projectStageInstruments.instrumentType,
+      isRequired: projectStageInstruments.isRequired,
+    })
+    .from(projectStageInstruments)
+    .where(eq(projectStageInstruments.projectStageId, stageId))
+
+  const requiredStudentInstruments = stageInstruments
+    .filter((instrument) => instrument.isRequired && studentInstrumentTypes.has(instrument.instrumentType))
+    .map((instrument) => instrument.instrumentType)
+
+  if (requiredStudentInstruments.length === 0) {
+    await markStageCompleted(tx, progress.id, stageId)
+    await unlockNextStage(tx, studentId, projectId, stage.order)
+    return
+  }
+
+  const studentSubmissions = await tx
+    .select({
+      instrumentType: submissions.instrumentType,
+      targetStudentId: submissions.targetStudentId,
+    })
+    .from(submissions)
+    .where(
+      and(
+        eq(submissions.studentId, studentId),
+        eq(submissions.projectId, projectId),
+        eq(submissions.projectStageId, stageId),
+        inArray(submissions.instrumentType, requiredStudentInstruments),
+      ),
+    )
+
+  const hasFulfilledAll = requiredStudentInstruments.every((instrumentType) => {
+    if (instrumentType === "PEER_ASSESSMENT") {
+      return studentSubmissions.some(
+        (submission) => submission.instrumentType === instrumentType && submission.targetStudentId,
+      )
+    }
+
+    return studentSubmissions.some(
+      (submission) => submission.instrumentType === instrumentType,
+    )
+  })
+
+  if (!hasFulfilledAll) {
+    return
+  }
+
+  await markStageCompleted(tx, progress.id, stageId)
+  await unlockNextStage(tx, studentId, projectId, stage.order)
+}
+
+async function markStageCompleted(
+  tx: any,
+  progressId: string,
+  stageId: string,
+) {
+  await tx
+    .update(projectStageProgress)
+    .set({
+      status: "COMPLETED",
+      completedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(projectStageProgress.id, progressId))
+}
+
+async function unlockNextStage(
+  tx: any,
+  studentId: string,
+  projectId: string,
+  currentOrder: number,
+) {
+  const nextStage = await tx
+    .select({
+      id: projectStages.id,
+      order: projectStages.order,
+    })
+    .from(projectStages)
+    .where(
+      and(
+        eq(projectStages.projectId, projectId),
+        gt(projectStages.order, currentOrder),
+      ),
+    )
+    .orderBy(asc(projectStages.order))
+    .limit(1)
+    .then((rows) => rows[0])
+
+  if (!nextStage) {
+    return
+  }
+
+  const nextProgress = await tx
+    .select()
+    .from(projectStageProgress)
+    .where(
+      and(
+        eq(projectStageProgress.projectStageId, nextStage.id),
+        eq(projectStageProgress.studentId, studentId),
+      ),
+    )
+    .limit(1)
+    .then((rows) => rows[0])
+
+  if (!nextProgress) {
+    await tx.insert(projectStageProgress).values({
+      projectStageId: nextStage.id,
+      studentId,
+      status: "IN_PROGRESS",
+      unlockedAt: new Date(),
+    })
+    return
+  }
+
+  if (nextProgress.status === "LOCKED") {
+    await tx
+      .update(projectStageProgress)
+      .set({ status: "IN_PROGRESS", unlockedAt: new Date(), updatedAt: new Date() })
+      .where(eq(projectStageProgress.id, nextProgress.id))
+  }
+}
