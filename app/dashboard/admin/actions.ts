@@ -18,6 +18,11 @@ import {
   UnauthorizedError,
   requireAdminUser,
 } from "@/lib/auth/session"
+import { auth } from "@/lib/auth"
+import {
+  createClassroomSchema,
+  updateClassroomSchema,
+} from "./classroom-schemas"
 
 const DASHBOARD_ADMIN_PATH = "/dashboard/admin"
 
@@ -46,12 +51,6 @@ const updateTermSchema = baseTermSchema.extend({
   id: z.string().uuid(),
   status: termStatusSchema.optional(),
   setActive: z.boolean().optional(),
-})
-
-const classSchema = z.object({
-  id: z.string().uuid().optional(),
-  termId: z.string().uuid(),
-  name: z.string().trim().min(1, "Class name is required").max(255),
 })
 
 const deleteTermSchema = z.object({ termId: z.string().uuid() })
@@ -283,9 +282,9 @@ export async function setActiveAcademicTerm(
 }
 
 export async function createClassroom(
-  values: z.input<typeof classSchema>,
+  values: z.input<typeof createClassroomSchema>,
 ): Promise<ActionResult> {
-  const parsed = classSchema.safeParse({ ...values, id: undefined })
+  const parsed = createClassroomSchema.safeParse(values)
 
   if (!parsed.success) {
     return {
@@ -298,12 +297,34 @@ export async function createClassroom(
   try {
     await requireAdminUser()
 
-    await db
-      .insert(classes)
-      .values({
-        name: parsed.data.name,
-        academicTermId: parsed.data.termId,
-      })
+    await db.transaction(async (tx) => {
+      const teacherIds = Array.from(new Set(parsed.data.teacherIds))
+      const studentIds = Array.from(new Set(parsed.data.studentIds))
+
+      const [created] = await tx
+        .insert(classes)
+        .values({
+          name: parsed.data.name,
+          academicTermId: parsed.data.termId,
+        })
+        .returning({ id: classes.id })
+
+      if (!created) {
+        throw new Error("Failed to persist class record")
+      }
+
+      const assignmentPayload = [
+        ...teacherIds.map((userId) => ({ classId: created.id, userId })),
+        ...studentIds.map((userId) => ({ classId: created.id, userId })),
+      ]
+
+      if (assignmentPayload.length > 0) {
+        await tx
+          .insert(userClassAssignments)
+          .values(assignmentPayload)
+          .onConflictDoNothing()
+      }
+    })
 
     revalidatePath(DASHBOARD_ADMIN_PATH)
 
@@ -314,9 +335,9 @@ export async function createClassroom(
 }
 
 export async function updateClassroom(
-  values: z.input<typeof classSchema>,
+  values: z.input<typeof updateClassroomSchema>,
 ): Promise<ActionResult> {
-  const parsed = classSchema.required({ id: true }).safeParse(values)
+  const parsed = updateClassroomSchema.safeParse(values)
 
   if (!parsed.success) {
     return {
@@ -329,10 +350,34 @@ export async function updateClassroom(
   try {
     await requireAdminUser()
 
-    await db
-      .update(classes)
-      .set({ name: parsed.data.name })
-      .where(eq(classes.id, parsed.data.id))
+    await db.transaction(async (tx) => {
+      await tx
+        .update(classes)
+        .set({
+          name: parsed.data.name,
+          academicTermId: parsed.data.termId,
+        })
+        .where(eq(classes.id, parsed.data.id))
+
+      await tx
+        .delete(userClassAssignments)
+        .where(eq(userClassAssignments.classId, parsed.data.id))
+
+      const teacherIds = Array.from(new Set(parsed.data.teacherIds))
+      const studentIds = Array.from(new Set(parsed.data.studentIds))
+
+      const assignmentPayload = [
+        ...teacherIds.map((userId) => ({ classId: parsed.data.id, userId })),
+        ...studentIds.map((userId) => ({ classId: parsed.data.id, userId })),
+      ]
+
+      if (assignmentPayload.length > 0) {
+        await tx
+          .insert(userClassAssignments)
+          .values(assignmentPayload)
+          .onConflictDoNothing()
+      }
+    })
 
     revalidatePath(DASHBOARD_ADMIN_PATH)
 
@@ -382,49 +427,32 @@ export async function createAccount(
   }
 
   try {
-    await requireAdminUser();
-    const { email, password, name, role } = parsed.data;
+    await requireAdminUser()
+    const { email, password, name, role } = parsed.data
 
-    // Call Better Auth API endpoint for signUpEmail
-    const baseUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
-    // Next.js dynamic route [..all] is for routing, not for URL. Use /api/auth
-    const res = await fetch(
-      `${baseUrl}/api/auth`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "signUpEmail",
-          email,
-          password,
-          name,
-        }),
-      }
-    );
+    const response = await auth.api.signUpEmail({
+      body: {
+        email,
+        password,
+        name,
+      },
+    })
 
-    let result: any = null;
-    try {
-      result = await res.json();
-    } catch (e) {
-      // If not JSON, log the response text for debugging
-      const text = await res.text();
-      throw new Error(`Server error: response is not JSON. Response: ${text.substring(0, 500)}`);
+    const createdUser = response?.data?.user ?? response?.user
+
+    if (!createdUser?.id) {
+      throw new Error(response?.error?.message ?? "Account creation failed")
     }
 
-    if (!res.ok || !result?.user?.id) {
-      throw new Error(result?.error?.message || "Account creation failed");
-    }
-
-    // Update role in DB
     await db
       .update(user)
       .set({ role })
-      .where(eq(user.id, result.user.id));
+      .where(eq(user.id, createdUser.id))
 
-    revalidatePath(DASHBOARD_ADMIN_PATH);
-    return { success: true };
+    revalidatePath(DASHBOARD_ADMIN_PATH)
+    return { success: true }
   } catch (error) {
-    return handleError(error, "Unable to create account. Ensure the email is unique.");
+    return handleError(error, "Unable to create account. Ensure the email is unique.")
   }
 }
 

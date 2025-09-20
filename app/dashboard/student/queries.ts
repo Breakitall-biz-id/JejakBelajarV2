@@ -279,7 +279,7 @@ export async function getStudentDashboardData(
 
   const studentsByClass = await fetchClassStudents(classIds)
 
-  const projects = [] as StudentDashboardData["projects"]
+  const studentProjects = [] as StudentDashboardData["projects"]
 
   for (const project of projectRows) {
     const stagesForProject = stageRowsByProject[project.id] ?? []
@@ -318,7 +318,7 @@ export async function getStudentDashboardData(
     const studentGroup = studentGroupRows.find((row) => row.projectId === project.id)
     const groupMembersList = studentGroup ? (membersByGroup[studentGroup.groupId] ?? []) : []
 
-    projects.push({
+    studentProjects.push({
       id: project.id,
       title: project.title,
       description: project.description,
@@ -345,7 +345,7 @@ export async function getStudentDashboardData(
     })
   }
 
-  return { projects }
+  return { projects: studentProjects }
 }
 
 async function ensureStageProgressEntries(

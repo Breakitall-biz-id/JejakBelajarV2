@@ -114,6 +114,7 @@ export async function overrideStageStatus(
         .select({
           id: projectStages.id,
           projectId: projectStages.projectId,
+          order: projectStages.order, // tambahkan order
         })
         .from(projectStages)
         .where(eq(projectStages.id, parsed.data.stageId))
@@ -145,7 +146,7 @@ export async function overrideStageStatus(
         .returning()
 
       if (parsed.data.status === "COMPLETED") {
-        await unlockNextStage(tx, parsed.data.studentId, parsed.data.projectId, progress.projectStageId)
+        await unlockNextStage(tx, parsed.data.studentId, parsed.data.projectId, stageRecord.order)
       }
     })
 

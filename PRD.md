@@ -70,6 +70,7 @@ The platform features three distinct user roles with specific access rights:
 * **UI Component Library**: shadcn/ui, with the main dashboard layout adapted from the **shadcn-blocks** template.
 * **Database**: Neon (Serverless PostgreSQL)
 * **Authentication**: NextAuth.js (Auth.js) or a similar solution to handle login, sessions, and multi-role route protection.
+* **Code Structure: Most be modular, Component Reusable, Do not build one module at one file, clean code
 
 ---
 

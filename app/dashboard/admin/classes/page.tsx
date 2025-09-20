@@ -4,8 +4,14 @@ import { ClassesSection } from "../_components/admin-dashboard/sections/classes-
 export default async function ClassesPage() {
   const data = await getAdminDashboardData()
   return (
-    <div className="p-4 lg:p-6">
-      <ClassesSection classes={data.classes} terms={data.terms} />
+    <div className="space-y-6 px-4 pb-10 pt-6 lg:px-8">
+      <ClassesSection
+        classes={data.classes}
+        terms={data.terms}
+        teachers={data.teachers}
+        students={data.students}
+        assignments={data.assignments}
+      />
     </div>
   )
 }

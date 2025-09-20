@@ -168,3 +168,16 @@ export async function requireTeacherUser(): Promise<ServerAuthSession> {
 export async function requireStudentUser(): Promise<ServerAuthSession> {
   return assertRole("STUDENT")
 }
+
+export function resolveDashboardPath(role: UserRole): string {
+  switch (role) {
+    case "ADMIN":
+      return "/dashboard/admin"
+    case "TEACHER":
+      return "/dashboard/teacher"
+    case "STUDENT":
+      return "/dashboard/student"
+    default:
+      return "/dashboard"
+  }
+}

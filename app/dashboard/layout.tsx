@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
+import { getServerAuthSession } from "@/lib/auth/session"
 
 import "@/app/dashboard/theme.css"
 
@@ -16,6 +17,7 @@ export default async function DashboardLayout({
 }) {
   const cookieStore = await cookies()
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
+  const session = await getServerAuthSession()
 
   return (
     <SidebarProvider
@@ -26,7 +28,11 @@ export default async function DashboardLayout({
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <AppSidebar
+        variant="inset"
+        initialRole={session?.user.role ?? null}
+        initialUser={session?.user ?? null}
+      />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">{children}</div>

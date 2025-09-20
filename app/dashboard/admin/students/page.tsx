@@ -13,7 +13,7 @@ export default async function StudentsPage() {
     dibuatPada: s.createdAt,
   }));
   return (
-    <div className="p-4 lg:p-6">
+    <div className="space-y-6 px-4 pb-10 pt-6 lg:px-8">
       <StudentsSection students={students} />
     </div>
   );

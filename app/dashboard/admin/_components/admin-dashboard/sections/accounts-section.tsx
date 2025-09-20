@@ -10,6 +10,7 @@ import {
   updateAccount,
   deleteAccount,
 } from "../../../actions"
+import type { ClassMembership } from "../../../queries"
 import {
   Card,
   CardContent,
@@ -18,14 +19,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import {
   Dialog,
   DialogContent,
@@ -43,7 +36,9 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 
 const createAccountForm = z.object({
@@ -57,13 +52,27 @@ type CreateAccountValues = z.infer<typeof createAccountForm>
 type AccountsSectionProps = {
   teachers: Array<{ id: string; name: string | null; email: string; createdAt: string }>
   students: Array<{ id: string; name: string | null; email: string; createdAt: string }>
+  teacherClasses: Record<string, ClassMembership[]>
+  studentClasses: Record<string, ClassMembership[]>
 }
 
-export function AccountsSection({ teachers, students }: AccountsSectionProps) {
+export function AccountsSection({ teachers, students, teacherClasses, studentClasses }: AccountsSectionProps) {
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <AccountCard title="Teachers" description="Manage facilitator accounts." accounts={teachers} role="TEACHER" />
-      <AccountCard title="Students" description="Manage learner accounts." accounts={students} role="STUDENT" />
+    <div className="grid gap-6 xl:grid-cols-2">
+      <AccountCard
+        title="Guru"
+        description="Kelola akun fasilitator dan lihat kelas yang mereka ampu."
+        accounts={teachers}
+        role="TEACHER"
+        membershipMap={teacherClasses}
+      />
+      <AccountCard
+        title="Siswa"
+        description="Kelola akun peserta dan pantau kelas yang mereka ikuti."
+        accounts={students}
+        role="STUDENT"
+        membershipMap={studentClasses}
+      />
     </div>
   )
 }
@@ -73,13 +82,15 @@ type AccountCardProps = {
   description: string
   accounts: Array<{ id: string; name: string | null; email: string; createdAt: string }>
   role: "TEACHER" | "STUDENT"
+  membershipMap: Record<string, ClassMembership[]>
 }
 
-function AccountCard({ title, description, accounts, role }: AccountCardProps) {
-  const roleLabel = role === "TEACHER" ? "teacher" : "student"
+function AccountCard({ title, description, accounts, role, membershipMap }: AccountCardProps) {
+  const totalAccounts = accounts.length
+  const label = role === "TEACHER" ? "guru" : "siswa"
 
   return (
-    <Card>
+    <Card className="border-muted/70 shadow-sm">
       <CardHeader className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <CardTitle>{title}</CardTitle>
@@ -88,37 +99,118 @@ function AccountCard({ title, description, accounts, role }: AccountCardProps) {
         <CreateAccountButton role={role} />
       </CardHeader>
       <CardContent className="space-y-4">
-        {accounts.length === 0 ? (
-          <p className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
-            No {roleLabel} accounts yet. Create one to get started.
-          </p>
+        <div className="flex items-center justify-between rounded-lg border border-dashed border-muted/60 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+          <span>{totalAccounts} akun {label}</span>
+          <span>Perbarui data dan bagikan kredensial awal</span>
+        </div>
+        {totalAccounts === 0 ? (
+          <EmptyAccountsMessage label={label} />
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {accounts.map((account) => (
-                <TableRow key={account.id}>
-                  <TableCell className="font-medium">{account.name ?? "—"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{account.email}</TableCell>
-                  <TableCell className="flex justify-end gap-2">
-                    <EditAccountButton account={account} role={role} />
-                    <DeleteAccountButton userId={account.id} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <div className="space-y-3">
+            {accounts.map((account) => (
+              <AccountRow
+                key={account.id}
+                account={account}
+                role={role}
+                memberships={membershipMap[account.id] ?? []}
+              />
+            ))}
+          </div>
         )}
       </CardContent>
     </Card>
   )
 }
+
+type AccountRowProps = {
+  account: { id: string; name: string | null; email: string; createdAt: string }
+  role: "TEACHER" | "STUDENT"
+  memberships: ClassMembership[]
+}
+
+function AccountRow({ account, role, memberships }: AccountRowProps) {
+  const displayName = account.name?.trim() || account.email.split("@")[0]
+  const initials = getInitials(displayName)
+  const createdAt = formatDate(account.createdAt)
+  const hasMemberships = memberships.length > 0
+
+  return (
+    <div className="rounded-xl border border-muted/60 bg-background p-4 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10 border">
+            <AvatarFallback className="text-sm font-semibold uppercase">{initials}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold leading-tight">{displayName}</p>
+            <p className="truncate text-xs text-muted-foreground">{account.email}</p>
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-1 text-right">
+          <Badge variant="outline" className="text-[11px] uppercase tracking-wide">
+            {hasMemberships ? `${memberships.length} kelas` : "Belum ada kelas"}
+          </Badge>
+          <span className="text-[11px] text-muted-foreground">Dibuat {createdAt}</span>
+        </div>
+      </div>
+
+      <Separator className="my-3" />
+
+      <div className="space-y-2">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Kelas</p>
+        {hasMemberships ? (
+          <div className="flex flex-wrap gap-2">
+            {memberships.map((membership) => (
+              <ClassChip key={membership.id} membership={membership} />
+            ))}
+          </div>
+        ) : (
+          <p className="rounded-lg border border-dashed border-muted/50 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+            Belum bergabung dalam kelas mana pun.
+          </p>
+        )}
+      </div>
+
+      <div className="mt-4 flex justify-end gap-2">
+        <EditAccountButton account={account} role={role} />
+        <DeleteAccountButton userId={account.id} />
+      </div>
+    </div>
+  )
+}
+
+type ClassChipProps = {
+  membership: ClassMembership
+}
+
+function ClassChip({ membership }: ClassChipProps) {
+  const isActive = membership.termStatus === "ACTIVE"
+  return (
+    <div className="flex flex-col gap-1 rounded-lg border border-muted/50 bg-muted/10 px-3 py-2 text-xs">
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium leading-tight">{membership.name}</span>
+        <Badge variant={isActive ? "default" : "secondary"} className="text-[10px] uppercase tracking-wide">
+          {isActive ? "Aktif" : "Tidak aktif"}
+        </Badge>
+      </div>
+      <span className="text-[11px] text-muted-foreground">{membership.termLabel}</span>
+    </div>
+  )
+}
+
+function EmptyAccountsMessage({ label }: { label: string }) {
+  return (
+    <div className="rounded-xl border border-dashed border-muted/60 bg-muted/20 p-6 text-center text-sm text-muted-foreground">
+      Tidak ada akun {label} yang terdaftar. Buat akun baru untuk memulai.
+    </div>
+  )
+}
+
+const updateAccountForm = z.object({
+  name: z.string().trim().min(1, "Name is required").max(255),
+})
+
+type UpdateAccountValues = z.infer<typeof updateAccountForm>
 
 function CreateAccountButton({ role }: { role: "TEACHER" | "STUDENT" }) {
   const [open, setOpen] = useState(false)
@@ -157,13 +249,13 @@ function CreateAccountButton({ role }: { role: "TEACHER" | "STUDENT" }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">New {role === "TEACHER" ? "teacher" : "student"}</Button>
+        <Button size="sm">Tambah {role === "TEACHER" ? "guru" : "siswa"}</Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create {role === "TEACHER" ? "teacher" : "student"}</DialogTitle>
+          <DialogTitle>Buat akun {role === "TEACHER" ? "guru" : "siswa"}</DialogTitle>
           <DialogDescription>
-            Provide initial credentials. Share the password with the user so they can sign in.
+            Masukkan data awal. Bagikan password sementara kepada pengguna untuk login pertama.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -173,7 +265,7 @@ function CreateAccountButton({ role }: { role: "TEACHER" | "STUDENT" }) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Full name</FormLabel>
+                  <FormLabel>Nama lengkap</FormLabel>
                   <FormControl>
                     <Input placeholder="Jane Doe" {...field} />
                   </FormControl>
@@ -186,9 +278,9 @@ function CreateAccountButton({ role }: { role: "TEACHER" | "STUDENT" }) {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email address</FormLabel>
+                  <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="name@example.com" {...field} />
+                    <Input type="email" placeholder="nama@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -199,9 +291,9 @@ function CreateAccountButton({ role }: { role: "TEACHER" | "STUDENT" }) {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Temporary password</FormLabel>
+                  <FormLabel>Password sementara</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="At least 8 characters" {...field} />
+                    <Input type="password" placeholder="Minimal 8 karakter" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -209,10 +301,10 @@ function CreateAccountButton({ role }: { role: "TEACHER" | "STUDENT" }) {
             />
             <div className="flex justify-end gap-2">
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-                Cancel
+                Batal
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "Saving…" : "Create"}
+                {isPending ? "Menyimpan…" : "Buat"}
               </Button>
             </div>
           </form>
@@ -221,12 +313,6 @@ function CreateAccountButton({ role }: { role: "TEACHER" | "STUDENT" }) {
     </Dialog>
   )
 }
-
-const updateAccountForm = z.object({
-  name: z.string().trim().min(1, "Name is required").max(255),
-})
-
-type UpdateAccountValues = z.infer<typeof updateAccountForm>
 
 function EditAccountButton({
   account,
@@ -279,7 +365,7 @@ function EditAccountButton({
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit account</DialogTitle>
+          <DialogTitle>Edit akun</DialogTitle>
           <DialogDescription>{account.email}</DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -289,7 +375,7 @@ function EditAccountButton({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Full name</FormLabel>
+                  <FormLabel>Nama lengkap</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -299,10 +385,10 @@ function EditAccountButton({
             />
             <div className="flex justify-end gap-2">
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-                Cancel
+                Batal
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "Saving…" : "Save"}
+                {isPending ? "Menyimpan…" : "Simpan"}
               </Button>
             </div>
           </form>
@@ -328,7 +414,21 @@ function DeleteAccountButton({ userId }: { userId: string }) {
 
   return (
     <Button variant="destructive" size="sm" onClick={onDelete} disabled={isPending}>
-      {isPending ? "Removing…" : "Delete"}
+      {isPending ? "Menghapus…" : "Hapus"}
     </Button>
   )
+}
+
+function getInitials(value: string) {
+  const parts = value.trim().split(/\s+/)
+  if (parts.length === 1) {
+    return parts[0]!.slice(0, 2).toUpperCase()
+  }
+  return `${parts[0]?.[0] ?? ""}${parts[parts.length - 1]?.[0] ?? ""}`.toUpperCase()
+}
+
+function formatDate(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.valueOf())) return "-"
+  return date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })
 }

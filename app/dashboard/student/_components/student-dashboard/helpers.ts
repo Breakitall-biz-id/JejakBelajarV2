@@ -1,4 +1,12 @@
 import type { StudentDashboardData } from "../../queries"
+import type { LucideIcon } from "lucide-react"
+import {
+  BookOpen,
+  ClipboardList,
+  Edit,
+  PenLine,
+  Users,
+} from "lucide-react"
 
 export const STUDENT_INSTRUMENT_TYPES = new Set([
   "JOURNAL",
@@ -29,16 +37,31 @@ export function instrumentDescription(instrument: string) {
   }
 }
 
-export function getStageStatusBadge(
-  status: StudentDashboardData["projects"][number]["stages"][number]["status"],
-) {
+type StageStatus = StudentDashboardData["projects"][number]["stages"][number]["status"]
+
+export function getStageStatusBadge(status: StageStatus) {
   switch (status) {
     case "COMPLETED":
-      return { label: "Completed", variant: "default" as const }
+      return {
+        label: "Completed",
+        variant: "outline" as const,
+        badgeClassName: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300",
+        indicatorClassName: "bg-emerald-500",
+      }
     case "IN_PROGRESS":
-      return { label: "In progress", variant: "secondary" as const }
+      return {
+        label: "In progress",
+        variant: "outline" as const,
+        badgeClassName: "border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-300",
+        indicatorClassName: "bg-sky-500",
+      }
     default:
-      return { label: "Locked", variant: "outline" as const }
+      return {
+        label: "Locked",
+        variant: "outline" as const,
+        badgeClassName: "border-muted-foreground/20 bg-muted text-muted-foreground",
+        indicatorClassName: "bg-muted-foreground/40",
+      }
   }
 }
 
@@ -60,4 +83,15 @@ export function extractSubmissionText(content: unknown) {
     return content
   }
   return ""
+}
+
+const instrumentIconMap: Record<string, LucideIcon> = {
+  JOURNAL: PenLine,
+  SELF_ASSESSMENT: ClipboardList,
+  PEER_ASSESSMENT: Users,
+  DAILY_NOTE: BookOpen,
+}
+
+export function getInstrumentIcon(instrument: string): LucideIcon {
+  return instrumentIconMap[instrument] ?? Edit
 }

@@ -1,97 +1,66 @@
-import * as React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+"use client"
+
+import { useState } from "react"
+import { Plus } from "lucide-react"
+
+import type { ClassWizardValues } from "@/app/dashboard/admin/classroom-schemas"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { classFormSchema, ClassFormValues, Option } from "./edit-class-dialogs";
-import { Plus } from "lucide-react";
+} from "@/components/ui/dialog"
 
-export function CreateKelasDialog({ termOptions, onSubmit, isPending }: {
-  termOptions: Option[];
-  onSubmit: (values: ClassFormValues) => void;
-  isPending: boolean;
-}) {
-  const [open, setOpen] = React.useState(false);
-  const form = useForm<ClassFormValues>({
-    resolver: zodResolver(classFormSchema),
-    defaultValues: {
-      name: "",
-      termId: termOptions[0]?.id ?? "",
-    },
-  });
+import { ClassWizardForm } from "./class-wizard-form"
+import type { Option, ParticipantOption } from "./types"
+
+type CreateKelasDialogProps = {
+  termOptions: Option[]
+  teacherOptions: ParticipantOption[]
+  studentOptions: ParticipantOption[]
+  defaultValues: ClassWizardValues
+  disabled?: boolean
+  onSubmit: (values: ClassWizardValues) => Promise<boolean>
+}
+
+export function CreateKelasDialog({
+  termOptions,
+  teacherOptions,
+  studentOptions,
+  defaultValues,
+  disabled,
+  onSubmit,
+}: CreateKelasDialogProps) {
+  const [open, setOpen] = useState(false)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">Tambah 
-            <Plus className="ml-2 h-4 w-4" />
-        </Button>      
-        </DialogTrigger>
-      <DialogContent className="max-w-lg">
+        <Button size="sm" disabled={disabled}>
+          Tambah kelas
+          <Plus className="ml-2 h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Buat Kelas</DialogTitle>
-          <DialogDescription>Hubungkan kelas ke tahun ajaran & semester yang sudah dipublikasikan.</DialogDescription>
+          <DialogTitle>Buat kelas baru</DialogTitle>
+          <DialogDescription>
+            Lengkapi detail kelas lalu hubungkan minimal satu guru dan siswa sebelum disimpan.
+          </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nama Kelas</FormLabel>
-                  <FormControl>
-                    <Input placeholder="cth: X IPA 1" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="termId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tahun Ajaran & Semester</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih tahun ajaran & semester" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {termOptions.map((option) => (
-                        <SelectItem key={option.id} value={option.id}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-                Batal
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Menyimpan…" : "Buat"}
-              </Button>
-            </div>
-          </form>
-        </Form>
+        <ClassWizardForm
+          mode="create"
+          defaultValues={defaultValues}
+          termOptions={termOptions}
+          teacherOptions={teacherOptions}
+          studentOptions={studentOptions}
+          onSubmit={onSubmit}
+          onCancel={() => setOpen(false)}
+        />
       </DialogContent>
     </Dialog>
-  );
+  )
 }

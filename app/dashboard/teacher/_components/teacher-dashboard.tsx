@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -131,12 +132,17 @@ export function TeacherDashboard({
 
   return (
     <div className="space-y-8 px-4 pb-8 pt-4 lg:px-6">
-      <header className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Teacher Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome back, {teacher.name ?? teacher.email}. Manage your project-based learning cycles,
-          stages, and student groups for the active academic terms.
-        </p>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight">Teacher Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome back, {teacher.name ?? teacher.email}. Manage your project-based learning cycles,
+            stages, and student groups for the active academic terms.
+          </p>
+        </div>
+        <Button variant="outline" asChild>
+          <Link href="/dashboard/teacher/reports">Reports &amp; exports</Link>
+        </Button>
       </header>
 
       {data.classes.length === 0 ? (

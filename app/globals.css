@@ -189,3 +189,29 @@
     letter-spacing: var(--tracking-normal);
   }
 }
+
+@layer utilities {
+  .animate-section-fade {
+    animation: section-fade-in 360ms cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  }
+}
+
+@keyframes section-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-section-fade {
+    animation-duration: 1ms;
+    animation-iteration-count: 1;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

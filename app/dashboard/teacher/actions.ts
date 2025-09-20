@@ -146,16 +146,17 @@ const ensureTeacherAccessToClass = async (
   teacherId: string,
   classId: string,
 ) => {
-  const assignment = await db.query.userClassAssignments.findFirst({
-    columns: {
-      userId: true,
-      classId: true,
-    },
-    where: and(
-      eq(userClassAssignments.userId, teacherId),
-      eq(userClassAssignments.classId, classId),
-    ),
-  })
+  const assignment = await db
+    .select({ userId: userClassAssignments.userId })
+    .from(userClassAssignments)
+    .where(
+      and(
+        eq(userClassAssignments.userId, teacherId),
+        eq(userClassAssignments.classId, classId),
+      ),
+    )
+    .limit(1)
+    .then((rows) => rows[0])
 
   if (!assignment) {
     throw new ForbiddenError("You are not assigned to this class.")
@@ -166,13 +167,12 @@ const ensureTeacherOwnsProject = async (
   teacherId: string,
   projectId: string,
 ) => {
-  const project = await db.query.projects.findFirst({
-    columns: {
-      id: true,
-      teacherId: true,
-    },
-    where: and(eq(projects.id, projectId), eq(projects.teacherId, teacherId)),
-  })
+  const project = await db
+    .select({ id: projects.id })
+    .from(projects)
+    .where(and(eq(projects.id, projectId), eq(projects.teacherId, teacherId)))
+    .limit(1)
+    .then((rows) => rows[0])
 
   if (!project) {
     throw new ForbiddenError("You do not manage this project.")
@@ -381,13 +381,15 @@ export async function updateProjectStage(
   try {
     const { user: teacher } = await requireTeacherUser()
 
-    const stage = await db.query.projectStages.findFirst({
-      columns: {
-        id: true,
-        projectId: true,
-      },
-      where: eq(projectStages.id, parsed.data.stageId),
-    })
+    const stage = await db
+      .select({
+        id: projectStages.id,
+        projectId: projectStages.projectId,
+      })
+      .from(projectStages)
+      .where(eq(projectStages.id, parsed.data.stageId))
+      .limit(1)
+      .then((rows) => rows[0])
 
     if (!stage) {
       throw new ForbiddenError("Stage not found.")
@@ -430,14 +432,16 @@ export async function deleteProjectStage(
   try {
     const { user: teacher } = await requireTeacherUser()
 
-    const stage = await db.query.projectStages.findFirst({
-      columns: {
-        id: true,
-        projectId: true,
-        order: true,
-      },
-      where: eq(projectStages.id, parsed.data.stageId),
-    })
+    const stage = await db
+      .select({
+        id: projectStages.id,
+        projectId: projectStages.projectId,
+        order: projectStages.order,
+      })
+      .from(projectStages)
+      .where(eq(projectStages.id, parsed.data.stageId))
+      .limit(1)
+      .then((rows) => rows[0])
 
     if (!stage) {
       throw new ForbiddenError("Stage not found.")
@@ -526,13 +530,15 @@ export async function setStageInstruments(
   try {
     const { user: teacher } = await requireTeacherUser()
 
-    const stage = await db.query.projectStages.findFirst({
-      columns: {
-        id: true,
-        projectId: true,
-      },
-      where: eq(projectStages.id, parsed.data.stageId),
-    })
+    const stage = await db
+      .select({
+        id: projectStages.id,
+        projectId: projectStages.projectId,
+      })
+      .from(projectStages)
+      .where(eq(projectStages.id, parsed.data.stageId))
+      .limit(1)
+      .then((rows) => rows[0])
 
     if (!stage) {
       throw new ForbiddenError("Stage not found.")
@@ -654,13 +660,15 @@ export async function deleteGroup(
   try {
     const { user: teacher } = await requireTeacherUser()
 
-    const group = await db.query.groups.findFirst({
-      columns: {
-        id: true,
-        projectId: true,
-      },
-      where: eq(groups.id, parsed.data.groupId),
-    })
+    const group = await db
+      .select({
+        id: groups.id,
+        projectId: groups.projectId,
+      })
+      .from(groups)
+      .where(eq(groups.id, parsed.data.groupId))
+      .limit(1)
+      .then((rows) => rows[0])
 
     if (!group) {
       throw new ForbiddenError("Group not found.")
@@ -696,13 +704,15 @@ export async function updateGroupMembers(
 
     await ensureTeacherOwnsProject(teacher.id, parsed.data.projectId)
 
-    const group = await db.query.groups.findFirst({
-      columns: {
-        id: true,
-        projectId: true,
-      },
-      where: eq(groups.id, parsed.data.groupId),
-    })
+    const group = await db
+      .select({
+        id: groups.id,
+        projectId: groups.projectId,
+      })
+      .from(groups)
+      .where(eq(groups.id, parsed.data.groupId))
+      .limit(1)
+      .then((rows) => rows[0])
 
     if (!group) {
       throw new ForbiddenError("Group not found.")
@@ -769,13 +779,15 @@ export async function deleteProjectStageInstruments(
   try {
     const { user: teacher } = await requireTeacherUser()
 
-    const stage = await db.query.projectStages.findFirst({
-      columns: {
-        id: true,
-        projectId: true,
-      },
-      where: eq(projectStages.id, stageId),
-    })
+    const stage = await db
+      .select({
+        id: projectStages.id,
+        projectId: projectStages.projectId,
+      })
+      .from(projectStages)
+      .where(eq(projectStages.id, stageId))
+      .limit(1)
+      .then((rows) => rows[0])
 
     if (!stage) {
       throw new ForbiddenError("Stage not found.")

@@ -12,6 +12,14 @@ type TermRow = typeof academicTerms.$inferSelect
 type ClassRow = typeof classes.$inferSelect
 type UserRow = typeof user.$inferSelect
 
+export type ClassMembership = {
+  id: string
+  name: string
+  termId: string
+  termLabel: string
+  termStatus: string
+}
+
 export type AdminDashboardData = {
   terms: Array<{
     id: string
@@ -50,6 +58,8 @@ export type AdminDashboardData = {
       studentIds: string[]
     }
   >
+  teacherClasses: Record<string, ClassMembership[]>
+  studentClasses: Record<string, ClassMembership[]>
 }
 
 const serializeDate = (value: Date | null) => value?.toISOString() ?? null
@@ -107,6 +117,35 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     }
   }
 
+  const teacherClasses: Record<string, ClassMembership[]> = {}
+  const studentClasses: Record<string, ClassMembership[]> = {}
+
+  for (const classItem of classRows) {
+    const assignment = assignments[classItem.id]
+    if (!assignment) continue
+
+    const term = classTermMap.get(classItem.academicTermId)
+    const membership: ClassMembership = {
+      id: classItem.id,
+      name: classItem.name,
+      termId: classItem.academicTermId,
+      termLabel: term
+        ? `${term.academicYear} • Semester ${term.semester === "ODD" ? "Ganjil" : "Genap"}`
+        : "Tahun ajaran belum ditentukan",
+      termStatus: term?.status ?? "INACTIVE",
+    }
+
+    for (const teacherId of assignment.teacherIds) {
+      const list = teacherClasses[teacherId] ?? (teacherClasses[teacherId] = [])
+      list.push(membership)
+    }
+
+    for (const studentId of assignment.studentIds) {
+      const list = studentClasses[studentId] ?? (studentClasses[studentId] = [])
+      list.push(membership)
+    }
+  }
+
   return {
     terms: termRows.map((term) => ({
       id: term.id,
@@ -132,6 +171,8 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     teachers: teacherRows.map(mapUserRow),
     students: studentRows.map(mapUserRow),
     assignments,
+    teacherClasses,
+    studentClasses,
   }
 }
 

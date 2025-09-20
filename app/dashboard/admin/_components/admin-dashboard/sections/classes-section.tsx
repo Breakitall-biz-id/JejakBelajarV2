@@ -1,9 +1,6 @@
 "use client"
 
-import { useMemo, useState, useTransition } from "react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import {
@@ -18,44 +15,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { ClassesTable, Kelas } from "./classes-table"
-import { CreateKelasDialog } from "./classes-dialogs/create-class-dialog"
 import {
   AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
 
-const classFormSchema = z.object({
-  name: z.string().trim().min(1, "Class name is required").max(255),
-  termId: z.string().uuid(),
-})
-
-type ClassFormValues = z.infer<typeof classFormSchema>
+import { ClassesTable, type Kelas } from "./classes-table"
+import { CreateKelasDialog } from "./classes-dialogs/create-class-dialog"
+import { EditKelasDialog } from "./classes-dialogs/edit-class-dialogs"
+import type { ClassWizardValues } from "@/app/dashboard/admin/classroom-schemas"
+import type {
+  Option,
+  ParticipantOption,
+} from "./classes-dialogs/types"
 
 type ClassesSectionProps = {
   classes: Array<{
@@ -76,50 +54,136 @@ type ClassesSectionProps = {
     endsAt: string | null
     createdAt: string
   }>
+  teachers: Array<{
+    id: string
+    name: string | null
+    email: string
+    createdAt: string
+  }>
+  students: Array<{
+    id: string
+    name: string | null
+    email: string
+    createdAt: string
+  }>
+  assignments: Record<string, { teacherIds: string[]; studentIds: string[] }>
 }
 
-export function ClassesSection({ classes, terms }: ClassesSectionProps) {
-  const [isCreatePending, setIsCreatePending] = useState(false);
-  const [editClassId, setEditClassId] = useState<string | null>(null)
-  const termOptions = useMemo(
-    () =>
-      terms.map((term) => ({
-        id: term.id,
-        label: `${term.academicYear} • Semester ${term.semester === "ODD" ? "Ganjil" : "Genap"}`,
-      })),
-    [terms],
+export function ClassesSection({ classes, terms, teachers, students, assignments }: ClassesSectionProps) {
+  const termOptions = useMemo<Option[]>(() => {
+    return terms.map((term) => ({
+      id: term.id,
+      label: `${term.academicYear} • Semester ${term.semester === "ODD" ? "Ganjil" : "Genap"}`,
+    }))
+  }, [terms])
+
+  const termLabelMap = useMemo(() => new Map(termOptions.map((option) => [option.id, option.label])), [termOptions])
+
+  const teacherOptions = useMemo<ParticipantOption[]>(
+    () => teachers.map((teacher) => ({ id: teacher.id, name: teacher.name, email: teacher.email })),
+    [teachers],
+  )
+  const studentOptions = useMemo<ParticipantOption[]>(
+    () => students.map((student) => ({ id: student.id, name: student.name, email: student.email })),
+    [students],
   )
 
-  const kelasData: Kelas[] = classes.map((c) => ({
-    id: c.id,
-    name: c.name,
-    academicTermId: c.termId,
-    createdAt: c.createdAt,
-    updatedAt: c.createdAt, 
-  }));
+  const teacherMap = useMemo(
+    () => new Map(teacherOptions.map((teacher) => [teacher.id, teacher])),
+    [teacherOptions],
+  )
+  const studentMap = useMemo(
+    () => new Map(studentOptions.map((student) => [student.id, student])),
+    [studentOptions],
+  )
 
-  const [editKelas, setEditKelas] = useState<Kelas | null>(null);
-  const [deleteKelas, setDeleteKelas] = useState<Kelas | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isEditPending, setIsEditPending] = useState(false);
+  const kelasData: Kelas[] = useMemo(() => {
+    return classes.map((kelas) => {
+      const assignment = assignments[kelas.id] ?? { teacherIds: [], studentIds: [] }
+      const teachersDetailed = assignment.teacherIds
+        .map((teacherId) => teacherMap.get(teacherId))
+        .filter((value): value is ParticipantOption => Boolean(value))
+      const studentsDetailed = assignment.studentIds
+        .map((studentId) => studentMap.get(studentId))
+        .filter((value): value is ParticipantOption => Boolean(value))
 
-  const handleEdit = (kelas: Kelas) => setEditKelas(kelas);
-  const handleDelete = (kelas: Kelas) => {
-    setDeleteKelas(kelas);
-    setIsDeleteDialogOpen(true);
-  };
-  const handleDeleteConfirm = async () => {
-    if (deleteKelas) {
-      await deleteClassroom({ classId: deleteKelas.id });
-      setDeleteKelas(null);
-      setIsDeleteDialogOpen(false);
-      toast.success("Kelas berhasil dihapus.");
+      return {
+        id: kelas.id,
+        name: kelas.name,
+        academicTermId: kelas.termId,
+        termLabel: termLabelMap.get(kelas.termId) ?? "Belum ditautkan",
+        termStatus: kelas.termStatus,
+        createdAt: kelas.createdAt,
+        teacherIds: assignment.teacherIds,
+        studentIds: assignment.studentIds,
+        teachers: teachersDetailed,
+        students: studentsDetailed,
+      }
+    })
+  }, [classes, assignments, teacherMap, studentMap, termLabelMap])
+
+  const [editTarget, setEditTarget] = useState<Kelas | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Kelas | null>(null)
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [isDeletePending, setIsDeletePending] = useState(false)
+
+  const activeTermId = useMemo(() => {
+    const active = terms.find((term) => term.status === "ACTIVE")
+    return active?.id ?? termOptions[0]?.id ?? ""
+  }, [terms, termOptions])
+
+  const createDefaultValues = useMemo<ClassWizardValues>(
+    () => ({
+      name: "",
+      termId: activeTermId,
+      teacherIds: [],
+      studentIds: [],
+    }),
+    [activeTermId],
+  )
+
+  const handleCreate = async (values: ClassWizardValues) => {
+    const result = await createClassroom(values)
+    if (!result.success) {
+      toast.error(result.error)
+      return false
     }
-  };
-  const handleDeleteDialogClose = () => {
-    setIsDeleteDialogOpen(false);
-    setDeleteKelas(null);
-  };
+    toast.success("Kelas berhasil dibuat dan anggota sudah ditautkan.")
+    return true
+  }
+
+  const handleUpdate = async (values: ClassWizardValues) => {
+    if (!editTarget) return false
+    const result = await updateClassroom({ id: editTarget.id, ...values })
+    if (!result.success) {
+      toast.error(result.error)
+      return false
+    }
+    toast.success("Perubahan kelas berhasil disimpan.")
+    return true
+  }
+
+  const handleDeleteClick = (kelas: Kelas) => {
+    setDeleteTarget(kelas)
+    setIsDeleteOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return
+    setIsDeletePending(true)
+    const result = await deleteClassroom({ classId: deleteTarget.id })
+    setIsDeletePending(false)
+    if (!result.success) {
+      toast.error(result.error)
+      return
+    }
+    toast.success(`Kelas ${deleteTarget.name} berhasil dihapus.`)
+    setDeleteTarget(null)
+    setIsDeleteOpen(false)
+  }
+
+  const teacherEmpty = teacherOptions.length === 0
+  const studentEmpty = studentOptions.length === 0
 
   return (
     <Card>
@@ -127,181 +191,71 @@ export function ClassesSection({ classes, terms }: ClassesSectionProps) {
         <div>
           <CardTitle>Daftar Kelas</CardTitle>
           <CardDescription>
-            Kelola kelas dan hubungkan ke tahun ajaran & semester aktif
+            Kelola kelas, hubungkan ke tahun ajaran aktif, dan pastikan guru serta siswa sudah ditautkan.
           </CardDescription>
         </div>
         <CreateKelasDialog
           termOptions={termOptions}
-          isPending={isCreatePending}
-          onSubmit={async (values) => {
-            setIsCreatePending(true);
-            const result = await createClassroom(values);
-            setIsCreatePending(false);
-            if (!result.success) {
-              // Error handling di dalam dialog
-              return;
-            }
-            toast.success("Kelas berhasil dibuat.");
-          }}
+          teacherOptions={teacherOptions}
+          studentOptions={studentOptions}
+          defaultValues={createDefaultValues}
+          disabled={termOptions.length === 0 || teacherEmpty || studentEmpty}
+          onSubmit={handleCreate}
         />
       </CardHeader>
       <CardContent className="space-y-4">
-        <ClassesTable data={kelasData} onEdit={handleEdit} onDelete={handleDelete} />
-        {/* Dialog Edit Kelas */}
-        {editKelas && (
+        <ClassesTable data={kelasData} onEdit={setEditTarget} onDelete={handleDeleteClick} />
+
+        {editTarget && (
           <EditKelasDialog
-            kelas={editKelas}
+            open={Boolean(editTarget)}
+            kelas={editTarget}
             termOptions={termOptions}
-            open={!!editKelas}
-            isPending={isEditPending}
-            onClose={() => setEditKelas(null)}
-            onSubmit={async (values) => {
-              setIsEditPending(true);
-              const result = await updateClassroom({
-                id: editKelas.id,
-                name: values.name,
-                termId: values.termId,
-              });
-              setIsEditPending(false);
-              if (!result.success) {
-                return;
-              }
-              toast.success("Kelas berhasil diubah.");
-              setEditKelas(null);
-            }}
+            teacherOptions={teacherOptions}
+            studentOptions={studentOptions}
+            onClose={() => setEditTarget(null)}
+            onSubmit={handleUpdate}
           />
         )}
-        <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => { if (!open) handleDeleteDialogClose(); }}>
+
+        <AlertDialog
+          open={isDeleteOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              setIsDeleteOpen(false)
+              setDeleteTarget(null)
+            }
+          }}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Hapus Kelas?</AlertDialogTitle>
+              <AlertDialogTitle>Hapus kelas?</AlertDialogTitle>
               <AlertDialogDescription>
-                {deleteKelas && (
+                {deleteTarget ? (
                   <span>
-                    Apakah Anda yakin ingin menghapus kelas <b>{deleteKelas.name}</b>? Tindakan ini tidak dapat dibatalkan.
+                    Kelas <strong>{deleteTarget.name}</strong> dan semua penugasan guru & siswa akan dilepas. Tindakan ini tidak dapat
+                    dibatalkan.
                   </span>
+                ) : (
+                  "Tindakan ini tidak dapat dibatalkan."
                 )}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={handleDeleteDialogClose}>Batal</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-white hover:bg-destructive/90">Hapus</AlertDialogAction>
+              <AlertDialogCancel disabled={isDeletePending}>Batal</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteConfirm} disabled={isDeletePending} className="bg-destructive text-white hover:bg-destructive/90">
+                {isDeletePending ? "Menghapus…" : "Hapus"}
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {(termOptions.length === 0 || teacherEmpty || studentEmpty) && (
+          <p className="text-sm text-muted-foreground">
+            Pastikan tahun ajaran aktif tersedia serta akun guru dan siswa sudah dibuat sebelum menambahkan kelas baru.
+          </p>
+        )}
       </CardContent>
     </Card>
   )
-function EditKelasDialog({ kelas, termOptions, onClose, onSuccess }: { kelas: Kelas, termOptions: Option[], onClose: () => void, onSuccess: () => void }) {
-  const [isPending, startTransition] = useTransition();
-  const form = useForm<ClassFormValues>({
-    resolver: zodResolver(classFormSchema),
-    defaultValues: {
-      name: kelas.name,
-      termId: kelas.academicTermId,
-    },
-  });
-
-  const submit = (values: ClassFormValues) => {
-    startTransition(async () => {
-      const result = await updateClassroom({
-        id: kelas.id,
-        name: values.name,
-        termId: values.termId,
-      });
-      if (!result.success) {
-        if (result.fieldErrors) {
-          for (const [field, messages] of Object.entries(result.fieldErrors)) {
-            form.setError(field as keyof ClassFormValues, {
-              message: messages?.[0],
-            });
-          }
-        }
-        toast.error(result.error);
-        return;
-      }
-      toast.success("Kelas berhasil diubah.");
-      onSuccess();
-    });
-  };
-
-  return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Edit Kelas</DialogTitle>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(submit)} className="space-y-4">
-            <ClassFormFields form={form} termOptions={termOptions} />
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={onClose}>
-                Batal
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Menyimpan…" : "Simpan"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
-  );
 }
-}
-
-type Option = { id: string; label: string }
-
-
-
-function ClassFormFields({
-  form,
-  termOptions,
-}: {
-  form: ReturnType<typeof useForm<ClassFormValues>>
-  termOptions: Option[]
-}) {
-  return (
-    <div className="space-y-4">
-      <FormField
-        control={form.control}
-        name="name"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Class name</FormLabel>
-            <FormControl>
-              <Input placeholder="e.g. Grade 10 Science" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="termId"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Academic term</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select term" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {termOptions.map((option) => (
-                  <SelectItem key={option.id} value={option.id}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </div>
-  )
-}
-
-
