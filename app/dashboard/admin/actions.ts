@@ -11,6 +11,8 @@ import {
   semesterEnum,
   termStatusEnum,
   userClassAssignments,
+  projectTemplates,
+  templateStageConfigs,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
 import {
@@ -83,6 +85,38 @@ const setStudentAssignmentsSchema = z.object({
   classId: z.string().uuid(),
   studentIds: z.array(z.string().uuid()).optional().default([]),
 })
+
+const instrumentTypeSchema = z.enum([
+  "JOURNAL",
+  "SELF_ASSESSMENT",
+  "PEER_ASSESSMENT",
+  "OBSERVATION",
+] as const)
+
+const stageConfigSchema = z.object({
+  stageName: z.string().min(1, "Stage name is required"),
+  instrumentType: instrumentTypeSchema,
+  description: z.string().optional(),
+  estimatedDuration: z.string().optional(),
+})
+
+const createTemplateSchema = z.object({
+  templateName: z.string().min(1, "Template name is required"),
+  description: z.string().optional(),
+  stageConfigs: z.array(stageConfigSchema).min(1, "At least one stage configuration is required"),
+})
+
+const updateTemplateSchema = z.object({
+  templateId: z.string().uuid(),
+  templateName: z.string().min(1, "Template name is required"),
+  description: z.string().optional(),
+  isActive: z.boolean().optional(),
+  stageConfigs: z.array(stageConfigSchema).min(1, "At least one stage configuration is required").optional(),
+})
+
+const deleteTemplateSchema = z.object({ templateId: z.string().uuid() })
+
+const toggleTemplateStatusSchema = z.object({ templateId: z.string().uuid() })
 
 const toDate = (value?: string | null) => {
   if (!value) return null
@@ -636,5 +670,190 @@ export async function setStudentAssignments(
     return { success: true }
   } catch (error) {
     return handleError(error, "Unable to update student assignments.")
+  }
+}
+
+export async function createTemplate(
+  values: z.input<typeof createTemplateSchema>,
+): Promise<ActionResult> {
+  const parsed = createTemplateSchema.safeParse(values)
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Please review the template details.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    }
+  }
+
+  try {
+    await requireAdminUser()
+
+    const result = await db.transaction(async (tx) => {
+      const [createdTemplate] = await tx
+        .insert(projectTemplates)
+        .values({
+          templateName: parsed.data.templateName,
+          description: parsed.data.description,
+          isActive: true,
+        })
+        .returning({ id: projectTemplates.id })
+
+      if (!createdTemplate) {
+        throw new Error("Failed to create template")
+      }
+
+      const stageConfigs = parsed.data.stageConfigs.map((config, index) => ({
+        templateId: createdTemplate.id,
+        stageName: config.stageName,
+        instrumentType: config.instrumentType,
+        description: config.description,
+        estimatedDuration: config.estimatedDuration,
+        displayOrder: index + 1,
+      }))
+
+      await tx.insert(templateStageConfigs).values(stageConfigs)
+
+      return { success: true, templateId: createdTemplate.id }
+    })
+
+    revalidatePath(DASHBOARD_ADMIN_PATH)
+    return result
+
+  } catch (error) {
+    return handleError(error, "Failed to create template.")
+  }
+}
+
+export async function updateTemplate(
+  values: z.input<typeof updateTemplateSchema>,
+): Promise<ActionResult> {
+  const parsed = updateTemplateSchema.safeParse(values)
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Please review the template details.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    }
+  }
+
+  try {
+    await requireAdminUser()
+
+    await db.transaction(async (tx) => {
+      const updatePayload: Partial<typeof projectTemplates.$inferInsert> = {
+        templateName: parsed.data.templateName,
+        description: parsed.data.description,
+      }
+
+      if (parsed.data.isActive !== undefined) {
+        updatePayload.isActive = parsed.data.isActive
+      }
+
+      await tx
+        .update(projectTemplates)
+        .set(updatePayload)
+        .where(eq(projectTemplates.id, parsed.data.templateId))
+
+      // Update stage configurations if provided
+      if (parsed.data.stageConfigs && parsed.data.stageConfigs.length > 0) {
+        // Delete existing stage configs
+        await tx
+          .delete(templateStageConfigs)
+          .where(eq(templateStageConfigs.templateId, parsed.data.templateId))
+
+        // Insert new stage configs
+        const stageConfigs = parsed.data.stageConfigs.map((config, index) => ({
+          templateId: parsed.data!.templateId,
+          stageName: config.stageName,
+          instrumentType: config.instrumentType,
+          description: config.description,
+          estimatedDuration: config.estimatedDuration,
+          displayOrder: index + 1,
+        }))
+
+        await tx.insert(templateStageConfigs).values(stageConfigs)
+      }
+    })
+
+    revalidatePath(DASHBOARD_ADMIN_PATH)
+    return { success: true }
+
+  } catch (error) {
+    return handleError(error, "Failed to update template.")
+  }
+}
+
+export async function deleteTemplate(
+  values: z.input<typeof deleteTemplateSchema>,
+): Promise<ActionResult> {
+  const parsed = deleteTemplateSchema.safeParse(values)
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Invalid template identifier.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    }
+  }
+
+  try {
+    await requireAdminUser()
+
+    await db.transaction(async (tx) => {
+      await tx
+        .delete(templateStageConfigs)
+        .where(eq(templateStageConfigs.templateId, parsed.data.templateId))
+
+      await tx
+        .delete(projectTemplates)
+        .where(eq(projectTemplates.id, parsed.data.templateId))
+    })
+
+    revalidatePath(DASHBOARD_ADMIN_PATH)
+    return { success: true }
+
+  } catch (error) {
+    return handleError(error, "Unable to delete the template.")
+  }
+}
+
+export async function toggleTemplateStatus(
+  values: z.input<typeof toggleTemplateStatusSchema>,
+): Promise<ActionResult> {
+  const parsed = toggleTemplateStatusSchema.safeParse(values)
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Invalid template identifier.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    }
+  }
+
+  try {
+    await requireAdminUser()
+
+    const [template] = await db
+      .select({ isActive: projectTemplates.isActive })
+      .from(projectTemplates)
+      .where(eq(projectTemplates.id, parsed.data.templateId))
+      .limit(1)
+
+    if (!template) {
+      return { success: false, error: "Template not found." }
+    }
+
+    await db
+      .update(projectTemplates)
+      .set({ isActive: !template.isActive })
+      .where(eq(projectTemplates.id, parsed.data.templateId))
+
+    revalidatePath(DASHBOARD_ADMIN_PATH)
+    return { success: true }
+
+  } catch (error) {
+    return handleError(error, "Unable to toggle template status.")
   }
 }

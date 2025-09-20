@@ -17,6 +17,7 @@ import {
   IconSettings,
   IconUsers,
   IconClipboardList,
+  IconLayoutKanban,
 } from "@tabler/icons-react"
 import type { Icon } from "@tabler/icons-react"
 
@@ -41,6 +42,7 @@ const adminNav: Array<{ title: string; url: string; icon: Icon }> = [
   { title: "Academic Terms", url: "/dashboard/admin/academic-terms", icon: IconCalendarEvent },
   { title: "Classes & Cohorts", url: "/dashboard/admin/classes", icon: IconClipboardList },
   { title: "Accounts", url: "/dashboard/admin/accounts", icon: IconUsers },
+  { title: "Templates", url: "/dashboard/admin/templates", icon: IconLayoutKanban },
   { title: "Reports", url: "/dashboard/admin/reports", icon: IconChartBar },
 ]
 

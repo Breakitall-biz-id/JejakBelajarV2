@@ -1,9 +1,10 @@
-import { useTransition, useMemo } from "react"
+import { useTransition, useMemo, useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { BookOpen, ClipboardList, Edit, PenLine, Send, Users } from "lucide-react"
 import { toast } from "sonner"
+import { Questionnaire } from "./questionnaire"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -22,7 +23,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { CurrentUser } from "@/lib/auth/session"
 import type { StudentDashboardData } from "../../queries"
 
-import { submitStageInstrument } from "../../actions"
+import { submitStageInstrument, studentInstrumentSchema } from "../../actions"
+import { getTemplateQuestions } from "../../queries"
 import {
   extractSubmissionText,
   formatInstrument,
@@ -47,12 +49,32 @@ export function InstrumentSubmissionCard({
   stage,
   instrumentType,
   existingSubmission,
+  student,
   projectId,
   peers,
   router,
 }: InstrumentSubmissionCardProps) {
   const [isPending, startTransition] = useTransition()
+  const [templateQuestions, setTemplateQuestions] = useState<Array<{
+    id: string
+    questionText: string
+    questionType: string
+    scoringGuide?: string
+  }>>([])
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false)
   const hasPeers = peers.length > 0
+
+  const isQuestionnaireType = ["SELF_ASSESSMENT", "PEER_ASSESSMENT", "OBSERVATION"].includes(instrumentType)
+
+  useEffect(() => {
+    if (isQuestionnaireType) {
+      setIsLoadingQuestions(true)
+      getTemplateQuestions(stage.id)
+        .then(setTemplateQuestions)
+        .catch(console.error)
+        .finally(() => setIsLoadingQuestions(false))
+    }
+  }, [stage.id, isQuestionnaireType])
 
   const formSchema = useMemo(() => {
     if (instrumentType === "PEER_ASSESSMENT") {
@@ -84,7 +106,7 @@ export function InstrumentSubmissionCard({
               existingSubmission?.targetStudentId ?? (hasPeers ? peers[0]?.studentId ?? "" : ""),
           }
         : {}),
-    } as any,
+    } as z.infer<typeof formSchema>,
   })
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
@@ -95,7 +117,7 @@ export function InstrumentSubmissionCard({
 
     if (instrumentType === "PEER_ASSESSMENT" && "targetStudentId" in values) {
       if (!values.targetStudentId || values.targetStudentId.length === 0) {
-        form.setError("targetStudentId" as any, { message: "Select a peer." })
+        form.setError("targetStudentId" as keyof typeof values, { message: "Select a peer." })
         return
       }
     }
@@ -104,7 +126,7 @@ export function InstrumentSubmissionCard({
       const result = await submitStageInstrument({
         projectId,
         stageId: stage.id,
-        instrumentType: instrumentType as any,
+        instrumentType: instrumentType as z.infer<typeof studentInstrumentSchema>,
         content: { text: values.response },
         targetStudentId: "targetStudentId" in values ? values.targetStudentId : undefined,
       })
@@ -127,6 +149,43 @@ export function InstrumentSubmissionCard({
     })
   }
 
+  // Show loading state for questionnaire types
+  if (isQuestionnaireType && isLoadingQuestions) {
+    return (
+      <Card className="h-full">
+        <CardContent className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p className="text-sm text-muted-foreground">Loading questionnaire...</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // For questionnaire-based instruments, use the modern questionnaire interface
+  if (isQuestionnaireType && templateQuestions.length > 0) {
+    const targetStudent = instrumentType === "PEER_ASSESSMENT" && peers.length > 0
+      ? peers[0]
+      : undefined
+
+    return (
+      <Questionnaire
+        questions={templateQuestions}
+        instrumentType={instrumentType as "SELF_ASSESSMENT" | "PEER_ASSESSMENT" | "OBSERVATION"}
+        stageId={stage.id}
+        projectId={projectId}
+        targetStudent={targetStudent}
+        existingSubmission={existingSubmission ? {
+          content: existingSubmission.content as Record<string, number>,
+          submittedAt: existingSubmission.submittedAt,
+        } : undefined}
+            router={router}
+      />
+    )
+  }
+
+  // For traditional instruments (JOURNAL, DAILY_NOTE), use the original interface
   return (
     <Card className="h-full">
       <CardHeader className="flex flex-row items-start gap-3 space-y-0">
@@ -163,7 +222,7 @@ export function InstrumentSubmissionCard({
 
             {instrumentType === "PEER_ASSESSMENT" && (
               <FormField
-                control={form.control as any}
+                control={form.control}
                 name="targetStudentId"
                 render={({ field }) => (
                   <FormItem>

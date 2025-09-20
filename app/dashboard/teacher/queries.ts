@@ -9,11 +9,29 @@ import {
   projectStageInstruments,
   projectStages,
   projects,
+  projectTemplates,
+  templateStageConfigs,
+  templateQuestions,
   userClassAssignments,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
 
 import type { CurrentUser } from "@/lib/auth/session"
+
+export type ProjectTemplate = {
+  id: string
+  templateName: string
+  description: string | null
+  isActive: boolean
+  stageConfigs: Array<{
+    id: string
+    stageName: string
+    instrumentType: string
+    displayOrder: number
+    description: string | null
+    estimatedDuration: string | null
+  }>
+}
 
 export type TeacherDashboardData = {
   classes: Array<{
@@ -350,4 +368,58 @@ export async function getTeacherDashboardData(
     projects: projectsPayload,
     studentsByClass,
   }
+}
+
+export async function getProjectTemplates(): Promise<ProjectTemplate[]> {
+  const templates = await db
+    .select({
+      id: projectTemplates.id,
+      templateName: projectTemplates.templateName,
+      description: projectTemplates.description,
+      isActive: projectTemplates.isActive,
+    })
+    .from(projectTemplates)
+    .where(eq(projectTemplates.isActive, true))
+    .orderBy(asc(projectTemplates.templateName))
+
+  const templateIds = templates.map((t) => t.id)
+
+  const stageConfigs = await db
+    .select({
+      id: templateStageConfigs.id,
+      templateId: templateStageConfigs.templateId,
+      stageName: templateStageConfigs.stageName,
+      instrumentType: templateStageConfigs.instrumentType,
+      displayOrder: templateStageConfigs.displayOrder,
+      description: templateStageConfigs.description,
+      estimatedDuration: templateStageConfigs.estimatedDuration,
+    })
+    .from(templateStageConfigs)
+    .where(inArray(templateStageConfigs.templateId, templateIds))
+    .orderBy(asc(templateStageConfigs.templateId), asc(templateStageConfigs.displayOrder))
+
+  const configsByTemplate = stageConfigs.reduce<
+    Record<string, ProjectTemplate["stageConfigs"]>
+  >((acc, config) => {
+    if (!acc[config.templateId]) {
+      acc[config.templateId] = []
+    }
+    acc[config.templateId].push({
+      id: config.id,
+      stageName: config.stageName,
+      instrumentType: config.instrumentType,
+      displayOrder: config.displayOrder,
+      description: config.description,
+      estimatedDuration: config.estimatedDuration,
+    })
+    return acc
+  }, {})
+
+  return templates.map((template) => ({
+    id: template.id,
+    templateName: template.templateName,
+    description: template.description,
+    isActive: template.isActive,
+    stageConfigs: configsByTemplate[template.id] || [],
+  }))
 }

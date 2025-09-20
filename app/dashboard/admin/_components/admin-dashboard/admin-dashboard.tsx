@@ -7,7 +7,7 @@ import {
   LayoutDashboard,
   Layers3,
   Users,
-} from "lucide-react"
+  } from "lucide-react"
 
 import type { AdminDashboardData } from "../../queries"
 
@@ -16,10 +16,12 @@ import { ClassesSection } from "./sections/classes-section"
 import TermsSection from "./sections/terms-section"
 import { OverviewSection } from "./sections/overview-section"
 import { ReportsSection } from "./sections/reports-section"
+import { TemplatesSection } from "./sections/templates-section"
 import { cn } from "@/lib/utils"
 
 type AdminDashboardProps = {
   data: AdminDashboardData
+  initialSection?: string
 }
 
 type NavItem = {
@@ -55,6 +57,12 @@ const NAV_ITEMS: NavItem[] = [
     icon: Users,
   },
   {
+    id: "templates",
+    label: "Templates",
+    description: "Project templates & configurations",
+    icon: LayoutDashboard,
+  },
+  {
     id: "reports",
     label: "Reports",
     description: "Exports and analytics",
@@ -62,8 +70,8 @@ const NAV_ITEMS: NavItem[] = [
   },
 ]
 
-export function AdminDashboard({ data }: AdminDashboardProps) {
-  const [active, setActive] = useState<string>(NAV_ITEMS[0]!.id)
+export function AdminDashboard({ data, initialSection }: AdminDashboardProps) {
+  const [active, setActive] = useState<string>(initialSection || NAV_ITEMS[0]!.id)
 
   const handleNavigate = useCallback((section: string) => {
     setActive(section)
@@ -104,6 +112,12 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
               teacherClasses={data.teacherClasses}
               studentClasses={data.studentClasses}
             />
+          </section>
+        )
+      case "templates":
+        return (
+          <section id="templates" className="space-y-6">
+            <TemplatesSection templates={data.templates} />
           </section>
         )
       case "reports":

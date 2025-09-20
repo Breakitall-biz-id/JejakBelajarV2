@@ -35,6 +35,9 @@ export type ProjectStatus = (typeof projectStatusEnum.enumValues)[number];
 export type InstrumentType = (typeof instrumentTypeEnum.enumValues)[number];
 export type StageProgressStatus = (typeof stageProgressStatusEnum.enumValues)[number];
 
+// Additional types for the new template system
+export type QuestionType = "STATEMENT" | "ESSAY_PROMPT";
+
 export const academicTerms = pgTable(
   "academic_terms",
   {
@@ -93,6 +96,61 @@ export const userClassAssignments = pgTable(
   }),
 );
 
+// Project Templates (created by Admin)
+export const projectTemplates = pgTable(
+  "project_templates",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    templateName: varchar("template_name", { length: 255 }).notNull().unique(),
+    description: text("description"),
+    createdById: uuid("created_by_id").references(() => user.id, { onDelete: "set null" }),
+    isActive: boolean("is_active").default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+);
+
+// Template Stage Configurations
+export const templateStageConfigs = pgTable(
+  "template_stage_configs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    templateId: uuid("template_id")
+      .notNull()
+      .references(() => projectTemplates.id, { onDelete: "cascade" }),
+    stageName: varchar("stage_name", { length: 255 }).notNull(),
+    instrumentType: instrumentTypeEnum("instrument_type").notNull(),
+    displayOrder: integer("display_order").notNull(),
+    description: text("description"),
+    estimatedDuration: varchar("estimated_duration", { length: 50 }), // e.g., "2 weeks", "1 month"
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    uniqueness: uniqueIndex("template_stage_configs_template_order_idx").on(
+      table.templateId,
+      table.displayOrder,
+    ),
+  }),
+);
+
+// Template Questions (predefined questions for each instrument)
+export const templateQuestions = pgTable(
+  "template_questions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    configId: uuid("config_id")
+      .notNull()
+      .references(() => templateStageConfigs.id, { onDelete: "cascade" }),
+    questionText: text("question_text").notNull(),
+    questionType: varchar("question_type", { length: 50 }).default("STATEMENT").notNull(), // STATEMENT, ESSAY_PROMPT
+    scoringGuide: text("scoring_guide"), // For questionnaires: Always=4, Often=3, Sometimes=2, Never=1
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+);
+
+// Updated Projects table - now links to template
 export const projects = pgTable("projects", {
   id: uuid("id").defaultRandom().primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
@@ -102,6 +160,7 @@ export const projects = pgTable("projects", {
     .notNull()
     .references(() => classes.id, { onDelete: "cascade" }),
   teacherId: uuid("teacher_id").references(() => user.id, { onDelete: "set null" }),
+  templateId: uuid("template_id").references(() => projectTemplates.id, { onDelete: "restrict" }),
   status: projectStatusEnum("status").default("DRAFT").notNull(),
   publishedAt: timestamp("published_at", { withTimezone: true }),
   archivedAt: timestamp("archived_at", { withTimezone: true }),
@@ -204,6 +263,7 @@ export const projectStageProgress = pgTable(
   }),
 );
 
+// Updated Submissions table - now works with template questions
 export const submissions = pgTable("submissions", {
   id: uuid("id").defaultRandom().primaryKey(),
   studentId: uuid("student_id")
@@ -212,15 +272,27 @@ export const submissions = pgTable("submissions", {
   projectId: uuid("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
+
+  // Link to template stage config instead of custom project stage
+  templateStageConfigId: uuid("template_stage_config_id")
+    .references(() => templateStageConfigs.id, { onDelete: "set null" }),
+
+  // For backward compatibility and flexibility
   projectStageId: uuid("project_stage_id")
     .references(() => projectStages.id, { onDelete: "set null" }),
-  projectStageName: varchar("project_stage_name", { length: 255 }).notNull(),
-  instrumentType: instrumentTypeEnum("instrument_type").notNull(),
+
+  // Context information
   targetStudentId: uuid("target_student_id").references(() => user.id, {
     onDelete: "cascade",
   }),
-  content: jsonb("content"),
-  score: integer("score"),
+
+  // Content structure based on PRD-V2:
+  // For questionnaires: {"template_question_id": score}
+  // For journals: {"text": "...", "html": "..."}
+  content: jsonb("content").notNull(),
+
+  // Grading and feedback
+  score: integer("score"), // Auto-calculated for questionnaires, manual for journals
   feedback: text("feedback"),
   submittedAt: timestamp("submitted_at", { withTimezone: true }).defaultNow().notNull(),
   assessedBy: uuid("assessed_by").references(() => user.id, { onDelete: "set null" }),

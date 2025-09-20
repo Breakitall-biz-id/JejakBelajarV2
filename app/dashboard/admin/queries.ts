@@ -5,12 +5,16 @@ import {
   academicTerms,
   classes,
   userClassAssignments,
+  projectTemplates,
+  templateStageConfigs,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
 
 type TermRow = typeof academicTerms.$inferSelect
 type ClassRow = typeof classes.$inferSelect
 type UserRow = typeof user.$inferSelect
+type TemplateRow = typeof projectTemplates.$inferSelect
+type StageConfigRow = typeof templateStageConfigs.$inferSelect
 
 export type ClassMembership = {
   id: string
@@ -18,6 +22,22 @@ export type ClassMembership = {
   termId: string
   termLabel: string
   termStatus: string
+}
+
+export type ProjectTemplate = {
+  id: string
+  templateName: string
+  description: string | null
+  isActive: boolean
+  createdAt: string
+  stageConfigs: Array<{
+    id: string
+    stageName: string
+    instrumentType: string
+    description: string | null
+    estimatedDuration: string | null
+    displayOrder: number
+  }>
 }
 
 export type AdminDashboardData = {
@@ -60,6 +80,7 @@ export type AdminDashboardData = {
   >
   teacherClasses: Record<string, ClassMembership[]>
   studentClasses: Record<string, ClassMembership[]>
+  templates: ProjectTemplate[]
 }
 
 const serializeDate = (value: Date | null) => value?.toISOString() ?? null
@@ -146,6 +167,41 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     }
   }
 
+  // Query templates data
+  const templateRows = await db
+    .select()
+    .from(projectTemplates)
+    .orderBy(asc(projectTemplates.createdAt))
+
+  const stageConfigRows = await db
+    .select()
+    .from(templateStageConfigs)
+    .orderBy(asc(templateStageConfigs.displayOrder))
+
+  const stageConfigsByTemplate = new Map<string, typeof stageConfigRows>()
+  for (const config of stageConfigRows) {
+    if (!stageConfigsByTemplate.has(config.templateId)) {
+      stageConfigsByTemplate.set(config.templateId, [])
+    }
+    stageConfigsByTemplate.get(config.templateId)!.push(config)
+  }
+
+  const templates = templateRows.map((template) => ({
+    id: template.id,
+    templateName: template.templateName,
+    description: template.description,
+    isActive: template.isActive,
+    createdAt: template.createdAt.toISOString(),
+    stageConfigs: (stageConfigsByTemplate.get(template.id) || []).map((config) => ({
+      id: config.id,
+      stageName: config.stageName,
+      instrumentType: config.instrumentType,
+      description: config.description,
+      estimatedDuration: config.estimatedDuration,
+      displayOrder: config.displayOrder,
+    })),
+  }))
+
   return {
     terms: termRows.map((term) => ({
       id: term.id,
@@ -173,6 +229,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     assignments,
     teacherClasses,
     studentClasses,
+    templates,
   }
 }
 
@@ -183,4 +240,58 @@ function mapUserRow(row: UserRow) {
     email: row.email,
     createdAt: row.createdAt?.toISOString?.() ?? new Date().toISOString(),
   }
+}
+
+export async function getAdminTemplates(): Promise<ProjectTemplate[]> {
+  const templates = await db
+    .select({
+      id: projectTemplates.id,
+      templateName: projectTemplates.templateName,
+      description: projectTemplates.description,
+      isActive: projectTemplates.isActive,
+      createdAt: projectTemplates.createdAt,
+    })
+    .from(projectTemplates)
+    .orderBy(asc(projectTemplates.createdAt))
+
+  const templateIds = templates.map(t => t.id)
+
+  const stageConfigs = templateIds.length > 0
+    ? await db
+        .select({
+          id: templateStageConfigs.id,
+          templateId: templateStageConfigs.templateId,
+          stageName: templateStageConfigs.stageName,
+          instrumentType: templateStageConfigs.instrumentType,
+          description: templateStageConfigs.description,
+          estimatedDuration: templateStageConfigs.estimatedDuration,
+          displayOrder: templateStageConfigs.displayOrder,
+        })
+        .from(templateStageConfigs)
+        .where(inArray(templateStageConfigs.templateId, templateIds))
+        .orderBy(asc(templateStageConfigs.displayOrder))
+    : []
+
+  const stageConfigsByTemplate = new Map<string, typeof stageConfigs>()
+  for (const config of stageConfigs) {
+    const list = stageConfigsByTemplate.get(config.templateId) || []
+    list.push(config)
+    stageConfigsByTemplate.set(config.templateId, list)
+  }
+
+  return templates.map(template => ({
+    id: template.id,
+    templateName: template.templateName,
+    description: template.description,
+    isActive: template.isActive,
+    createdAt: template.createdAt.toISOString(),
+    stageConfigs: (stageConfigsByTemplate.get(template.id) || []).map(config => ({
+      id: config.id,
+      stageName: config.stageName,
+      instrumentType: config.instrumentType,
+      description: config.description,
+      estimatedDuration: config.estimatedDuration,
+      displayOrder: config.displayOrder,
+    })),
+  }))
 }

@@ -15,6 +15,7 @@ import {
   userClassAssignments,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
+import { templateStageConfigs, templateQuestions } from "@/db/schema/jejak"
 import {
   ForbiddenError,
   UnauthorizedError,
@@ -447,5 +448,124 @@ async function unlockNextStage(
       .update(projectStageProgress)
       .set({ status: "IN_PROGRESS", unlockedAt: new Date(), updatedAt: new Date() })
       .where(eq(projectStageProgress.id, nextProgress.id))
+  }
+}
+
+const questionnaireInstrumentSchema = z.enum([
+  "SELF_ASSESSMENT",
+  "PEER_ASSESSMENT",
+  "OBSERVATION",
+] as const)
+
+const questionnaireSchema = z.object({
+  projectId: z.string().uuid(),
+  stageId: z.string().uuid(),
+  instrumentType: questionnaireInstrumentSchema,
+  content: z.record(z.string(), z.number().min(1).max(4)),
+  targetStudentId: z.string().uuid().optional(),
+})
+
+export async function submitQuestionnaire(
+  input: z.infer<typeof questionnaireSchema>
+): Promise<ActionResult> {
+  const student = await requireStudentUser()
+
+  try {
+    const result = await db.transaction(async (tx) => {
+      // Validate class assignment
+      const classAssignment = await tx
+        .select({
+          classId: userClassAssignments.classId,
+        })
+        .from(userClassAssignments)
+        .innerJoin(projects, eq(userClassAssignments.classId, projects.classId))
+        .where(
+          and(
+            eq(userClassAssignments.userId, student.id),
+            eq(projects.id, input.projectId),
+          ),
+        )
+        .limit(1)
+        .then((rows) => rows[0])
+
+      if (!classAssignment) {
+        throw new ForbiddenError("You are not assigned to this project.")
+      }
+
+      // Get template stage config for this stage
+      const templateConfig = await tx
+        .select({
+          id: templateStageConfigs.id,
+        })
+        .from(templateStageConfigs)
+        .innerJoin(projectStages, eq(templateStageConfigs.id, projectStages.templateStageConfigId))
+        .where(
+          and(
+            eq(projectStages.id, input.stageId),
+            eq(projectStages.projectId, input.projectId),
+          ),
+        )
+        .limit(1)
+        .then((rows) => rows[0])
+
+      if (!templateConfig) {
+        throw new ForbiddenError("Template configuration not found for this stage.")
+      }
+
+      // Validate peer target for peer assessments
+      if (input.instrumentType === "PEER_ASSESSMENT" && input.targetStudentId) {
+        await validatePeerTarget(tx, student.id, input.projectId, input.targetStudentId)
+      }
+
+      // Calculate total score from questionnaire responses
+      const totalScore = Object.values(input.content).reduce((sum, score) => sum + score, 0)
+      const averageScore = totalScore / Object.keys(input.content).length
+
+      // Check if submission already exists
+      const existingSubmission = await tx
+        .select({ id: submissions.id })
+        .from(submissions)
+        .where(
+          and(
+            eq(submissions.studentId, student.id),
+            eq(submissions.projectId, input.projectId),
+            eq(submissions.templateStageConfigId, templateConfig.id),
+            eq(submissions.instrumentType, input.instrumentType),
+            ...(input.targetStudentId ? [eq(submissions.targetStudentId, input.targetStudentId)] : []),
+          ),
+        )
+        .limit(1)
+        .then((rows) => rows[0])
+
+      if (existingSubmission) {
+        // Update existing submission
+        await tx
+          .update(submissions)
+          .set({
+            content: input.content,
+            score: Math.round(averageScore),
+            submittedAt: new Date(),
+          })
+          .where(eq(submissions.id, existingSubmission.id))
+      } else {
+        // Create new submission
+        await tx.insert(submissions).values({
+          studentId: student.id,
+          projectId: input.projectId,
+          templateStageConfigId: templateConfig.id,
+          instrumentType: input.instrumentType,
+          content: input.content,
+          score: Math.round(averageScore),
+          targetStudentId: input.targetStudentId,
+          submittedAt: new Date(),
+        })
+      }
+
+      return { success: true }
+    })
+
+    return result
+  } catch (error) {
+    return handleError(error, "Failed to submit questionnaire")
   }
 }

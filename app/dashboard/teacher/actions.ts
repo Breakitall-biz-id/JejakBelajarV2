@@ -15,6 +15,9 @@ import {
   projectStages,
   projects,
   projectStatusEnum,
+  projectTemplates,
+  templateStageConfigs,
+  templateQuestions,
   userClassAssignments,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
@@ -48,7 +51,9 @@ const projectBaseSchema = z.object({
     .transform((value) => (value && value.length > 0 ? value : null)),
 })
 
-const createProjectSchema = projectBaseSchema
+const createProjectSchema = projectBaseSchema.extend({
+  templateId: z.string().uuid("Please select a project template"),
+})
 
 const updateProjectSchema = projectBaseSchema.extend({
   projectId: z.string().uuid(),
@@ -197,21 +202,80 @@ export async function createProject(
 
     await ensureTeacherAccessToClass(teacher.id, parsed.data.classId)
 
-    const [created] = await db
-      .insert(projects)
-      .values({
-        classId: parsed.data.classId,
-        teacherId: teacher.id,
-        title: parsed.data.title,
-        description: parsed.data.description,
-        theme: parsed.data.theme,
-        status: "DRAFT",
-      })
-      .returning({ id: projects.id })
+    // Verify template exists and is active
+    const template = await db
+      .select({ id: projectTemplates.id })
+      .from(projectTemplates)
+      .where(
+        and(
+          eq(projectTemplates.id, parsed.data.templateId),
+          eq(projectTemplates.isActive, true)
+        )
+      )
+      .limit(1)
+      .then((rows) => rows[0])
+
+    if (!template) {
+      return { success: false, error: "Selected template is not available." }
+    }
+
+    const result = await db.transaction(async (tx) => {
+      // Create the project
+      const [created] = await tx
+        .insert(projects)
+        .values({
+          classId: parsed.data.classId,
+          teacherId: teacher.id,
+          title: parsed.data.title,
+          description: parsed.data.description,
+          theme: parsed.data.theme,
+          templateId: parsed.data.templateId,
+          status: "DRAFT",
+        })
+        .returning({ id: projects.id })
+
+      // Get template stage configs
+      const stageConfigs = await tx
+        .select({
+          id: templateStageConfigs.id,
+          stageName: templateStageConfigs.stageName,
+          instrumentType: templateStageConfigs.instrumentType,
+          displayOrder: templateStageConfigs.displayOrder,
+          description: templateStageConfigs.description,
+          estimatedDuration: templateStageConfigs.estimatedDuration,
+        })
+        .from(templateStageConfigs)
+        .where(eq(templateStageConfigs.templateId, parsed.data.templateId))
+        .orderBy(asc(templateStageConfigs.displayOrder))
+
+      // Create project stages from template configs
+      for (const config of stageConfigs) {
+        const [stage] = await tx
+          .insert(projectStages)
+          .values({
+            projectId: created.id,
+            name: config.stageName,
+            description: config.description,
+            order: config.displayOrder,
+          })
+          .returning({ id: projectStages.id })
+
+        // Create stage instruments
+        await tx
+          .insert(projectStageInstruments)
+          .values({
+            projectStageId: stage.id,
+            instrumentType: config.instrumentType,
+            isRequired: true,
+          })
+      }
+
+      return created
+    })
 
     revalidatePath(DASHBOARD_TEACHER_PATH)
 
-    return { success: true, data: { projectId: created.id } }
+    return { success: true, data: { projectId: result.id } }
   } catch (error) {
     return handleError(error, "Unable to create project.")
   }

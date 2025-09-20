@@ -15,6 +15,7 @@ import {
   userClassAssignments,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
+import { templateStageConfigs, templateQuestions } from "@/db/schema/jejak"
 import type { CurrentUser } from "@/lib/auth/session"
 
 type StageProgressRow = typeof projectStageProgress.$inferSelect
@@ -497,4 +498,26 @@ async function fetchClassStudents(classIds: string[]) {
     })
     return acc
   }, {})
+}
+
+export async function getTemplateQuestions(stageId: string): Promise<Array<{
+  id: string
+  questionText: string
+  questionType: string
+  scoringGuide?: string
+}>> {
+  const questions = await db
+    .select({
+      id: templateQuestions.id,
+      questionText: templateQuestions.questionText,
+      questionType: templateQuestions.questionType,
+      scoringGuide: templateQuestions.scoringGuide,
+    })
+    .from(templateQuestions)
+    .innerJoin(templateStageConfigs, eq(templateQuestions.configId, templateStageConfigs.id))
+    .innerJoin(projectStages, eq(templateStageConfigs.id, projectStages.templateStageConfigId))
+    .where(eq(projectStages.id, stageId))
+    .orderBy(asc(templateQuestions.id))
+
+  return questions
 }

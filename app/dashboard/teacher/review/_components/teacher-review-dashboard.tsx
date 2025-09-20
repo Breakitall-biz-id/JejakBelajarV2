@@ -55,15 +55,29 @@ export function TeacherReviewDashboard({ teacher, data }: TeacherReviewDashboard
 
   if (data.classes.length === 0) {
     return (
-      <div className="px-4 pb-12 pt-6 lg:px-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>No classes assigned</CardTitle>
-            <CardDescription>
-              You need to be assigned to a class to review student progress. Contact your school administrator.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+      <div className="min-h-screen bg-background">
+        <header className="border-b bg-card">
+          <div className="container mx-auto px-6 py-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight">Assessment Review</h1>
+                <p className="text-muted-foreground mt-1">
+                  Grade reflections, peer feedback, and observation notes to guide your students through the PjBL stages.
+                </p>
+              </div>
+            </div>
+          </div>
+        </header>
+        <main className="container mx-auto px-6 py-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>No classes assigned</CardTitle>
+              <CardDescription>
+                You need to be assigned to a class to review student progress. Contact your school administrator.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </main>
       </div>
     )
   }
@@ -71,15 +85,38 @@ export function TeacherReviewDashboard({ teacher, data }: TeacherReviewDashboard
   const classProjects = data.classProjects[selectedClass] ?? []
 
   return (
-    <div className="space-y-8 px-4 pb-12 pt-6 lg:px-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Assessment Review</h1>
-        <p className="text-muted-foreground">
-          Grade reflections, peer feedback, and observation notes to guide your students through the PjBL stages.
-        </p>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight">Assessment Review</h1>
+              <p className="text-muted-foreground mt-1">
+                Grade reflections, peer feedback, and observation notes to guide your students through the PjBL stages.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" asChild>
+                <a href="/dashboard/teacher">
+                  <ChevronsDown className="h-4 w-4 mr-2 rotate-180" />
+                  Back to Dashboard
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
       </header>
 
-      <Tabs value={selectedClass} onValueChange={setSelectedClass} className="space-y-6">
+      {/* Main Content */}
+      <main className="container mx-auto px-6 py-8">
+        <Tabs value={selectedClass} onValueChange={setSelectedClass} className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Select Class</h2>
+            <p className="text-sm text-muted-foreground">Choose a class to review student submissions</p>
+          </div>
+        </div>
         <TabsList className="w-full overflow-x-auto">
           {data.classes.map((classInfo) => (
             <TabsTrigger key={classInfo.id} value={classInfo.id} className="px-6">
@@ -91,44 +128,75 @@ export function TeacherReviewDashboard({ teacher, data }: TeacherReviewDashboard
         {data.classes.map((classInfo) => (
           <TabsContent key={classInfo.id} value={classInfo.id} className="space-y-6">
             {classProjects.length === 0 ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>No projects yet</CardTitle>
+              <Card className="border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                  <NotebookPen className="h-12 w-12 text-muted-foreground mb-4" />
+                  <CardTitle className="text-lg mb-2">No projects yet</CardTitle>
                   <CardDescription>
                     Publish a project for this class to begin tracking student submissions.
                   </CardDescription>
-                </CardHeader>
+                </CardContent>
               </Card>
             ) : (
               classProjects.map((project) => (
-                <Card key={project.id} className="border-muted">
-                  <CardHeader>
-                    <CardTitle>{project.title}</CardTitle>
-                    <CardDescription>
-                      Review student progress stage by stage. Update observation scores to unlock subsequent stages.
-                    </CardDescription>
+                <Card key={project.id} className="border-muted shadow-sm">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <CardTitle className="text-xl">{project.title}</CardTitle>
+                        <CardDescription>
+                          Review student progress stage by stage. Update observation scores to unlock subsequent stages.
+                        </CardDescription>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">
+                          {project.stages.length} stages
+                        </Badge>
+                        <Badge variant="outline">
+                          {project.status}
+                        </Badge>
+                      </div>
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <Accordion type="multiple" className="space-y-4">
-                      {project.stages.map((stage) => (
-                        <AccordionItem key={stage.id} value={stage.id} className="rounded-lg border">
-                          <AccordionTrigger className="px-4 py-3">
-                            <div className="flex flex-col gap-1 text-left">
-                              <span className="font-semibold">Stage {stage.order}: {stage.name}</span>
-                              <StageInstrumentSummary instruments={stage.instruments} />
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent className="space-y-4 bg-muted/40 px-4 py-4">
-                            <StageStudentsTable
-                              stage={stage}
-                              projectId={project.id}
-                              teacher={teacher}
-                              router={router}
-                            />
-                          </AccordionContent>
-                        </AccordionItem>
+                    <div className="space-y-4">
+                      {project.stages.map((stage, index) => (
+                        <div key={stage.id} className="border border-border rounded-lg overflow-hidden">
+                          <div className="bg-card border-b">
+                            <Accordion type="single" value={stage.id} className="w-full">
+                              <AccordionItem value={stage.id} className="border-0">
+                                <AccordionTrigger className="px-6 py-4 hover:no-underline group">
+                                  <div className="flex items-center justify-between w-full pr-4">
+                                    <div className="flex items-center gap-4">
+                                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-muted text-foreground font-semibold">
+                                        {index + 1}
+                                      </div>
+                                      <div className="text-left">
+                                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                                          {stage.name}
+                                        </h3>
+                                        <StageInstrumentSummary instruments={stage.instruments} />
+                                      </div>
+                                    </div>
+                                    <Badge variant="outline" className="ml-4">
+                                      {stage.students.length} student{stage.students.length !== 1 ? 's' : ''}
+                                    </Badge>
+                                  </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="px-6 py-4">
+                                  <StageStudentsTable
+                                    stage={stage}
+                                    projectId={project.id}
+                                    teacher={teacher}
+                                    router={router}
+                                  />
+                                </AccordionContent>
+                              </AccordionItem>
+                            </Accordion>
+                          </div>
+                        </div>
                       ))}
-                    </Accordion>
+                    </div>
                   </CardContent>
                 </Card>
               ))
@@ -136,6 +204,7 @@ export function TeacherReviewDashboard({ teacher, data }: TeacherReviewDashboard
           </TabsContent>
         ))}
       </Tabs>
+      </main>
     </div>
   )
 }
@@ -146,11 +215,11 @@ function StageInstrumentSummary({ instruments }: { instruments: string[] }) {
   }
 
   return (
-    <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+    <div className="flex flex-wrap gap-1.5 text-sm text-muted-foreground">
       {instruments.map((instrument) => (
-        <Badge key={instrument} variant="outline" className="capitalize">
+        <span key={instrument} className="px-2 py-1 bg-muted rounded-md text-xs capitalize">
           {instrument.replace(/_/g, " ")}
-        </Badge>
+        </span>
       ))}
     </div>
   )
@@ -223,56 +292,65 @@ function StudentReviewPanel({ stage, student, projectId, router }: StudentReview
   }
 
   return (
-    <div className="rounded-lg border bg-background p-4">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="font-semibold">{student.name ?? "Unnamed learner"}</span>
-            <Badge variant={progressLabel.variant}>{progressLabel.label}</Badge>
+    <div className="rounded-lg border bg-card shadow-sm hover:shadow-md transition-shadow">
+      <header className="p-6 border-b bg-muted/30">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+              <span className="font-semibold text-sm">
+                {(student.name ?? "UN").charAt(0)}
+              </span>
+            </div>
+            <div>
+              <h4 className="font-semibold text-foreground">{student.name ?? "Unnamed learner"}</h4>
+              <p className="text-sm text-muted-foreground">
+                {student.groupName ? `Group: ${student.groupName}` : "Independent work"}
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {student.groupName ? `Group: ${student.groupName}` : "Independent"}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => onOverrideStatus("IN_PROGRESS")}
-            disabled={isStatusTransition}
-          >
-            Reactivate
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onOverrideStatus("COMPLETED")}
-            disabled={isStatusTransition}
-          >
-            Mark complete
-          </Button>
+          <div className="flex items-center gap-3">
+            <Badge variant={progressLabel.variant}>{progressLabel.label}</Badge>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => onOverrideStatus("IN_PROGRESS")}
+                disabled={isStatusTransition}
+              >
+                Reactivate
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => onOverrideStatus("COMPLETED")}
+                disabled={isStatusTransition}
+              >
+                Mark complete
+              </Button>
+            </div>
+          </div>
         </div>
       </header>
 
-      <Separator className="my-3" />
+      <div className="p-6">
+        <div className="space-y-4">
+          {currentStudent?.submissions.map((submission) => (
+            <SubmissionFeedbackCard
+              key={submission.id}
+              submission={submission}
+              stage={stage}
+              studentId={student.id}
+              router={router}
+            />
+          ))}
 
-      <div className="space-y-4">
-        {currentStudent?.submissions.map((submission) => (
-          <SubmissionFeedbackCard
-            key={submission.id}
-            submission={submission}
-            stage={stage}
-            studentId={student.id}
-            router={router}
-          />
-        ))}
-
-        {(currentStudent?.submissions.length ?? 0) === 0 && (
-          <div className="flex items-center gap-2 rounded-md border border-dashed bg-muted/40 p-4 text-sm text-muted-foreground">
-            <AlertCircle className="h-4 w-4" />
-            No submissions yet for this stage.
-          </div>
-        )}
+          {(currentStudent?.submissions.length ?? 0) === 0 && (
+            <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/20 bg-muted/20 p-8 text-center text-muted-foreground">
+              <AlertCircle className="h-5 w-5" />
+              <span className="font-medium">No submissions yet for this stage.</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -348,64 +426,108 @@ function SubmissionFeedbackCard({ submission, stage, studentId, router }: Submis
   }
 
   return (
-    <Card className="border-muted">
-      <CardHeader className="space-y-2">
+    <Card className="border border-border bg-card shadow-sm">
+      <CardHeader className="space-y-4 pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold capitalize">
-            {submission.instrumentType.replace(/_/g, " ")}
-          </CardTitle>
-          <Badge variant="outline">Submitted {formatDate(submission.submittedAt)}</Badge>
-        </div>
-        <CardDescription className="whitespace-pre-wrap">
-          {extractSubmissionText(submission.content)}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 md:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="score"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Score (0-100)</FormLabel>
-                  <FormControl>
-                    <Input type="number" min={0} max={100} placeholder="e.g. 85" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="feedback"
-              render={({ field }) => (
-                <FormItem className="md:col-span-2">
-                  <FormLabel>Feedback for learner</FormLabel>
-                  <FormControl>
-                    <Textarea rows={4} placeholder="Share your observations and next steps" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="md:col-span-2 flex justify-end">
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Saving...
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    <ClipboardCheck className="h-4 w-4" />
-                    Save feedback
-                  </span>
-                )}
-              </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/10 text-primary">
+              {submission.instrumentType === "OBSERVATION" && <MessageSquareText className="h-5 w-5" />}
+              {submission.instrumentType === "JOURNAL" && <NotebookPen className="h-5 w-5" />}
+              {submission.instrumentType === "SELF_ASSESSMENT" && <CheckCircle2 className="h-5 w-5" />}
+              {submission.instrumentType === "PEER_ASSESSMENT" && <MessageSquareText className="h-5 w-5" />}
+              {submission.instrumentType === "DAILY_NOTE" && <NotebookPen className="h-5 w-5" />}
             </div>
-          </form>
-        </Form>
+            <div>
+              <CardTitle className="text-base font-semibold capitalize">
+                {submission.instrumentType.replace(/_/g, " ")}
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">Student submission</p>
+            </div>
+          </div>
+          <Badge variant="secondary" className="text-xs">
+            {formatDate(submission.submittedAt)}
+          </Badge>
+        </div>
+        <div className="bg-muted/50 p-4 rounded-lg border">
+          <p className="text-sm text-foreground whitespace-pre-wrap">
+            {extractSubmissionText(submission.content)}
+          </p>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <div className="border-t pt-6">
+          <h4 className="font-medium mb-4">Provide Feedback</h4>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="score"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Score (0-100)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          max={100}
+                          placeholder="e.g. 85"
+                          className="focus-visible:ring-primary"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={form.control}
+                name="feedback"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Feedback for learner</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        rows={4}
+                        placeholder="Share your observations and next steps..."
+                        className="resize-none focus-visible:ring-primary"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  type="button"
+                  className="hover:bg-muted"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <ClipboardCheck className="h-4 w-4" />
+                      Save feedback
+                    </span>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
       </CardContent>
     </Card>
   )

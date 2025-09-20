@@ -1,14 +1,16 @@
 "use client"
 
 import Link from "next/link"
-import { useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
+  BookOpen,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   Edit,
   ListChecks,
@@ -17,10 +19,25 @@ import {
   Plus,
   Trash,
   Users,
+  BarChart3,
+  ClipboardCheck,
+  CheckCircle2,
+  Archive,
+  LayoutDashboard,
+  FileText,
+  Settings,
+  LogOut,
+  Bell,
+  Search,
+  TrendingUp,
+  Clock,
+  UserCheck,
+  Target,
+  Calendar,
 } from "lucide-react"
 
 import type { CurrentUser } from "@/lib/auth/session"
-import type { TeacherDashboardData } from "../queries"
+import type { TeacherDashboardData, ProjectTemplate } from "../queries"
 import {
   createGroup,
   createProject,
@@ -36,23 +53,8 @@ import {
   updateProjectStage,
   updateProjectStatus,
 } from "../actions"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import {
   Dialog,
   DialogContent,
@@ -70,15 +72,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -101,12 +95,39 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+import { Input } from "@/components/ui/input"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/components/ui/radio-group"
 
 type TeacherDashboardProps = {
   teacher: CurrentUser
   data: TeacherDashboardData
   projectStatusOptions: readonly string[]
   instrumentOptions: readonly string[]
+}
+
+// Empty State Component
+function EmptyState({ title, description, icon }: {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="text-muted-foreground mb-4">{icon}</div>
+      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+      <p className="text-muted-foreground max-w-md">{description}</p>
+    </div>
+  )
 }
 
 export function TeacherDashboard({
@@ -130,43 +151,116 @@ export function TeacherDashboard({
     return map
   }, [data.projects])
 
+  const totalProjects = data.projects.length
+  const activeProjects = data.projects.filter(p => p.status === 'PUBLISHED').length
+  const totalStudents = Object.values(data.studentsByClass).reduce((acc, students) => acc + students.length, 0)
+  const totalClasses = data.classes.length
+
   return (
-    <div className="space-y-8 px-4 pb-8 pt-4 lg:px-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Teacher Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back, {teacher.name ?? teacher.email}. Manage your project-based learning cycles,
-            stages, and student groups for the active academic terms.
-          </p>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div>
+              <h1 className="text-2xl font-semibold">Teacher Dashboard</h1>
+              <p className="text-muted-foreground mt-1">
+                Welcome back, {teacher.name ?? teacher.email}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/dashboard/teacher/reports">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Reports
+                </Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="/dashboard/teacher/review">
+                  <ClipboardCheck className="h-4 w-4 mr-2" />
+                  Review
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
-        <Button variant="outline" asChild>
-          <Link href="/dashboard/teacher/reports">Reports &amp; exports</Link>
-        </Button>
       </header>
 
-      {data.classes.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            You are not assigned to any classes yet. Contact the school administrator to get
-            started.
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-6 xl:grid-cols-2">
-          {data.classes.map((classInfo) => (
-            <ClassProjectsCard
-              key={classInfo.id}
-              classInfo={classInfo}
-              projects={projectsByClass.get(classInfo.id) ?? []}
-              students={data.studentsByClass[classInfo.id] ?? []}
-              projectStatusOptions={projectStatusOptions}
-              instrumentOptions={instrumentOptions}
-              router={router}
-            />
-          ))}
+      {/* Main Content */}
+      <main className="container mx-auto px-6 py-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-card border border-border rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Classes</p>
+                <p className="text-2xl font-bold text-foreground">{totalClasses}</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <BookOpen className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Active Projects</p>
+                <p className="text-2xl font-bold text-foreground">{activeProjects}</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <Target className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Students</p>
+                <p className="text-2xl font-bold text-foreground">{totalStudents}</p>
+              </div>
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Users className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Pending Reviews</p>
+                <p className="text-2xl font-bold text-foreground">12</p>
+              </div>
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <Clock className="h-6 w-6 text-orange-600" />
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+
+        {data.classes.length === 0 ? (
+          <EmptyState
+            title="No Classes Assigned"
+            description="You are not assigned to any classes yet. Contact your school administrator to get started."
+            icon={<Users className="h-12 w-12" />}
+          />
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-2">
+            {data.classes.map((classInfo) => (
+              <ClassProjectsCard
+                key={classInfo.id}
+                classInfo={classInfo}
+                projects={projectsByClass.get(classInfo.id) ?? []}
+                students={data.studentsByClass[classInfo.id] ?? []}
+                projectStatusOptions={projectStatusOptions}
+                instrumentOptions={instrumentOptions}
+                router={router}
+              />
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   )
 }
@@ -194,29 +288,61 @@ function ClassProjectsCard({
   instrumentOptions,
   router,
 }: ClassProjectsCardProps) {
+  const activeProjects = projects.filter(p => p.status === 'PUBLISHED')
+
   return (
-    <Card className="flex h-full flex-col">
-      <CardHeader className="space-y-3">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1">
-            <CardTitle>{classInfo.name}</CardTitle>
-            <CardDescription>
-              Academic Year {classInfo.academicYear} • Semester {classInfo.semester === "ODD" ? "Ganjil" : "Genap"}
-            </CardDescription>
+    <div className="bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+      {/* Class Header */}
+      <div className="p-6 border-b border-border">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">{classInfo.name}</h3>
+            <p className="text-sm text-muted-foreground">
+              {classInfo.academicYear} • {classInfo.semester === "ODD" ? "Ganjil" : "Genap"}
+            </p>
           </div>
-          <Badge variant={classInfo.termStatus === "ACTIVE" ? "default" : "outline"}>
-            {classInfo.termStatus === "ACTIVE" ? "Active term" : "Inactive"}
+          <Badge
+            variant={classInfo.termStatus === "ACTIVE" ? "default" : "secondary"}
+            className="px-3 py-1"
+          >
+            {classInfo.termStatus === "ACTIVE" ? "Active" : "Inactive"}
           </Badge>
         </div>
-        <CreateProjectDialog classId={classInfo.id} router={router} />
-      </CardHeader>
-      <CardContent className="flex-1 space-y-4">
+
+        {/* Quick Stats */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-6 text-sm">
+            <div className="text-center">
+              <p className="text-xl font-bold text-foreground">{projects.length}</p>
+              <p className="text-xs text-muted-foreground">Projects</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-bold text-foreground">{activeProjects.length}</p>
+              <p className="text-xs text-muted-foreground">Active</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-bold text-foreground">{students.length}</p>
+              <p className="text-xs text-muted-foreground">Students</p>
+            </div>
+          </div>
+          <CreateProjectDialog classId={classInfo.id} router={router} />
+        </div>
+      </div>
+
+      {/* Projects List */}
+      <div className="p-6">
         {projects.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-            No projects yet. Create a project to plan the stages and student groups for this class.
+          <div className="text-center py-8">
+            <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
+              <BookOpen className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h4 className="text-lg font-semibold text-foreground mb-2">No Projects Yet</h4>
+            <p className="text-muted-foreground text-sm">
+              Create your first project to start managing PjBL activities
+            </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {projects.map((project) => (
               <ProjectCard
                 key={project.id}
@@ -230,8 +356,68 @@ function ClassProjectsCard({
             ))}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
+  )
+}
+
+// Group Card Component
+function GroupCard({ group, projectId, students, router }: {
+  group: TeacherDashboardData['projects'][number]['groups'][number]
+  projectId: string
+  students: ClassStudent[]
+  router: ReturnType<typeof useRouter>
+}) {
+  return (
+    <div className="border border-border rounded-lg p-4 bg-card hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-muted rounded-lg">
+              <Users className="h-4 w-4 text-foreground" />
+            </div>
+            <h4 className="font-semibold text-foreground">{group.name}</h4>
+            <Badge variant="secondary" className="ml-2">
+              {group.members.length} members
+            </Badge>
+          </div>
+
+          {group.members.length > 0 ? (
+            <div className="ml-11">
+              <div className="flex flex-wrap gap-2">
+                {group.members.slice(0, 3).map((member) => (
+                  <Badge key={member.studentId} variant="outline" className="text-xs">
+                    {member.studentName ?? member.studentId.slice(0, 8)}
+                  </Badge>
+                ))}
+                {group.members.length > 3 && (
+                  <Badge variant="outline" className="text-xs bg-muted">
+                    +{group.members.length - 3} more
+                  </Badge>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground ml-11">No members assigned</p>
+          )}
+        </div>
+
+        <div className="flex gap-2 ml-4">
+          <EditGroupDialog
+            group={group}
+            projectId={projectId}
+            router={router}
+          />
+          <EditGroupMembersDialog
+            group={group}
+            projectId={projectId}
+            students={students}
+            router={router}
+          />
+          <DeleteGroupButton groupId={group.id} router={router} />
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -239,10 +425,34 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
   const [open, setOpen] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
+  const [templates, setTemplates] = useState<ProjectTemplate[]>([])
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false)
+
+  // Load templates when dialog opens
+  useEffect(() => {
+    if (open) {
+      loadTemplates()
+    }
+  }, [open])
+
+  const loadTemplates = async () => {
+    setIsLoadingTemplates(true)
+    try {
+      const templateData = await getProjectTemplates()
+      setTemplates(templateData)
+    } catch (error) {
+      console.error("Failed to load templates:", error)
+      setFormError("Failed to load project templates")
+    } finally {
+      setIsLoadingTemplates(false)
+    }
+  }
 
   const formSchema = useMemo(
     () =>
       z.object({
+        templateId: z.string().min(1, "Please select a project template"),
         title: z.string().trim().min(1, "Project title is required").max(255),
         theme: z.string().trim().optional(),
         description: z.string().trim().optional(),
@@ -253,6 +463,7 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      templateId: "",
       title: "",
       theme: "",
       description: "",
@@ -264,9 +475,10 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
     startTransition(async () => {
       const result = await createProject({
         classId,
+        templateId: values.templateId,
         title: values.title,
-        theme: values.theme?.trim() || null,
-        description: values.description?.trim() || null,
+        theme: values.theme?.trim() || undefined,
+        description: values.description?.trim() || undefined,
       })
 
       if (!result.success) {
@@ -274,38 +486,125 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
         return
       }
 
-      toast.success("Project created.")
+      toast.success("Project created with template.")
       form.reset()
+      setSelectedTemplate(null)
+      setTemplates([])
       setOpen(false)
       router.refresh()
     })
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        if (!newOpen) {
+          form.reset()
+          setSelectedTemplate(null)
+        }
+        setOpen(newOpen)
+      }}
+    >
       <DialogTrigger asChild>
-        <Button size="sm">
-          <Plus className="mr-2 h-4 w-4" /> New project
+        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shadow-sm">
+          <Plus className="h-4 w-4" />
+          New Project
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Create project</DialogTitle>
-          <DialogDescription>
-            Define the core details of your PjBL project. You can add stages and groups after
-            saving.
+      <DialogContent className="max-w-2xl border-border max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="text-xl font-semibold">Create New Project</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            Select a project template to get started with predefined stages and assessment instruments.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            {/* Template Selection */}
+            <FormField
+              control={form.control}
+              name="templateId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-foreground font-medium">Select Project Template</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={(value) => {
+                        field.onChange(value)
+                        setSelectedTemplate(value)
+                      }}
+                      value={field.value}
+                      className="space-y-3"
+                    >
+                      {isLoadingTemplates ? (
+                        <div className="flex items-center justify-center py-8">
+                          <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                          <span>Loading templates...</span>
+                        </div>
+                      ) : templates.length === 0 ? (
+                        <div className="text-center py-8 border-2 border-dashed border-border rounded-lg bg-muted/50">
+                          <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                          <p className="text-sm text-muted-foreground">No project templates available</p>
+                          <p className="text-xs text-muted-foreground mt-1">Please contact your administrator to create templates</p>
+                        </div>
+                      ) : (
+                        templates.map((template) => {
+                          const totalStages = new Set(template.stageConfigs.map(c => c.stageName)).size
+                          const instruments = Array.from(new Set(template.stageConfigs.map(c => c.instrumentType)))
+                          const duration = template.stageConfigs.length > 0
+                            ? `${Math.ceil(template.stageConfigs.length / 2)} weeks`
+                            : "Flexible"
+
+                          return (
+                            <div key={template.id} className="flex items-center space-x-2">
+                              <RadioGroupItem value={template.id} id={template.id} />
+                              <label
+                                htmlFor={template.id}
+                                className="flex flex-1 cursor-pointer rounded-lg border p-3 hover:bg-muted/50 [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary/5"
+                              >
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <div className="font-medium">{template.templateName}</div>
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                      <span>{totalStages} stages</span>
+                                      <span>•</span>
+                                      <span>{duration}</span>
+                                    </div>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground mt-1">{template.description}</p>
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {instruments.map((instrument) => (
+                                      <Badge key={instrument} variant="secondary" className="text-xs">
+                                        {instrument.replace(/_/g, " ")}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              </label>
+                            </div>
+                          )
+                        })
+                      )}
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Project title</FormLabel>
+                  <FormLabel className="text-foreground font-medium">Project Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="Community Garden Project" {...field} />
+                    <Input
+                      placeholder="Community Garden Project"
+                      className="border-border focus:border-primary focus:ring-primary"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -316,12 +615,16 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
               name="theme"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Theme (optional)</FormLabel>
+                  <FormLabel className="text-foreground font-medium">Theme (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Green Living" {...field} />
+                    <Input
+                      placeholder="Green Living"
+                      className="border-border focus:border-primary focus:ring-primary"
+                      {...field}
+                    />
                   </FormControl>
-                  <FormDescription>
-                    Helps students understand how the project aligns with the P5 dimensions.
+                  <FormDescription className="text-muted-foreground">
+                    Customize the theme to match your specific implementation context.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -332,11 +635,12 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel className="text-foreground font-medium">Description</FormLabel>
                   <FormControl>
                     <Textarea
                       rows={4}
-                      placeholder="High-level objective and expected outcomes."
+                      placeholder="Specific objectives and expected outcomes for your class project."
+                      className="border-border focus:border-primary focus:ring-primary"
                       {...field}
                     />
                   </FormControl>
@@ -345,14 +649,30 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
               )}
             />
             {formError && (
-              <p className="text-sm text-destructive">{formError}</p>
+              <p className="text-sm text-red-600">{formError}</p>
             )}
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                className="border-border text-foreground hover:bg-accent"
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                {isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Project"
+                )}
               </Button>
             </div>
           </form>
@@ -379,9 +699,20 @@ function ProjectCard({
   instrumentOptions,
   router,
 }: ProjectCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
   const [isStatusPending, startStatusTransition] = useTransition()
 
-  const statusLabel = project.status.charAt(0) + project.status.slice(1).toLowerCase()
+  const statusColors: Record<string, string> = {
+    DRAFT: 'bg-muted text-foreground',
+    PUBLISHED: 'bg-muted text-foreground',
+    ARCHIVED: 'bg-muted text-foreground',
+  }
+
+  const statusIcons: Record<string, React.ReactNode> = {
+    DRAFT: <Edit className="h-4 w-4" />,
+    PUBLISHED: <CheckCircle2 className="h-4 w-4" />,
+    ARCHIVED: <Archive className="h-4 w-4" />,
+  }
 
   const handleStatusChange = (status: string) => {
     if (status === project.status) return
@@ -389,7 +720,7 @@ function ProjectCard({
     startStatusTransition(async () => {
       const result = await updateProjectStatus({
         projectId: project.id,
-        status: status as typeof project.status,
+        status: status as "DRAFT" | "PUBLISHED" | "ARCHIVED",
       })
 
       if (!result.success) {
@@ -403,63 +734,107 @@ function ProjectCard({
   }
 
   return (
-    <Card className="border-muted">
-      <CardHeader className="space-y-2">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <CardTitle className="text-lg">{project.title}</CardTitle>
-            {project.theme && (
-              <p className="text-sm text-muted-foreground">Theme: {project.theme}</p>
-            )}
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
-                {isStatusPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+    <div className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+      {/* Project Header */}
+      <div className="p-4 bg-card">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="p-1 hover:bg-muted rounded-md transition-colors"
+              >
+                {isExpanded ? (
+                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
                 ) : (
-                  <span>{statusLabel}</span>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
                 )}
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Project status</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {projectStatusOptions.map((statusOption) => (
-                <DropdownMenuItem
-                  key={statusOption}
-                  onClick={() => handleStatusChange(statusOption)}
-                  className="cursor-pointer"
-                >
-                  {statusOption.charAt(0) + statusOption.slice(1).toLowerCase()}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </button>
+              <div className="flex-1">
+                <h4 className="font-semibold text-foreground">{project.title}</h4>
+                {project.theme && (
+                  <p className="text-sm text-muted-foreground">Theme: {project.theme}</p>
+                )}
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground ml-8">
+              {project.description ?? "No description provided."}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 ml-4">
+            <Badge className={statusColors[project.status]}>
+              {statusIcons[project.status]}
+              <span className="ml-1">{project.status}</span>
+            </Badge>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  {isStatusPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <MoreHorizontal className="h-4 w-4" />
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {projectStatusOptions.map((statusOption) => (
+                  <DropdownMenuItem
+                    key={statusOption}
+                    onClick={() => handleStatusChange(statusOption)}
+                    className="cursor-pointer"
+                  >
+                    {statusOption.charAt(0) + statusOption.slice(1).toLowerCase()}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground">
-          {project.description ?? "No description provided."}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <EditProjectDialog project={project} classId={classId} router={router} />
-          <DeleteProjectButton projectId={project.id} router={router} />
+      </div>
+
+      {/* Expandable Content */}
+      {isExpanded && (
+        <div className="border-t border-border bg-muted/50 p-4 space-y-6">
+          {/* Quick Stats */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <p className="text-lg font-bold text-foreground">{project.stages.length}</p>
+              <p className="text-xs text-muted-foreground">Stages</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold text-foreground">{project.groups.length}</p>
+              <p className="text-xs text-muted-foreground">Groups</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold text-foreground">
+                {project.groups.reduce((acc, group) => acc + group.members.length, 0)}
+              </p>
+              <p className="text-xs text-muted-foreground">Students</p>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <EditProjectDialog project={project} classId={classId} router={router} />
+            <DeleteProjectButton projectId={project.id} router={router} />
+          </div>
+
+          <ProjectStagesSection
+            project={project}
+            instrumentOptions={instrumentOptions}
+            router={router}
+          />
+          <Separator />
+          <ProjectGroupsSection
+            project={project}
+            students={students}
+            router={router}
+          />
         </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <ProjectStagesSection
-          project={project}
-          instrumentOptions={instrumentOptions}
-          router={router}
-        />
-        <Separator />
-        <ProjectGroupsSection
-          project={project}
-          students={students}
-          router={router}
-        />
-      </CardContent>
-    </Card>
+      )}
+    </div>
   )
 }
 
@@ -500,8 +875,8 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
         projectId: project.id,
         classId,
         title: values.title,
-        theme: values.theme?.trim() || null,
-        description: values.description?.trim() || null,
+        theme: values.theme?.trim() || undefined,
+        description: values.description?.trim() || undefined,
       })
 
       if (!result.success) {
@@ -646,13 +1021,15 @@ function ProjectStagesSection({ project, instrumentOptions, router }: ProjectSta
 
   return (
     <section className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <ListBadge />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-muted rounded-lg">
+            <ListChecks className="h-5 w-5 text-foreground" />
+          </div>
           <div>
-            <h3 className="font-semibold leading-tight">Project stages</h3>
+            <h3 className="font-semibold text-foreground">Project Stages</h3>
             <p className="text-sm text-muted-foreground">
-              Define the sequential PjBL stages and required assessment instruments.
+              Sequential PjBL stages with assessment instruments
             </p>
           </div>
         </div>
@@ -660,7 +1037,7 @@ function ProjectStagesSection({ project, instrumentOptions, router }: ProjectSta
       </div>
 
       {hasStages ? (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {project.stages.map((stage, index) => (
             <StageItem
               key={stage.id}
@@ -674,21 +1051,16 @@ function ProjectStagesSection({ project, instrumentOptions, router }: ProjectSta
           ))}
         </div>
       ) : (
-        <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-          No stages yet. Add stages following the PjBL syntax to unlock instruments for students.
-        </p>
+        <div className="text-center py-6 border-2 border-dashed border-border rounded-lg bg-muted/50">
+          <ListChecks className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">No stages configured yet</p>
+          <p className="text-xs text-muted-foreground mt-1">Add PjBL stages to enable student submissions</p>
+        </div>
       )}
     </section>
   )
 }
 
-function ListBadge() {
-  return (
-    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-      <ListChecks className="h-4 w-4" />
-    </span>
-  )
-}
 
 type StageItemProps = {
   stage: TeacherDashboardData["projects"][number]["stages"][number]
@@ -787,7 +1159,7 @@ function StageItem({
           >
             <ChevronDown className="h-4 w-4" />
           </Button>
-          <EditStageDialog stage={stage} router={router} />
+          <EditStageDialog stage={stage} project={project} router={router} />
           <StageInstrumentsDialog
             stage={stage}
             instrumentOptions={instrumentOptions}
@@ -880,9 +1252,9 @@ function CreateStageDialog({ projectId, router }: { projectId: string; router: R
       const result = await createProjectStage({
         projectId,
         name: values.name,
-        description: values.description?.trim() || null,
-        unlocksAt: values.unlocksAt || null,
-        dueAt: values.dueAt || null,
+        description: values.description?.trim() || undefined,
+        unlocksAt: values.unlocksAt || undefined,
+        dueAt: values.dueAt || undefined,
       })
 
       if (!result.success) {
@@ -985,10 +1357,11 @@ function CreateStageDialog({ projectId, router }: { projectId: string; router: R
 
 type EditStageDialogProps = {
   stage: TeacherDashboardData["projects"][number]["stages"][number]
+  project: TeacherDashboardData["projects"][number]
   router: ReturnType<typeof useRouter>
 }
 
-function EditStageDialog({ stage, router }: EditStageDialogProps) {
+function EditStageDialog({ stage, project, router }: EditStageDialogProps) {
   const [open, setOpen] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -1021,9 +1394,9 @@ function EditStageDialog({ stage, router }: EditStageDialogProps) {
         stageId: stage.id,
         projectId: project.id,
         name: values.name,
-        description: values.description?.trim() || null,
-        unlocksAt: values.unlocksAt || null,
-        dueAt: values.dueAt || null,
+        description: values.description?.trim() || undefined,
+        unlocksAt: values.unlocksAt || undefined,
+        dueAt: values.dueAt || undefined,
       })
 
       if (!result.success) {
@@ -1149,7 +1522,7 @@ function StageInstrumentsDialog({
     startTransition(async () => {
       const result = await setStageInstruments({
         stageId: stage.id,
-        instrumentTypes: Array.from(selected),
+        instrumentTypes: Array.from(selected) as ("JOURNAL" | "SELF_ASSESSMENT" | "PEER_ASSESSMENT" | "OBSERVATION" | "DAILY_NOTE")[],
       })
 
       if (!result.success) {
@@ -1250,15 +1623,15 @@ type ProjectGroupsSectionProps = {
 function ProjectGroupsSection({ project, students, router }: ProjectGroupsSectionProps) {
   return (
     <section className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Users className="h-4 w-4" />
-          </span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-muted rounded-lg">
+            <Users className="h-5 w-5 text-foreground" />
+          </div>
           <div>
-            <h3 className="font-semibold leading-tight">Student groups</h3>
+            <h3 className="font-semibold text-foreground">Student Groups</h3>
             <p className="text-sm text-muted-foreground">
-              Organise students into collaborative groups aligned with project deliverables.
+              Collaborative groups for project-based learning
             </p>
           </div>
         </div>
@@ -1266,55 +1639,23 @@ function ProjectGroupsSection({ project, students, router }: ProjectGroupsSectio
       </div>
 
       {project.groups.length === 0 ? (
-        <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-          No groups yet. Create groups to begin assigning students.
-        </p>
+        <div className="text-center py-6 border-2 border-dashed border-border rounded-lg bg-muted/50">
+          <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">No groups created yet</p>
+          <p className="text-xs text-muted-foreground mt-1">Create groups to organize students for collaboration</p>
+        </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Group</TableHead>
-              <TableHead>Members</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {project.groups.map((group) => (
-              <TableRow key={group.id}>
-                <TableCell className="font-medium">{group.name}</TableCell>
-                <TableCell>
-                  {group.members.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {group.members.map((member) => (
-                        <Badge key={member.studentId} variant="outline">
-                          {member.studentName ?? "Unnamed student"}
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">No members assigned.</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <div className="flex justify-end gap-2">
-                    <EditGroupDialog
-                      group={group}
-                      projectId={project.id}
-                      router={router}
-                    />
-                    <EditGroupMembersDialog
-                      group={group}
-                      projectId={project.id}
-                      students={students}
-                      router={router}
-                    />
-                    <DeleteGroupButton groupId={group.id} router={router} />
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <div className="grid gap-3">
+          {project.groups.map((group) => (
+            <GroupCard
+              key={group.id}
+              group={group}
+              projectId={project.id}
+              students={students}
+              router={router}
+            />
+          ))}
+        </div>
       )}
     </section>
   )

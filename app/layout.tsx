@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Parkinsans } from "next/font/google";
+import { Geist, Geist_Mono, Mona_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const parkinsans = Parkinsans({
-  variable: "--font-parkinsans",
+const monaSans = Mona_Sans({
+  variable: "--font-mona-sans",
   subsets: ["latin"],
 });
 
@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${parkinsans.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${monaSans.variable} antialiased`}
       >
         <ThemeProvider
           attribute="class"
