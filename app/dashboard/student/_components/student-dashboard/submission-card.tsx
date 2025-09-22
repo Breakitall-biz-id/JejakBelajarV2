@@ -24,7 +24,7 @@ import type { CurrentUser } from "@/lib/auth/session"
 import type { StudentDashboardData } from "../../queries"
 
 import { submitStageInstrument, studentInstrumentSchema } from "../../actions"
-import { getTemplateQuestions } from "../../queries"
+import { getTemplateQuestions } from "../../actions"
 import {
   extractSubmissionText,
   formatInstrument,
@@ -117,7 +117,7 @@ export function InstrumentSubmissionCard({
 
     if (instrumentType === "PEER_ASSESSMENT" && "targetStudentId" in values) {
       if (!values.targetStudentId || values.targetStudentId.length === 0) {
-        form.setError("targetStudentId" as keyof typeof values, { message: "Select a peer." })
+        form.setError("targetStudentId", { message: "Select a peer." })
         return
       }
     }
@@ -132,10 +132,10 @@ export function InstrumentSubmissionCard({
       })
 
       if (!result.success) {
-        if (result.fieldErrors) {
+        if (result.fieldErrors && typeof result.fieldErrors === 'object') {
           for (const [field, messages] of Object.entries(result.fieldErrors)) {
             form.setError(field as keyof typeof values, {
-              message: messages?.[0] ?? result.error,
+              message: (Array.isArray(messages) ? messages?.[0] : messages) ?? result.error,
             })
           }
         }

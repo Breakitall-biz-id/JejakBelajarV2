@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray } from "drizzle-orm"
+import { and, asc, eq, inArray, sql } from "drizzle-orm"
 
 import { db } from "@/db"
 import {
@@ -12,10 +12,10 @@ import {
   projects,
   projectStatusEnum,
   submissions,
+  templateStageConfigs,
   userClassAssignments,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
-import { templateStageConfigs, templateQuestions } from "@/db/schema/jejak"
 import type { CurrentUser } from "@/lib/auth/session"
 
 type StageProgressRow = typeof projectStageProgress.$inferSelect
@@ -89,23 +89,26 @@ export type StudentDashboardData = {
         targetStudentId: string | null
         targetStudentName: string | null
       }>
+      submissionsByInstrument: Record<string, Array<{
+        id: string
+        instrumentType: string
+        content: unknown
+        submittedAt: string
+        targetStudentId: string | null
+        targetStudentName: string | null
+      }>>
     }>
   }>
 }
 
-const studentInstrumentTypes = new Set([
-  "JOURNAL",
-  "SELF_ASSESSMENT",
-  "PEER_ASSESSMENT",
-  "DAILY_NOTE",
-])
 
 const serializeDate = (value: Date | null) => value?.toISOString() ?? null
 
 export async function getStudentDashboardData(
   student: CurrentUser,
 ): Promise<StudentDashboardData> {
-  const classRows = await db
+  try {
+    const classRows = await db
     .select({
       classId: classes.id,
       className: classes.name,
@@ -127,15 +130,18 @@ export async function getStudentDashboardData(
     return { projects: [] }
   }
 
-  const classIds = classRows.map((row) => row.classId)
-  const classMap = new Map(
-    classRows.map((row) => [row.classId, {
-      id: row.classId,
-      name: row.className,
-      academicYear: row.academicYear,
-      semester: row.semester,
-    }]),
-  )
+  const classIds = classRows.map((row) => row.classId).filter(Boolean)
+  const classMap = new Map()
+  for (const row of classRows) {
+    if (row && row.classId) {
+      classMap.set(row.classId, {
+        id: row.classId,
+        name: row.className || "",
+        academicYear: row.academicYear || "",
+        semester: row.semester || "",
+      })
+    }
+  }
 
   const projectRows = await db
     .select({
@@ -163,7 +169,7 @@ export async function getStudentDashboardData(
     return { projects: [] }
   }
 
-  const projectIds = projectRows.map((row) => row.id)
+  const projectIds = projectRows.map((row) => row.id).filter(Boolean)
 
   const stageRows = await db
     .select({
@@ -179,17 +185,44 @@ export async function getStudentDashboardData(
     .where(inArray(projectStages.projectId, projectIds))
     .orderBy(asc(projectStages.projectId), asc(projectStages.order))
 
-  const stageRowsByProject = stageRows.reduce<Record<string, StageRow[]>>((acc, row) => {
-    if (!acc[row.projectId]) {
-      acc[row.projectId] = []
+  // Group stages by name (like admin dialog) - merge stages with same name
+  const stageRowsByProject: Record<string, StageRow[]> = {}
+
+  for (const row of stageRows) {
+    if (!stageRowsByProject[row.projectId]) {
+      stageRowsByProject[row.projectId] = []
     }
-    acc[row.projectId].push(row)
-    return acc
-  }, {})
+    stageRowsByProject[row.projectId].push(row)
+  }
 
-  const stageIds = stageRows.map((row) => row.id)
+  // Now merge stages with same name within each project
+  const mergedStagesByProject: Record<string, StageRow[]> = {}
 
-  const instrumentRows = stageIds.length
+  for (const [projectId, projectStages] of Object.entries(stageRowsByProject)) {
+    const stageMap = new Map<string, StageRow>()
+
+    for (const stage of projectStages) {
+      const existing = stageMap.get(stage.name)
+
+      if (!existing) {
+        // First stage with this name
+        stageMap.set(stage.name, stage)
+      } else {
+        // Merge with existing stage - keep the one with lower order
+        if (stage.order < existing.order) {
+          stageMap.set(stage.name, stage)
+        }
+      }
+    }
+
+    mergedStagesByProject[projectId] = Array.from(stageMap.values()).sort((a, b) => a.order - b.order)
+  }
+
+  // Get all stage IDs from merged stages for instrument query
+  const allStageIds = stageRows.map((row) => row.id)
+  const mergedStageIds = Object.values(mergedStagesByProject).flat().map((row) => row.id)
+
+  const instrumentRows = allStageIds.length
     ? await db
         .select({
           id: projectStageInstruments.id,
@@ -198,29 +231,32 @@ export async function getStudentDashboardData(
           isRequired: projectStageInstruments.isRequired,
         })
         .from(projectStageInstruments)
-        .where(inArray(projectStageInstruments.projectStageId, stageIds))
+        .where(inArray(projectStageInstruments.projectStageId, allStageIds))
     : []
 
-  const instrumentsByStage = instrumentRows.reduce<Record<string, typeof instrumentRows>>((acc, instrument) => {
-    if (!acc[instrument.projectStageId]) {
-      acc[instrument.projectStageId] = []
+  const instrumentsByStage: Record<string, typeof instrumentRows> = {}
+  for (const instrument of instrumentRows) {
+    if (instrument && instrument.projectStageId) {
+      if (!instrumentsByStage[instrument.projectStageId]) {
+        instrumentsByStage[instrument.projectStageId] = []
+      }
+      instrumentsByStage[instrument.projectStageId].push(instrument)
     }
-    acc[instrument.projectStageId].push(instrument)
-    return acc
-  }, {})
+  }
 
   const submissionRows: StudentSubmissionRow[] = await db
     .select({
       id: submissions.id,
       stageId: submissions.projectStageId,
       projectId: submissions.projectId,
-      instrumentType: submissions.instrumentType,
+      instrumentType: templateStageConfigs.instrumentType,
       content: submissions.content,
       submittedAt: submissions.submittedAt,
       targetStudentId: submissions.targetStudentId,
       targetStudentName: user.name,
     })
     .from(submissions)
+    .leftJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
     .leftJoin(user, eq(user.id, submissions.targetStudentId))
     .where(
       and(
@@ -229,16 +265,18 @@ export async function getStudentDashboardData(
       ),
     )
 
-  const submissionsByStage = submissionRows.reduce<Record<string, StudentSubmissionRow[]>>((acc, submission) => {
-    if (!submission.stageId) {
-      return acc
+  const submissionsByStage: Record<string, StudentSubmissionRow[]> = {}
+  if (submissionRows) {
+    for (const submission of submissionRows) {
+      if (!submission.stageId) {
+        continue
+      }
+      if (!submissionsByStage[submission.stageId]) {
+        submissionsByStage[submission.stageId] = []
+      }
+      submissionsByStage[submission.stageId].push(submission)
     }
-    if (!acc[submission.stageId]) {
-      acc[submission.stageId] = []
-    }
-    acc[submission.stageId].push(submission)
-    return acc
-  }, {})
+  }
 
   const studentGroupRows = await db
     .select({
@@ -255,7 +293,7 @@ export async function getStudentDashboardData(
       ),
     )
 
-  const groupIds = studentGroupRows.map((row) => row.groupId)
+  const groupIds = (studentGroupRows || []).map((row) => row.groupId)
 
   const groupMemberRows = groupIds.length
     ? await db
@@ -270,7 +308,7 @@ export async function getStudentDashboardData(
         .where(inArray(groupMembers.groupId, groupIds))
     : []
 
-  const membersByGroup = groupMemberRows.reduce<Record<string, typeof groupMemberRows>>((acc, member) => {
+  const membersByGroup = (groupMemberRows || []).reduce<Record<string, typeof groupMemberRows>>((acc, member) => {
     if (!acc[member.groupId]) {
       acc[member.groupId] = []
     }
@@ -278,30 +316,126 @@ export async function getStudentDashboardData(
     return acc
   }, {})
 
-  const studentsByClass = await fetchClassStudents(classIds)
+  await fetchClassStudents(classIds)
 
   const studentProjects = [] as StudentDashboardData["projects"]
 
   for (const project of projectRows) {
+    if (!project || !project.id) {
+      console.warn("Invalid project data")
+      continue
+    }
+
     const stagesForProject = stageRowsByProject[project.id] ?? []
-    const progressMap = await ensureStageProgressEntries(student.id, project.id, stagesForProject)
+
+    if (stagesForProject.length === 0) {
+      continue
+    }
+
+    let progressMap: Map<string, StageProgressRow>
+    try {
+      progressMap = await ensureStageProgressEntries(student.id, project.id, stagesForProject)
+
+      const missingProgress = stagesForProject.filter(stage => !progressMap.has(stage.id))
+      if (missingProgress.length > 0) {
+        for (const stage of missingProgress) {
+          try {
+            const [created] = await db
+              .insert(projectStageProgress)
+              .values({
+                projectStageId: stage.id,
+                studentId: student.id,
+                status: stage.order === 1 ? "IN_PROGRESS" : "LOCKED",
+                unlockedAt: stage.order === 1 ? new Date() : null,
+              })
+              .returning()
+            if (created) {
+              progressMap.set(stage.id, created)
+            }
+          } catch (createError) {
+            if (createError instanceof Error && createError.message.includes('duplicate')) {
+              const [existing] = await db
+                .select()
+                .from(projectStageProgress)
+                .where(
+                  and(
+                    eq(projectStageProgress.projectStageId, stage.id),
+                    eq(projectStageProgress.studentId, student.id),
+                  ),
+                )
+                .limit(1)
+              if (existing) {
+                progressMap.set(stage.id, existing)
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      progressMap = new Map()
+      for (const stage of stagesForProject) {
+        try {
+          const [created] = await db
+            .insert(projectStageProgress)
+            .values({
+              projectStageId: stage.id,
+              studentId: student.id,
+              status: stage.order === 1 ? "IN_PROGRESS" : "LOCKED",
+              unlockedAt: stage.order === 1 ? new Date() : null,
+            })
+            .returning()
+          if (created) {
+            progressMap.set(stage.id, created)
+          }
+        } catch (createError) {
+          if (createError instanceof Error && createError.message.includes('duplicate')) {
+            const [existing] = await db
+              .select()
+              .from(projectStageProgress)
+              .where(
+                and(
+                  eq(projectStageProgress.projectStageId, stage.id),
+                  eq(projectStageProgress.studentId, student.id),
+                ),
+              )
+              .limit(1)
+            if (existing) {
+              progressMap.set(stage.id, existing)
+            }
+          }
+        }
+      }
+    }
 
     const stageData = stagesForProject.map((stage) => {
-      const progress = progressMap.get(stage.id)!
-      const instruments = (instrumentsByStage[stage.id] ?? []).map((instrument) => ({
+      const progress = progressMap.get(stage.id)
+      if (!progress) {
+        return null
+      }
+
+      const instruments = instrumentsByStage[stage.id]?.map((instrument) => ({
         id: instrument.id,
         instrumentType: instrument.instrumentType,
         isRequired: instrument.isRequired,
-      }))
+      })) ?? []
 
-      const stageSubmissions = (submissionsByStage[stage.id] ?? []).map((submission) => ({
-        id: submission.id,
-        instrumentType: submission.instrumentType,
-        content: submission.content,
-        submittedAt: submission.submittedAt.toISOString(),
-        targetStudentId: submission.targetStudentId,
-        targetStudentName: submission.targetStudentName,
-      }))
+      // Group submissions by instrument type for multiple assessments per stage
+      const submissionsByInstrument: Record<string, typeof stageSubmissions> = {}
+      const stageSubmissions = submissionsByStage[stage.id] ?? []
+
+      for (const submission of stageSubmissions) {
+        if (!submissionsByInstrument[submission.instrumentType]) {
+          submissionsByInstrument[submission.instrumentType] = []
+        }
+        submissionsByInstrument[submission.instrumentType].push({
+          id: submission.id,
+          instrumentType: submission.instrumentType,
+          content: submission.content,
+          submittedAt: submission.submittedAt.toISOString(),
+          targetStudentId: submission.targetStudentId,
+          targetStudentName: submission.targetStudentName,
+        })
+      }
 
       return {
         id: stage.id,
@@ -312,12 +446,19 @@ export async function getStudentDashboardData(
         dueAt: serializeDate(stage.dueAt),
         status: progress.status,
         requiredInstruments: instruments,
-        submissions: stageSubmissions,
+        submissions: Object.values(submissionsByInstrument).flat(),
+        submissionsByInstrument,
       }
-    })
+    }).filter((stage): stage is NonNullable<typeof stage> => stage !== null)
 
     const studentGroup = studentGroupRows.find((row) => row.projectId === project.id)
     const groupMembersList = studentGroup ? (membersByGroup[studentGroup.groupId] ?? []) : []
+
+    const classData = classMap.get(project.classId)
+    if (!classData || !project.classId) {
+      console.warn(`Class data not found for project ${project.id}`)
+      continue
+    }
 
     studentProjects.push({
       id: project.id,
@@ -325,7 +466,7 @@ export async function getStudentDashboardData(
       description: project.description,
       theme: project.theme,
       status: project.status,
-      class: classMap.get(project.classId)!,
+      class: classData,
       teacher: {
         id: project.teacherId,
         name: project.teacherName,
@@ -347,11 +488,14 @@ export async function getStudentDashboardData(
   }
 
   return { projects: studentProjects }
+  } catch (error) {
+    return { projects: [] }
+  }
 }
 
 async function ensureStageProgressEntries(
   studentId: string,
-  projectId: string,
+  _projectId: string,
   stages: StageRow[],
 ): Promise<Map<string, StageProgressRow>> {
   if (stages.length === 0) {
@@ -371,7 +515,12 @@ async function ensureStageProgressEntries(
         ),
       )
 
-    const progressMap = new Map(existing.map((row) => [row.projectStageId, row]))
+    const progressMap = new Map()
+    for (const row of existing) {
+      if (row && row.projectStageId) {
+        progressMap.set(row.projectStageId, row)
+      }
+    }
 
     let encounteredIncomplete = false
 
@@ -447,7 +596,15 @@ async function ensureStageProgressEntries(
         ),
       )
 
-    return new Map(finalRows.map((row) => [row.projectStageId, row]))
+    const resultMap = new Map()
+    if (finalRows) {
+      for (const row of finalRows) {
+        if (row && row.projectStageId) {
+          resultMap.set(row.projectStageId, row)
+        }
+      }
+    }
+    return resultMap
   })
 }
 
@@ -480,44 +637,30 @@ async function fetchClassStudents(classIds: string[]) {
       ),
     )
 
-  return rows.reduce<Record<
+  const result: Record<
     string,
     Array<{
       studentId: string
       name: string | null
       email: string
     }>
-  >>((acc, row) => {
-    if (!acc[row.classId]) {
-      acc[row.classId] = []
+  > = {}
+
+  if (rows) {
+    for (const row of rows) {
+      if (row && row.classId) {
+        if (!result[row.classId]) {
+          result[row.classId] = []
+        }
+        result[row.classId].push({
+          studentId: row.studentId || "",
+          name: row.studentName,
+          email: row.studentEmail || "",
+        })
+      }
     }
-    acc[row.classId].push({
-      studentId: row.studentId,
-      name: row.studentName,
-      email: row.studentEmail,
-    })
-    return acc
-  }, {})
+  }
+
+  return result
 }
 
-export async function getTemplateQuestions(stageId: string): Promise<Array<{
-  id: string
-  questionText: string
-  questionType: string
-  scoringGuide?: string
-}>> {
-  const questions = await db
-    .select({
-      id: templateQuestions.id,
-      questionText: templateQuestions.questionText,
-      questionType: templateQuestions.questionType,
-      scoringGuide: templateQuestions.scoringGuide,
-    })
-    .from(templateQuestions)
-    .innerJoin(templateStageConfigs, eq(templateQuestions.configId, templateStageConfigs.id))
-    .innerJoin(projectStages, eq(templateStageConfigs.id, projectStages.templateStageConfigId))
-    .where(eq(projectStages.id, stageId))
-    .orderBy(asc(templateQuestions.id))
-
-  return questions
-}

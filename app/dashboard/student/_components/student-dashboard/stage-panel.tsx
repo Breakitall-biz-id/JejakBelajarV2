@@ -82,9 +82,8 @@ export function StagePanel({
           <h4 className="text-sm font-semibold">Required submissions</h4>
           <div className="grid gap-4 md:grid-cols-2">
             {studentInstruments.map((instrument) => {
-              const existingSubmission = stage.submissions.find(
-                (submission) => submission.instrumentType === instrument.instrumentType,
-              )
+              // Find existing submission for this specific instrument type
+              const existingSubmission = stage.submissionsByInstrument?.[instrument.instrumentType]?.[0]
 
               return (
                 <InstrumentSubmissionCard
@@ -108,24 +107,26 @@ export function StagePanel({
           <Separator />
           <h4 className="text-sm font-semibold">Your submissions</h4>
           <div className="space-y-2">
-            {stage.submissions.map((submission) => (
-              <div
-                key={submission.id}
-                className="rounded-md border bg-background p-3 text-sm"
-              >
-                <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                  <span>{submission.instrumentType.replace(/_/g, " ")}</span>
-                  <span>{formatDate(submission.submittedAt)}</span>
-                </div>
-                <p className="mt-2 whitespace-pre-wrap">
-                  {extractSubmissionText(submission.content)}
-                </p>
-                {submission.targetStudentName && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Feedback for {submission.targetStudentName}
+            {Object.entries(stage.submissionsByInstrument || {}).map(([instrumentType, submissions]) => (
+              submissions.map((submission) => (
+                <div
+                  key={submission.id}
+                  className="rounded-md border bg-background p-3 text-sm"
+                >
+                  <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                    <span>{instrumentType.replace(/_/g, " ")}</span>
+                    <span>{formatDate(submission.submittedAt)}</span>
+                  </div>
+                  <p className="mt-2 whitespace-pre-wrap">
+                    {extractSubmissionText(submission.content)}
                   </p>
-                )}
-              </div>
+                  {submission.targetStudentName && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Feedback for {submission.targetStudentName}
+                    </p>
+                  )}
+                </div>
+              ))
             ))}
           </div>
         </div>

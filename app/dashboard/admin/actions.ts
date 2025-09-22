@@ -706,13 +706,13 @@ export async function createTemplate(
         throw new Error("Failed to create template")
       }
 
-      const stageConfigs = parsed.data.stageConfigs.map((config) => ({
+      const stageConfigs = parsed.data.stageConfigs.map((config, index) => ({
         templateId: createdTemplate.id,
         stageName: config.stageName,
         instrumentType: config.instrumentType,
         description: config.description,
         estimatedDuration: config.estimatedDuration,
-        displayOrder: config.displayOrder,
+        displayOrder: config.displayOrder ?? (index + 1),
       }))
 
       await tx.insert(templateStageConfigs).values(stageConfigs)

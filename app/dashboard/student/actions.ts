@@ -1,7 +1,7 @@
 "use server"
 
 import { z } from "zod"
-import { and, asc, eq, gt, inArray } from "drizzle-orm"
+import { and, asc, eq, gt } from "drizzle-orm"
 
 import { db } from "@/db"
 import {
@@ -12,10 +12,10 @@ import {
   projectStages,
   projects,
   submissions,
+  templateQuestions,
+  templateStageConfigs,
   userClassAssignments,
 } from "@/db/schema/jejak"
-import { user } from "@/db/schema/auth"
-import { templateStageConfigs, templateQuestions } from "@/db/schema/jejak"
 import {
   ForbiddenError,
   UnauthorizedError,
@@ -31,6 +31,7 @@ const studentInstrumentSchema = z.enum([
   "SELF_ASSESSMENT",
   "PEER_ASSESSMENT",
   "DAILY_NOTE",
+  "OBSERVATION",
 ] as const)
 
 const submissionSchema = z.object({
@@ -46,6 +47,7 @@ const studentInstrumentTypes = new Set([
   "SELF_ASSESSMENT",
   "PEER_ASSESSMENT",
   "DAILY_NOTE",
+  "OBSERVATION",
 ])
 
 export async function submitStageInstrument(
@@ -71,7 +73,7 @@ export async function submitStageInstrument(
   }
 
   try {
-    const { user: student } = await requireStudentUser()
+    const student = await requireStudentUser()
 
     await db.transaction(async (tx) => {
       const projectRecord = await tx
@@ -94,7 +96,7 @@ export async function submitStageInstrument(
         .from(userClassAssignments)
         .where(
           and(
-            eq(userClassAssignments.userId, student.id),
+            eq(userClassAssignments.userId, student.user.id),
             eq(userClassAssignments.classId, projectRecord.classId),
           ),
         )
@@ -140,14 +142,33 @@ export async function submitStageInstrument(
         throw new ForbiddenError("This instrument is not required for the selected stage.")
       }
 
-      const progress = await ensureStageProgress(tx, student.id, projectId, stageRecord)
+      const progress = await ensureStageProgress(tx, student.user.id, stageRecord)
 
       if (progress.status === "LOCKED") {
         throw new ForbiddenError("This stage is locked. Complete previous stages first.")
       }
 
       if (instrumentType === "PEER_ASSESSMENT" && targetStudentId) {
-        await validatePeerTarget(tx, student.id, projectId, targetStudentId)
+        await validatePeerTarget(tx, student.user.id, projectId, targetStudentId)
+      }
+
+      // Find the template stage config for this instrument type
+      const templateConfig = await tx
+        .select({ id: templateStageConfigs.id })
+        .from(templateStageConfigs)
+        .innerJoin(projects, eq(templateStageConfigs.templateId, projects.templateId))
+        .innerJoin(projectStages, eq(projects.id, projectStages.projectId))
+        .where(
+          and(
+            eq(projectStages.id, stageId),
+            eq(templateStageConfigs.instrumentType, instrumentType),
+          ),
+        )
+        .limit(1)
+        .then((rows) => rows[0])
+
+      if (!templateConfig) {
+        throw new ForbiddenError("Instrument configuration not found for this stage.")
       }
 
       const existingSubmission = await tx
@@ -155,10 +176,10 @@ export async function submitStageInstrument(
         .from(submissions)
         .where(
           and(
-            eq(submissions.studentId, student.id),
+            eq(submissions.studentId, student.user.id),
             eq(submissions.projectId, projectId),
             eq(submissions.projectStageId, stageId),
-            eq(submissions.instrumentType, instrumentType),
+            eq(submissions.templateStageConfigId, templateConfig.id),
             ...(instrumentType === "PEER_ASSESSMENT" && targetStudentId
               ? [eq(submissions.targetStudentId, targetStudentId)]
               : []),
@@ -179,17 +200,16 @@ export async function submitStageInstrument(
           .where(eq(submissions.id, existingSubmission.id))
       } else {
         await tx.insert(submissions).values({
-          studentId: student.id,
+          studentId: student.user.id,
           projectId,
           projectStageId: stageId,
-          projectStageName: stageRecord.name ?? stageRecord.id,
-          instrumentType,
+          templateStageConfigId: templateConfig.id,
           content,
           targetStudentId: targetStudentId ?? null,
         })
       }
 
-      await evaluateStageCompletion(tx, student.id, projectId, stageRecord.id)
+      await evaluateStageCompletion(tx, student.user.id, projectId, stageRecord.id)
     })
 
     return { success: true }
@@ -214,7 +234,6 @@ function handleError(error: unknown, fallback: string): ActionResult {
 async function ensureStageProgress(
   tx: any,
   studentId: string,
-  projectId: string,
   stage: { id: string; order: number },
 ) {
   const existing = await tx
@@ -340,50 +359,50 @@ async function evaluateStageCompletion(
     .map((instrument) => instrument.instrumentType)
 
   if (requiredStudentInstruments.length === 0) {
-    await markStageCompleted(tx, progress.id, stageId)
+    await markStageCompleted(tx, progress.id)
     await unlockNextStage(tx, studentId, projectId, stage.order)
     return
   }
 
   const studentSubmissions = await tx
     .select({
-      instrumentType: submissions.instrumentType,
+      instrumentType: templateStageConfigs.instrumentType,
       targetStudentId: submissions.targetStudentId,
     })
     .from(submissions)
+    .leftJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
     .where(
       and(
         eq(submissions.studentId, studentId),
         eq(submissions.projectId, projectId),
         eq(submissions.projectStageId, stageId),
-        inArray(submissions.instrumentType, requiredStudentInstruments),
       ),
     )
 
-  const hasFulfilledAll = requiredStudentInstruments.every((instrumentType) => {
-    if (instrumentType === "PEER_ASSESSMENT") {
-      return studentSubmissions.some(
-        (submission) => submission.instrumentType === instrumentType && submission.targetStudentId,
-      )
-    }
+  // Check if all required instruments have been submitted
+  const submittedInstruments = new Set(studentSubmissions.map(s => s.instrumentType))
 
-    return studentSubmissions.some(
-      (submission) => submission.instrumentType === instrumentType,
-    )
-  })
+  // For peer assessment, verify there's at least one submission with a target
+  const hasPeerAssessment = requiredStudentInstruments.includes("PEER_ASSESSMENT")
+  const hasValidPeerSubmission = hasPeerAssessment
+    ? studentSubmissions.some(s => s.instrumentType === "PEER_ASSESSMENT" && s.targetStudentId)
+    : true
+
+  const hasFulfilledAll = requiredStudentInstruments.every(instrument =>
+    submittedInstruments.has(instrument)
+  ) && hasValidPeerSubmission
 
   if (!hasFulfilledAll) {
     return
   }
 
-  await markStageCompleted(tx, progress.id, stageId)
+  await markStageCompleted(tx, progress.id)
   await unlockNextStage(tx, studentId, projectId, stage.order)
 }
 
 async function markStageCompleted(
   tx: any,
   progressId: string,
-  stageId: string,
 ) {
   await tx
     .update(projectStageProgress)
@@ -465,6 +484,43 @@ const questionnaireSchema = z.object({
   targetStudentId: z.string().uuid().optional(),
 })
 
+export async function getTemplateQuestions(
+  stageId: string
+): Promise<Array<{
+  id: string
+  questionText: string
+  questionType: string
+  scoringGuide?: string
+}>> {
+  try {
+    if (!stageId) {
+      return []
+    }
+
+    const questions = await db
+      .select({
+        id: templateQuestions.id,
+        questionText: templateQuestions.questionText,
+        questionType: templateQuestions.questionType,
+        scoringGuide: templateQuestions.scoringGuide,
+      })
+      .from(templateQuestions)
+      .innerJoin(templateStageConfigs, eq(templateQuestions.configId, templateStageConfigs.id))
+      .innerJoin(projects, eq(templateStageConfigs.templateId, projects.templateId))
+      .innerJoin(projectStages, eq(projects.id, projectStages.projectId))
+      .where(eq(projectStages.id, stageId))
+      .orderBy(asc(templateQuestions.id))
+
+    return questions.map(q => ({
+      ...q,
+      scoringGuide: q.scoringGuide ?? undefined
+    }))
+  } catch (error) {
+    console.error("Error fetching template questions:", error)
+    return []
+  }
+}
+
 export async function submitQuestionnaire(
   input: z.infer<typeof questionnaireSchema>
 ): Promise<ActionResult> {
@@ -481,7 +537,7 @@ export async function submitQuestionnaire(
         .innerJoin(projects, eq(userClassAssignments.classId, projects.classId))
         .where(
           and(
-            eq(userClassAssignments.userId, student.id),
+            eq(userClassAssignments.userId, student.user.id),
             eq(projects.id, input.projectId),
           ),
         )
@@ -492,13 +548,13 @@ export async function submitQuestionnaire(
         throw new ForbiddenError("You are not assigned to this project.")
       }
 
-      // Get template stage config for this stage
-      const templateConfig = await tx
+      // Validate that the stage exists
+      const stageRecord = await tx
         .select({
-          id: templateStageConfigs.id,
+          id: projectStages.id,
+          name: projectStages.name,
         })
-        .from(templateStageConfigs)
-        .innerJoin(projectStages, eq(templateStageConfigs.id, projectStages.templateStageConfigId))
+        .from(projectStages)
         .where(
           and(
             eq(projectStages.id, input.stageId),
@@ -508,13 +564,32 @@ export async function submitQuestionnaire(
         .limit(1)
         .then((rows) => rows[0])
 
-      if (!templateConfig) {
-        throw new ForbiddenError("Template configuration not found for this stage.")
+      if (!stageRecord) {
+        throw new ForbiddenError("Stage not found.")
       }
 
       // Validate peer target for peer assessments
       if (input.instrumentType === "PEER_ASSESSMENT" && input.targetStudentId) {
-        await validatePeerTarget(tx, student.id, input.projectId, input.targetStudentId)
+        await validatePeerTarget(tx, student.user.id, input.projectId, input.targetStudentId)
+      }
+
+      // Find the template stage config for this instrument type
+      const templateConfig = await tx
+        .select({ id: templateStageConfigs.id })
+        .from(templateStageConfigs)
+        .innerJoin(projects, eq(templateStageConfigs.templateId, projects.templateId))
+        .innerJoin(projectStages, eq(projects.id, projectStages.projectId))
+        .where(
+          and(
+            eq(projectStages.id, input.stageId),
+            eq(templateStageConfigs.instrumentType, input.instrumentType),
+          ),
+        )
+        .limit(1)
+        .then((rows) => rows[0])
+
+      if (!templateConfig) {
+        throw new ForbiddenError("Instrument configuration not found for this stage.")
       }
 
       // Calculate total score from questionnaire responses
@@ -527,10 +602,10 @@ export async function submitQuestionnaire(
         .from(submissions)
         .where(
           and(
-            eq(submissions.studentId, student.id),
+            eq(submissions.studentId, student.user.id),
             eq(submissions.projectId, input.projectId),
+            eq(submissions.projectStageId, input.stageId),
             eq(submissions.templateStageConfigId, templateConfig.id),
-            eq(submissions.instrumentType, input.instrumentType),
             ...(input.targetStudentId ? [eq(submissions.targetStudentId, input.targetStudentId)] : []),
           ),
         )
@@ -550,18 +625,17 @@ export async function submitQuestionnaire(
       } else {
         // Create new submission
         await tx.insert(submissions).values({
-          studentId: student.id,
+          studentId: student.user.id,
           projectId: input.projectId,
+          projectStageId: input.stageId,
           templateStageConfigId: templateConfig.id,
-          instrumentType: input.instrumentType,
           content: input.content,
           score: Math.round(averageScore),
           targetStudentId: input.targetStudentId,
-          submittedAt: new Date(),
         })
       }
 
-      return { success: true }
+      return { success: true, data: undefined }
     })
 
     return result
