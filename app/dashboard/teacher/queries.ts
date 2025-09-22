@@ -286,15 +286,27 @@ export async function getTeacherDashboardData(
         acc[stage.projectId] = []
       }
 
-      acc[stage.projectId].push({
-        id: stage.id,
-        name: stage.name,
-        description: stage.description,
-        order: stage.order,
-        unlocksAt: serializeDate(stage.unlocksAt),
-        dueAt: serializeDate(stage.dueAt),
-        instruments: instrumentsByStage[stage.id] ?? [],
-      })
+        const existingStageIndex = acc[stage.projectId].findIndex(s => s.name === stage.name)
+
+      if (existingStageIndex >= 0) {
+        const existingStage = acc[stage.projectId][existingStageIndex]
+        const newInstruments = instrumentsByStage[stage.id] ?? []
+
+        const existingInstrumentTypes = new Set(existingStage.instruments.map(i => i.instrumentType))
+        const uniqueNewInstruments = newInstruments.filter(i => !existingInstrumentTypes.has(i.instrumentType))
+
+        existingStage.instruments = [...existingStage.instruments, ...uniqueNewInstruments]
+      } else {
+        acc[stage.projectId].push({
+          id: stage.id,
+          name: stage.name,
+          description: stage.description,
+          order: stage.order,
+          unlocksAt: serializeDate(stage.unlocksAt),
+          dueAt: serializeDate(stage.dueAt),
+          instruments: instrumentsByStage[stage.id] ?? [],
+        })
+      }
 
       return acc
     },
