@@ -58,7 +58,7 @@ type AccountsSectionProps = {
 
 export function AccountsSection({ teachers, students, teacherClasses, studentClasses }: AccountsSectionProps) {
   return (
-    <div className="grid gap-6 xl:grid-cols-2">
+  <div className="grid gap-5 xl:grid-cols-2">
       <AccountCard
         title="Guru"
         description="Kelola akun fasilitator dan lihat kelas yang mereka ampu."
@@ -90,18 +90,18 @@ function AccountCard({ title, description, accounts, role, membershipMap }: Acco
   const label = role === "TEACHER" ? "guru" : "siswa"
 
   return (
-    <Card className="border-muted/70 shadow-sm">
-      <CardHeader className="flex flex-wrap items-start justify-between gap-4">
+  <Card className="border border-muted/60 shadow-md rounded-md">
+      <CardHeader className="flex flex-wrap items-start justify-between gap-3 pb-2">
         <div>
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
+          <CardTitle className="text-lg font-bold tracking-tight mb-1">{title}</CardTitle>
+          <CardDescription className="text-sm text-muted-foreground">{description}</CardDescription>
         </div>
         <CreateAccountButton role={role} />
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between rounded-lg border border-dashed border-muted/60 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-          <span>{totalAccounts} akun {label}</span>
-          <span>Perbarui data dan bagikan kredensial awal</span>
+      <CardContent className="space-y-3">
+        <div className="flex items-center justify-between rounded-md border border-dashed border-muted/50 bg-muted/10 px-3 py-1.5 text-xs text-muted-foreground">
+          <span className="font-medium">{totalAccounts} akun {label}</span>
+          <span className="hidden sm:inline">Perbarui data & bagikan kredensial awal</span>
         </div>
         {totalAccounts === 0 ? (
           <EmptyAccountsMessage label={label} />
@@ -135,11 +135,11 @@ function AccountRow({ account, role, memberships }: AccountRowProps) {
   const hasMemberships = memberships.length > 0
 
   return (
-    <div className="rounded-xl border border-muted/60 bg-background p-4 shadow-sm">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+  <div className="rounded-md border border-muted/50 bg-background p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
+  <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 border">
-            <AvatarFallback className="text-sm font-semibold uppercase">{initials}</AvatarFallback>
+          <Avatar className="h-9 w-9 border border-muted/40">
+            <AvatarFallback className="text-xs font-semibold uppercase">{initials}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold leading-tight">{displayName}</p>
@@ -147,17 +147,17 @@ function AccountRow({ account, role, memberships }: AccountRowProps) {
           </div>
         </div>
         <div className="flex flex-col items-end gap-1 text-right">
-          <Badge variant="outline" className="text-[11px] uppercase tracking-wide">
+          <Badge variant="secondary" className="text-[10px] uppercase tracking-wide rounded px-2 py-0.5">
             {hasMemberships ? `${memberships.length} kelas` : "Belum ada kelas"}
           </Badge>
-          <span className="text-[11px] text-muted-foreground">Dibuat {createdAt}</span>
+          <span className="text-[10px] text-muted-foreground">Dibuat {createdAt}</span>
         </div>
       </div>
 
-      <Separator className="my-3" />
+  <Separator className="my-2" />
 
-      <div className="space-y-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Kelas</p>
+      <div className="space-y-1">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">Kelas</p>
         {hasMemberships ? (
           <div className="flex flex-wrap gap-2">
             {memberships.map((membership) => (
@@ -165,13 +165,13 @@ function AccountRow({ account, role, memberships }: AccountRowProps) {
             ))}
           </div>
         ) : (
-          <p className="rounded-lg border border-dashed border-muted/50 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+          <p className="rounded-md border border-dashed border-muted/40 bg-muted/10 px-3 py-1.5 text-xs text-muted-foreground">
             Belum bergabung dalam kelas mana pun.
           </p>
         )}
       </div>
 
-      <div className="mt-4 flex justify-end gap-2">
+  <div className="mt-3 flex justify-end gap-2">
         <EditAccountButton account={account} role={role} />
         <DeleteAccountButton userId={account.id} />
       </div>
@@ -186,21 +186,21 @@ type ClassChipProps = {
 function ClassChip({ membership }: ClassChipProps) {
   const isActive = membership.termStatus === "ACTIVE"
   return (
-    <div className="flex flex-col gap-1 rounded-lg border border-muted/50 bg-muted/10 px-3 py-2 text-xs">
+    <div className="flex flex-col gap-1 rounded border border-muted/40 bg-muted/5 px-2.5 py-1.5 text-xs">
       <div className="flex items-center gap-2">
-        <span className="text-sm font-medium leading-tight">{membership.name}</span>
-        <Badge variant={isActive ? "default" : "secondary"} className="text-[10px] uppercase tracking-wide">
+        <span className="text-xs font-medium leading-tight">{membership.name}</span>
+        <Badge variant={isActive ? "default" : "secondary"} className="text-[9px] uppercase tracking-wide rounded px-1.5 py-0.5">
           {isActive ? "Aktif" : "Tidak aktif"}
         </Badge>
       </div>
-      <span className="text-[11px] text-muted-foreground">{membership.termLabel}</span>
+      <span className="text-[10px] text-muted-foreground">{membership.termLabel}</span>
     </div>
   )
 }
 
 function EmptyAccountsMessage({ label }: { label: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-muted/60 bg-muted/20 p-6 text-center text-sm text-muted-foreground">
+  <div className="rounded-md border border-dashed border-muted/50 bg-muted/10 p-5 text-center text-sm text-muted-foreground">
       Tidak ada akun {label} yang terdaftar. Buat akun baru untuk memulai.
     </div>
   )
@@ -251,64 +251,68 @@ function CreateAccountButton({ role }: { role: "TEACHER" | "STUDENT" }) {
       <DialogTrigger asChild>
         <Button size="sm">Tambah {role === "TEACHER" ? "guru" : "siswa"}</Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Buat akun {role === "TEACHER" ? "guru" : "siswa"}</DialogTitle>
-          <DialogDescription>
-            Masukkan data awal. Bagikan password sementara kepada pengguna untuk login pertama.
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(submit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nama lengkap</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Jane Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="nama@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password sementara</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="Minimal 8 karakter" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-                Batal
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Menyimpan…" : "Buat"}
-              </Button>
-            </div>
-          </form>
-        </Form>
+      <DialogContent className="max-w-md p-0 overflow-hidden rounded-md">
+        <div className="bg-card">
+          <div className="px-6 pt-6 pb-2 border-b border-muted/60">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold tracking-tight mb-1">Buat akun {role === "TEACHER" ? "guru" : "siswa"}</DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">Masukkan data awal. Bagikan password sementara kepada pengguna untuk login pertama.</DialogDescription>
+            </DialogHeader>
+          </div>
+          <div className="px-6 py-6">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(submit)} className="space-y-3">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Nama lengkap</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Jane Doe" {...field} className="w-full text-base px-3 py-2 rounded-md border-[1px] border-border focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary/60 transition-all duration-200" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="nama@example.com" {...field} className="w-full text-base px-3 py-2 rounded-md border-[1px] border-border focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary/60 transition-all duration-200" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Password sementara</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Minimal 8 karakter" {...field} className="w-full text-base px-3 py-2 rounded-md border-[1px] border-border focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary/60 transition-all duration-200" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="flex justify-end gap-2 mt-4">
+                  <Button type="button" variant="ghost" className="text-muted-foreground hover:bg-muted/60" onClick={() => setOpen(false)}>
+                    Batal
+                  </Button>
+                  <Button type="submit" disabled={isPending} className="bg-primary hover:bg-primary/90 transition-colors">
+                    {isPending ? "Menyimpan…" : "Buat"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )
@@ -363,36 +367,42 @@ function EditAccountButton({
           Edit
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Edit akun</DialogTitle>
-          <DialogDescription>{account.email}</DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(submit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nama lengkap</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-                Batal
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Menyimpan…" : "Simpan"}
-              </Button>
-            </div>
-          </form>
-        </Form>
+      <DialogContent className="max-w-md p-0 overflow-hidden rounded-md">
+        <div className="bg-card">
+          <div className="px-6 pt-6 pb-2 border-b border-muted/60">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold tracking-tight mb-1">Edit akun</DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">{account.email}</DialogDescription>
+            </DialogHeader>
+          </div>
+          <div className="px-6 py-6">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(submit)} className="space-y-3">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Nama lengkap</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="w-full text-base px-3 py-2 rounded-md border-[1px] border-border focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary/60 transition-all duration-200" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="flex justify-end gap-2 mt-4">
+                  <Button type="button" variant="ghost" className="text-muted-foreground hover:bg-muted/60" onClick={() => setOpen(false)}>
+                    Batal
+                  </Button>
+                  <Button type="submit" disabled={isPending} className="bg-primary hover:bg-primary/90 transition-colors">
+                    {isPending ? "Menyimpan…" : "Simpan"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )

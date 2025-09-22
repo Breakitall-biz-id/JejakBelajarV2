@@ -1,6 +1,6 @@
 # Product Requirements Document (PRD): JejakBelajar
 
-**Version**: 4.1 (Final - Admin-Centric Model)
+**Version**: 2 (Final - Admin-Centric Model)
 **Date**: September 20, 2025
 
 This document details the functional, non-functional, workflow, and technical specifications for the **JejakBelajar** platform, based on a centralized, admin-controlled project structure.

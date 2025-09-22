@@ -13,7 +13,7 @@ import { CreateQuestionDialog } from "./create-question-dialog"
 import { EditQuestionDialog } from "./edit-question-dialog"
 import { toast } from "sonner"
 
-type TemplateQuestion = {
+export type TemplateQuestion = {
   id: string
   questionText: string
   questionType: string
@@ -120,16 +120,15 @@ export function QuestionsList({
           No statements yet
         </div>
       ) : (
-        <div className="space-y-1">
+        <div className="space-y-1 max-h-[40vh] overflow-y-auto">
           {questions.map((question) => (
             <div key={question.id} className="flex items-center justify-between p-2 border border-border rounded text-xs">
               <div className="flex-1 min-w-0">
-                <p
-                  className="truncate text-[10px]"
-                  title={question.questionText}
-                >
-                  {question.questionText}
-                </p>
+                <div
+                  className="break-words whitespace-pre-line text-[10px]"
+                  title={question.questionText.replace(/<[^>]+>/g, '')}
+                  dangerouslySetInnerHTML={{ __html: question.questionText }}
+                />
               </div>
               <div className="flex items-center gap-1 ml-2">
                 {question.scoringGuide && (

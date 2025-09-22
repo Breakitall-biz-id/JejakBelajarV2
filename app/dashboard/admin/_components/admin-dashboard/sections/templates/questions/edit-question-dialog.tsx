@@ -16,13 +16,13 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import {
   Select,
   SelectContent,
@@ -30,12 +30,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Info } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { toast } from "sonner"
 
 const editQuestionSchema = z.object({
   questionText: z.string().min(1, "Question text is required"),
   questionType: z.enum(["STATEMENT", "ESSAY_PROMPT"], {
-    required_error: "Question type is required",
+    message: "Question type is required",
   }),
   scoringGuide: z.string().optional(),
 })
@@ -111,99 +113,117 @@ export function EditQuestionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="max-w-lg px-8 py-6">
         <DialogHeader>
-          <DialogTitle>Edit Question</DialogTitle>
-          <DialogDescription>
-            Update the question details below.
+          <DialogTitle className="text-xl font-bold font-sans">Edit Pertanyaan</DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground mt-1">
+            Ubah detail pertanyaan di bawah ini.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="questionText"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Question Text</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Enter the question text..."
-                      className="min-h-[100px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    This is the main question or statement that will be presented to users.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="questionType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Question Type</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
+            <TooltipProvider>
+              <FormField
+                control={form.control}
+                name="questionText"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <FormLabel className="text-[13px] font-semibold leading-none">Teks Pertanyaan</FormLabel>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span tabIndex={0} className="cursor-pointer"><Info className="w-4 h-4 text-muted-foreground" /></span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs text-xs">
+                          Pertanyaan utama yang akan ditampilkan ke pengguna.
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select question type" />
-                      </SelectTrigger>
+                      <RichTextEditor
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Masukkan teks pertanyaan..."
+                        className="min-h-[90px]"
+                      />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="STATEMENT">Statement</SelectItem>
-                      <SelectItem value="ESSAY_PROMPT">Essay Prompt</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    <span className="text-muted-foreground">
-                      <strong>Statement:</strong> For rating scale questions (Always/Often/Sometimes/Never)
-                    </span>
-                    <br />
-                    <span className="text-muted-foreground">
-                      <strong>Essay Prompt:</strong> For open-ended written responses
-                    </span>
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="scoringGuide"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Scoring Guide (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Example: Always=4, Often=3, Sometimes=2, Never=1"
-                      className="min-h-[80px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Define how this question should be scored. This helps maintain consistency in assessment.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="questionType"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <FormLabel className="text-[13px] font-semibold leading-none">Tipe Pertanyaan</FormLabel>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span tabIndex={0} className="cursor-pointer"><Info className="w-4 h-4 text-muted-foreground" /></span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs text-xs">
+                          <span className="font-semibold">Statement:</span> Skala (Selalu/Sering/Kadang/Tidak Pernah). <span className="font-semibold">Essay Prompt:</span> Jawaban bebas.
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="border border-input rounded-md focus:ring-2 focus:ring-primary/40 focus:border-primary/60 text-sm w-full">
+                          <SelectValue placeholder="Pilih tipe pertanyaan" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="STATEMENT">Statement</SelectItem>
+                        <SelectItem value="ESSAY_PROMPT">Essay Prompt</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <DialogFooter>
+              <FormField
+                control={form.control}
+                name="scoringGuide"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <FormLabel className="text-[13px] font-semibold leading-none">Panduan Penilaian</FormLabel>
+                      <span className="text-xs text-muted-foreground font-normal">(Opsional)</span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span tabIndex={0} className="cursor-pointer"><Info className="w-4 h-4 text-muted-foreground" /></span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs text-xs">
+                          Cara penilaian (misal: Selalu=4, dst). Membantu konsistensi penilaian.
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <FormControl>
+                      <Textarea
+                        className="min-h-[70px] border border-input rounded-md focus:ring-2 focus:ring-primary/40 focus:border-primary/60 text-sm w-full"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </TooltipProvider>
+            <DialogFooter className="pt-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
+                className="min-w-[90px]"
               >
-                Cancel
+                Tutup
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Updating..." : "Update Question"}
+              <Button type="submit" disabled={isSubmitting} className="min-w-[120px]">
+                {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
               </Button>
             </DialogFooter>
           </form>

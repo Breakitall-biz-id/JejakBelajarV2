@@ -130,142 +130,164 @@ export function ClassWizardForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={submitHandler} className="space-y-6">
-        <nav className="flex flex-col gap-3">
-          <ol className="flex flex-wrap items-center gap-3">
+      <form onSubmit={submitHandler} className="space-y-0">
+        {/* Horizontal Stepper with Progress Bar */}
+        <nav className="mb-2">
+          <div className="relative flex items-center justify-between mb-2">
             {STEP_DEFINITIONS.map((step, index) => {
-              const isActive = index === currentStep
-              const isCompleted = index < currentStep
+              const isActive = index === currentStep;
+              const isCompleted = index < currentStep;
               return (
-                <li
-                  key={step.id}
-                  className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                <div key={step.id} className="flex-1 flex flex-col items-center">
+                  <div className={`flex items-center justify-center rounded-full border transition-all duration-200 ${
                     isActive
-                      ? "border-primary bg-primary/10 text-primary"
+                      ? "border-primary/80 ring-2 ring-primary/30 bg-primary text-primary-foreground shadow-md scale-105"
                       : isCompleted
-                        ? "border-muted bg-muted/70 text-muted-foreground"
-                        : "border-transparent bg-muted/40 text-muted-foreground"
-                  }`}
-                >
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full border bg-background text-[11px]">
-                    {index + 1}
-                  </span>
-                  <span>{step.label}</span>
-                </li>
-              )
+                        ? "border-primary/40 bg-primary/10 text-primary"
+                        : "border-muted bg-background text-muted-foreground"
+                  }`} style={{ width: 32, height: 32 }}>
+                    <span className="font-bold text-sm">{index + 1}</span>
+                  </div>
+                  <span className={`mt-1 text-xs font-medium tracking-wide ${isActive ? "text-primary" : "text-muted-foreground"}`}>{step.label}</span>
+                </div>
+              );
             })}
-          </ol>
-          <p className="text-sm text-muted-foreground">{currentConfig.description}</p>
+            {/* Progress Bar (background) */}
+            <div className="absolute left-0 right-0 top-14 -translate-y-1/2 h-0.5 bg-muted/60 z-0 rounded-full" style={{ marginLeft: 16, marginRight: 16 }} />
+            {/* Progress Bar (active) */}
+            <div className="absolute left-0 top-14 -translate-y-1/2 h-0.5 bg-primary/80 z-10 rounded-full transition-all duration-300" style={{ marginLeft: 16, marginRight: 16, width: `${(currentStep) / (STEP_DEFINITIONS.length - 1) * 100}%` }} />
+          </div>
+          <p className="text-base font-normal text-muted-foreground text-center mb-2">{currentConfig.description}</p>
         </nav>
 
-        {currentConfig.id === "details" && (
-          <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nama kelas</FormLabel>
-                  <FormControl>
-                    <Input placeholder="cth: X IPA 1" autoFocus {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="termId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tahun ajaran & semester</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih tahun ajaran" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {termOptions.map((option) => (
-                        <SelectItem key={option.id} value={option.id}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        )}
-
-        {currentConfig.id === "teachers" && (
-          <FormField
-            control={form.control}
-            name="teacherIds"
-            render={({ field }) => (
-              <FormItem>
-                <ParticipantChecklist
-                  label="Pilih guru pengampu"
-                  description="Guru dapat menangani lebih dari satu kelas."
-                  options={teacherOptions}
-                  optionLookup={teacherLookup}
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={isSubmitting}
-                  emptyMessage="Belum ada akun guru yang tersedia. Buat akun guru terlebih dahulu."
+        {/* Step Content */}
+  <div className="rounded-md border border-muted shadow-md p-0 mb-4 overflow-hidden transition-all duration-300 animate-fade-in">
+          {/* Illustration/Highlight for details step */}
+          {currentConfig.id === "details" && (
+            <div className="p-6">
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Nama Kelas</FormLabel>
+                      <FormControl>
+                        <Input placeholder="cth: X IPA 1" autoFocus {...field} className="w-full text-base px-3 py-2 rounded-md focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary/60 border-[1px] border-border transition-all duration-200" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        {currentConfig.id === "students" && (
-          <FormField
-            control={form.control}
-            name="studentIds"
-            render={({ field }) => (
-              <FormItem>
-                <ParticipantChecklist
-                  label="Pilih siswa"
-                  description="Siswa yang sudah bergabung tetap dapat ditambahkan ke kelas lain bila diperlukan."
-                  options={studentOptions}
-                  optionLookup={studentLookup}
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={isSubmitting}
-                  emptyMessage="Belum ada akun siswa yang tersedia. Buat akun siswa terlebih dahulu."
+                <FormField
+                  control={form.control}
+                  name="termId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Tahun Ajaran & Semester</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger className="w-full px-3 py-2 rounded-md text-base border-[1px] border-border focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary/60 transition-all duration-200">
+                            <SelectValue placeholder="Pilih tahun ajaran" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {termOptions.map((option) => (
+                            <SelectItem key={option.id} value={option.id}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+              </div>
+            </div>
+          )}
 
-        <div className="flex items-center justify-between gap-3">
-          <Button type="button" variant="ghost" onClick={currentStep === 0 ? onCancel : handleBack} disabled={isSubmitting}>
+          {currentConfig.id === "teachers" && (
+            <div className="p-8">
+              <FormField
+                control={form.control}
+                name="teacherIds"
+                render={({ field }) => (
+                  <FormItem>
+                    <ParticipantChecklist
+                      label="Guru Pengampu"
+                      description=""
+                      options={teacherOptions}
+                      optionLookup={teacherLookup}
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={isSubmitting}
+                      emptyMessage="Belum ada akun guru yang tersedia."
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
+
+          {currentConfig.id === "students" && (
+            <div className="p-8">
+              <FormField
+                control={form.control}
+                name="studentIds"
+                render={({ field }) => (
+                  <FormItem>
+                    <ParticipantChecklist
+                      label="Siswa"
+                      description=""
+                      options={studentOptions}
+                      optionLookup={studentLookup}
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={isSubmitting}
+                      emptyMessage="Belum ada akun siswa yang tersedia."
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Wizard Controls */}
+        <div className="flex items-center justify-end gap-3 mt-6">
+          <Button
+            type="button"
+            variant="ghost"
+            className="rounded-full px-5 py-2 text-base font-medium"
+            onClick={currentStep === 0 ? onCancel : handleBack}
+            disabled={isSubmitting}
+          >
             {currentStep === 0 ? "Batal" : "Kembali"}
           </Button>
-          <div className="flex items-center gap-2">
-            {currentStep < STEP_DEFINITIONS.length - 1 && (
-              <Button
-                type="button"
-                onClick={handleNext}
-                disabled={
-                  isSubmitting || (currentConfig.id === "teachers" && disableTeacherStep) || (currentConfig.id === "students" && disableStudentStep)
-                }
-              >
-                Lanjut
-              </Button>
-            )}
-            {isLastStep && (
-              <Button type="submit" disabled={isSubmitting || disableStudentStep}>
-                {isSubmitting ? "Menyimpan…" : submitLabel ?? (mode === "create" ? "Buat Kelas" : "Simpan Perubahan")}
-              </Button>
-            )}
-          </div>
+          {currentStep < STEP_DEFINITIONS.length - 1 && (
+            <Button
+              type="button"
+              className="rounded-full px-7 py-2 text-base font-bold shadow-sm"
+              onClick={handleNext}
+              disabled={
+                isSubmitting || (currentConfig.id === "teachers" && disableTeacherStep) || (currentConfig.id === "students" && disableStudentStep)
+              }
+            >
+              Lanjut
+            </Button>
+          )}
+          {isLastStep && (
+            <Button
+              type="submit"
+              className="rounded-full px-7 py-2 text-base font-bold shadow-sm"
+              disabled={isSubmitting || disableStudentStep}
+            >
+              {isSubmitting ? "Menyimpan…" : submitLabel ?? (mode === "create" ? "Buat Kelas" : "Simpan Perubahan")}
+            </Button>
+          )}
         </div>
       </form>
     </Form>
@@ -327,13 +349,14 @@ function ParticipantChecklist({
     <div className="space-y-3">
       <div>
         <FormLabel>{label}</FormLabel>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <p className="text-xs text-muted-foreground pt-4">{description}</p>
       </div>
       <Input
         placeholder="Cari berdasarkan nama atau email"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         disabled={disabled || options.length === 0}
+        className="border-[1px]"
       />
       <div className="max-h-60 space-y-2 overflow-y-auto rounded-md border bg-muted/40 p-3">
         {options.length === 0 ? (

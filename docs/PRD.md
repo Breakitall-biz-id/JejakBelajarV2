@@ -1,6 +1,6 @@
 # Product Requirements Document (PRD): JejakBelajar
 
-**Version**: 2.0 (Final)
+**Version**: 1 (Final)
 **Date**: September 19, 2025
 
 This document details the functional, non-functional, workflow, and technical specifications for the **JejakBelajar** platform.

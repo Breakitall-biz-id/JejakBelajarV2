@@ -44,22 +44,25 @@ export function CreateKelasDialog({
           <Plus className="ml-2 h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Buat kelas baru</DialogTitle>
-          <DialogDescription>
-            Lengkapi detail kelas lalu hubungkan minimal satu guru dan siswa sebelum disimpan.
-          </DialogDescription>
-        </DialogHeader>
-        <ClassWizardForm
-          mode="create"
-          defaultValues={defaultValues}
-          termOptions={termOptions}
-          teacherOptions={teacherOptions}
-          studentOptions={studentOptions}
-          onSubmit={onSubmit}
-          onCancel={() => setOpen(false)}
-        />
+      <DialogContent className="max-w-2xl p-0 overflow-hidden">
+        <div className="bg-card">
+          <div className="px-6 pt-6 pb-2 border-b border-muted/60">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold tracking-tight mb-1">Tambah Kelas</DialogTitle>
+            </DialogHeader>
+          </div>
+          <div className="px-6 py-6">
+            <ClassWizardForm
+              mode="create"
+              defaultValues={defaultValues}
+              termOptions={termOptions}
+              teacherOptions={teacherOptions}
+              studentOptions={studentOptions}
+              onSubmit={onSubmit}
+              onCancel={() => setOpen(false)}
+            />
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )

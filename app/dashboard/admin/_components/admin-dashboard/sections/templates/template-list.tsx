@@ -3,15 +3,7 @@
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MoreHorizontal, Plus, Edit, Trash2, Eye, LayoutDashboard, Calendar, Users } from "lucide-react"
 import {
   DropdownMenu,
@@ -20,11 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { TemplateDetailsDialog } from "./template-details-dialog"
-import { CreateTemplateDialog } from "./create-template-dialog"
 import { EditTemplateDialog } from "./edit-template-dialog"
 import { toast } from "sonner"
 import { ProjectTemplate } from "@/app/dashboard/admin/queries"
 import { deleteTemplate } from "@/app/dashboard/admin/actions"
+import { CreateTemplateDialog } from "./create-template-dialog"
 
 type TemplateListProps = {
   templates: ProjectTemplate[]
@@ -80,6 +72,11 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
     return [...new Set(types)] // Remove duplicates
   }
 
+  const getStageCount = (template: ProjectTemplate) => {
+    const names = new Set(template.stageConfigs.map(cfg => cfg.stageName))
+    return names.size
+  }
+
   return (
     <div className="space-y-6">
       {/* Header Section */}
@@ -128,7 +125,7 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
                         {template.isActive ? "Active" : "Inactive"}
                       </Badge>
                       <Badge variant="outline" className="text-xs">
-                        {template.stageConfigs.length} stages
+                        {getStageCount(template)} stages
                       </Badge>
                     </div>
                   </div>
@@ -187,7 +184,7 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
                     </div>
                     <div className="flex items-center gap-1">
                       <Users className="h-3 w-3" />
-                      {template.stageConfigs.length} stages
+                      {getStageCount(template)} stages
                     </div>
                   </div>
                   <Button

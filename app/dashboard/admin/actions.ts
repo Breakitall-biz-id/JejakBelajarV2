@@ -13,6 +13,7 @@ import {
   userClassAssignments,
   projectTemplates,
   templateStageConfigs,
+  templateQuestions,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
 import {
@@ -94,10 +95,12 @@ const instrumentTypeSchema = z.enum([
 ] as const)
 
 const stageConfigSchema = z.object({
+  id: z.string().uuid().optional(),
   stageName: z.string().min(1, "Stage name is required"),
   instrumentType: instrumentTypeSchema,
   description: z.string().optional(),
   estimatedDuration: z.string().optional(),
+  displayOrder: z.number().min(1).optional(),
 })
 
 const createTemplateSchema = z.object({
@@ -703,13 +706,13 @@ export async function createTemplate(
         throw new Error("Failed to create template")
       }
 
-      const stageConfigs = parsed.data.stageConfigs.map((config, index) => ({
+      const stageConfigs = parsed.data.stageConfigs.map((config) => ({
         templateId: createdTemplate.id,
         stageName: config.stageName,
         instrumentType: config.instrumentType,
         description: config.description,
         estimatedDuration: config.estimatedDuration,
-        displayOrder: index + 1,
+        displayOrder: config.displayOrder,
       }))
 
       await tx.insert(templateStageConfigs).values(stageConfigs)
@@ -758,13 +761,47 @@ export async function updateTemplate(
 
       // Update stage configurations if provided
       if (parsed.data.stageConfigs && parsed.data.stageConfigs.length > 0) {
-        // Delete existing stage configs
+        // Get existing configs with their questions to preserve them
+        const existingConfigs = await tx
+          .select({
+            id: templateStageConfigs.id,
+            questions: {
+              id: templateQuestions.id,
+              questionText: templateQuestions.questionText,
+              questionType: templateQuestions.questionType,
+              scoringGuide: templateQuestions.scoringGuide,
+            },
+          })
+          .from(templateStageConfigs)
+          .leftJoin(
+            templateQuestions,
+            eq(templateQuestions.configId, templateStageConfigs.id)
+          )
+          .where(eq(templateStageConfigs.templateId, parsed.data.templateId))
+
+        // Store existing questions by config ID to preserve them
+        const questionsToPreserve: Record<string, typeof templateQuestions.$inferInsert[]> = {}
+        existingConfigs.forEach(row => {
+          if (row.questions) {
+            if (!questionsToPreserve[row.id]) {
+              questionsToPreserve[row.id] = []
+            }
+            questionsToPreserve[row.id].push({
+              configId: row.id, // Will be updated to new config ID later
+              questionText: row.questions.questionText,
+              questionType: row.questions.questionType,
+              scoringGuide: row.questions.scoringGuide,
+            })
+          }
+        })
+
+        // Delete all existing stage configs (cascade will delete questions too)
         await tx
           .delete(templateStageConfigs)
           .where(eq(templateStageConfigs.templateId, parsed.data.templateId))
 
-        // Insert new stage configs
-        const stageConfigs = parsed.data.stageConfigs.map((config, index) => ({
+        // Create new stage configs with sequential display order
+        const newConfigs = parsed.data.stageConfigs.map((config, index) => ({
           templateId: parsed.data!.templateId,
           stageName: config.stageName,
           instrumentType: config.instrumentType,
@@ -773,7 +810,26 @@ export async function updateTemplate(
           displayOrder: index + 1,
         }))
 
-        await tx.insert(templateStageConfigs).values(stageConfigs)
+        const insertedConfigs = await tx
+          .insert(templateStageConfigs)
+          .values(newConfigs)
+          .returning({ id: templateStageConfigs.id, stageName: templateStageConfigs.stageName })
+
+        // Recreate questions for preserved configs
+        for (let i = 0; i < parsed.data.stageConfigs.length; i++) {
+          const oldConfigId = parsed.data.stageConfigs[i].id
+          const newConfigId = insertedConfigs[i]?.id
+
+          if (oldConfigId && newConfigId && questionsToPreserve[oldConfigId]) {
+            // Recreate questions for this config
+            await tx.insert(templateQuestions).values(
+              questionsToPreserve[oldConfigId].map(q => ({
+                ...q,
+                configId: newConfigId,
+              }))
+            )
+          }
+        }
       }
     })
 

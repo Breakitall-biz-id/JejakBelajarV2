@@ -1,10 +1,17 @@
 "use client"
 
-import { useTransition } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Form } from "@/components/ui/form"
 import { toast } from "sonner"
 import { updateAcademicTerm } from "@/app/dashboard/admin/actions"
@@ -25,7 +32,7 @@ type EditTermDialogProps = {
 }
 
 export function EditTermDialog({ term, open, onOpenChange, onSuccess }: EditTermDialogProps) {
-  const [isPending, startTransition] = useTransition()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<TermFormValues>({
     resolver: zodResolver(formSchema),
@@ -38,8 +45,9 @@ export function EditTermDialog({ term, open, onOpenChange, onSuccess }: EditTerm
     },
   })
 
-  const submit = (values: TermFormValues) => {
-    startTransition(async () => {
+  const onSubmit = async (values: TermFormValues) => {
+    setIsSubmitting(true)
+    try {
       const result = await updateAcademicTerm({
         id: term.id,
         academicYear: values.academicYear,
@@ -48,6 +56,7 @@ export function EditTermDialog({ term, open, onOpenChange, onSuccess }: EditTerm
         endsAt: values.endsAt,
         setActive: values.setActive,
       })
+
       if (!result.success) {
         if (result.fieldErrors) {
           for (const [field, messages] of Object.entries(result.fieldErrors)) {
@@ -56,13 +65,22 @@ export function EditTermDialog({ term, open, onOpenChange, onSuccess }: EditTerm
             })
           }
         }
-        toast.error(result.error)
+        toast.error(result.error || "Failed to update term")
         return
       }
-      toast.success("Term updated.")
-      onOpenChange(false)
+
+      toast.success("Term akademik berhasil diperbarui!")
       onSuccess()
-    })
+    } catch (err) {
+      toast.error("Failed to update term")
+      console.error(err)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCancel = () => {
+    onOpenChange(false)
   }
 
   return (
@@ -72,23 +90,33 @@ export function EditTermDialog({ term, open, onOpenChange, onSuccess }: EditTerm
           Edit
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Edit academic term</DialogTitle>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(submit)} className="space-y-4">
-            <TermFormFields form={form} />
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Saving…" : "Save changes"}
-              </Button>
-            </div>
-          </form>
-        </Form>
+      <DialogContent className="max-w-2xl p-0 overflow-hidden">
+        <div className="bg-card">
+          <div className="px-6 pt-6 pb-2 border-b border-muted/60">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold">Edit Term Akademik</DialogTitle>
+              <DialogDescription>
+                Ubah informasi term akademik yang sudah ada
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          <div className="p-6">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <TermFormFields form={form} />
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="ghost" onClick={handleCancel}>
+                    Batal
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Menyimpan…" : "Simpan Perubahan"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )

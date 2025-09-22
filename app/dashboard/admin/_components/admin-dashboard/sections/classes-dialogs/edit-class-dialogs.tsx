@@ -45,20 +45,26 @@ export function EditKelasDialog({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Edit kelas</DialogTitle>
-        </DialogHeader>
-        <ClassWizardForm
-          mode="edit"
-          defaultValues={defaultValues}
-          termOptions={termOptions}
-          teacherOptions={teacherOptions}
-          studentOptions={studentOptions}
-          submitLabel="Simpan perubahan"
-          onSubmit={onSubmit}
-          onCancel={onClose}
-        />
+      <DialogContent className="max-w-2xl p-0 overflow-hidden">
+        <div className="bg-card">
+          <div className="px-6 pt-6 pb-2 border-b border-muted/60">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold tracking-tight mb-1">Edit Kelas</DialogTitle>
+            </DialogHeader>
+          </div>
+          <div className="px-6 py-6">
+            <ClassWizardForm
+              mode="edit"
+              defaultValues={defaultValues}
+              termOptions={termOptions}
+              teacherOptions={teacherOptions}
+              studentOptions={studentOptions}
+              submitLabel="Simpan perubahan"
+              onSubmit={onSubmit}
+              onCancel={onClose}
+            />
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )
