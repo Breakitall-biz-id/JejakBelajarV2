@@ -1,6 +1,21 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+
+export type ProjectTemplate = {
+  id: string
+  templateName: string
+  description: string | null
+  isActive: boolean
+  stageConfigs: Array<{
+    id: string
+    stageName: string
+    instrumentType: string
+    displayOrder: number
+    description: string | null
+    estimatedDuration: string | null
+  }>
+}
 import { z } from "zod"
 import { and, asc, count, eq, inArray } from "drizzle-orm"
 
@@ -866,5 +881,66 @@ export async function deleteProjectStageInstruments(
     return { success: true }
   } catch (error) {
     return handleError(error, "Unable to clear stage instruments.")
+  }
+}
+
+export async function getProjectTemplates(): Promise<ProjectTemplate[]> {
+  try {
+    await requireTeacherUser()
+
+    const templates = await db
+      .select({
+        id: projectTemplates.id,
+        templateName: projectTemplates.templateName,
+        description: projectTemplates.description,
+        isActive: projectTemplates.isActive,
+      })
+      .from(projectTemplates)
+      .where(eq(projectTemplates.isActive, true))
+      .orderBy(asc(projectTemplates.templateName))
+
+    const templateIds = templates.map((t) => t.id)
+
+    const stageConfigs = await db
+      .select({
+        id: templateStageConfigs.id,
+        templateId: templateStageConfigs.templateId,
+        stageName: templateStageConfigs.stageName,
+        instrumentType: templateStageConfigs.instrumentType,
+        displayOrder: templateStageConfigs.displayOrder,
+        description: templateStageConfigs.description,
+        estimatedDuration: templateStageConfigs.estimatedDuration,
+      })
+      .from(templateStageConfigs)
+      .where(inArray(templateStageConfigs.templateId, templateIds))
+      .orderBy(asc(templateStageConfigs.templateId), asc(templateStageConfigs.displayOrder))
+
+    const configsByTemplate = stageConfigs.reduce<
+      Record<string, ProjectTemplate["stageConfigs"]>
+    >((acc, config) => {
+      if (!acc[config.templateId]) {
+        acc[config.templateId] = []
+      }
+      acc[config.templateId].push({
+        id: config.id,
+        stageName: config.stageName,
+        instrumentType: config.instrumentType,
+        displayOrder: config.displayOrder,
+        description: config.description,
+        estimatedDuration: config.estimatedDuration,
+      })
+      return acc
+    }, {})
+
+    return templates.map((template) => ({
+      id: template.id,
+      templateName: template.templateName,
+      description: template.description,
+      isActive: template.isActive,
+      stageConfigs: configsByTemplate[template.id] || [],
+    }))
+  } catch (error) {
+    console.error("Error fetching project templates:", error)
+    throw error
   }
 }

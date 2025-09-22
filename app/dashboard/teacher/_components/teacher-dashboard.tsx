@@ -23,21 +23,15 @@ import {
   ClipboardCheck,
   CheckCircle2,
   Archive,
-  LayoutDashboard,
-  FileText,
-  Settings,
-  LogOut,
-  Bell,
-  Search,
-  TrendingUp,
-  Clock,
-  UserCheck,
   Target,
-  Calendar,
+  Clock,
+  FileText,
 } from "lucide-react"
 
 import type { CurrentUser } from "@/lib/auth/session"
-import type { TeacherDashboardData, ProjectTemplate } from "../queries"
+import type { TeacherDashboardData } from "../queries"
+import type { ProjectTemplate } from "../actions"
+import { getProjectTemplates } from "../actions"
 import {
   createGroup,
   createProject,
@@ -97,13 +91,6 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   RadioGroup,
   RadioGroupItem,
 } from "@/components/ui/radio-group"
@@ -151,7 +138,6 @@ export function TeacherDashboard({
     return map
   }, [data.projects])
 
-  const totalProjects = data.projects.length
   const activeProjects = data.projects.filter(p => p.status === 'PUBLISHED').length
   const totalStudents = Object.values(data.studentsByClass).reduce((acc, students) => acc + students.length, 0)
   const totalClasses = data.classes.length
@@ -425,7 +411,6 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
   const [open, setOpen] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
   const [templates, setTemplates] = useState<ProjectTemplate[]>([])
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false)
 
@@ -488,7 +473,6 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
 
       toast.success("Project created with template.")
       form.reset()
-      setSelectedTemplate(null)
       setTemplates([])
       setOpen(false)
       router.refresh()
@@ -501,7 +485,6 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
       onOpenChange={(newOpen) => {
         if (!newOpen) {
           form.reset()
-          setSelectedTemplate(null)
         }
         setOpen(newOpen)
       }}
@@ -532,7 +515,6 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
                     <RadioGroup
                       onValueChange={(value) => {
                         field.onChange(value)
-                        setSelectedTemplate(value)
                       }}
                       value={field.value}
                       className="space-y-3"
@@ -550,8 +532,8 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
                         </div>
                       ) : (
                         templates.map((template) => {
-                          const totalStages = new Set(template.stageConfigs.map(c => c.stageName)).size
-                          const instruments = Array.from(new Set(template.stageConfigs.map(c => c.instrumentType)))
+                          const totalStages = new Set(template.stageConfigs.map((c) => c.stageName)).size
+                          const instruments = Array.from(new Set(template.stageConfigs.map((c) => c.instrumentType)))
                           const duration = template.stageConfigs.length > 0
                             ? `${Math.ceil(template.stageConfigs.length / 2)} weeks`
                             : "Flexible"
@@ -574,7 +556,7 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
                                   </div>
                                   <p className="text-sm text-muted-foreground mt-1">{template.description}</p>
                                   <div className="flex flex-wrap gap-1 mt-2">
-                                    {instruments.map((instrument) => (
+                                    {instruments.map((instrument: string) => (
                                       <Badge key={instrument} variant="secondary" className="text-xs">
                                         {instrument.replace(/_/g, " ")}
                                       </Badge>
