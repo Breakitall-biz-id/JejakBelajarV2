@@ -60,7 +60,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -495,22 +494,21 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
           New Project
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl border-border max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="space-y-3">
-          <DialogTitle className="text-xl font-semibold">Create New Project</DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            Select a project template to get started with predefined stages and assessment instruments.
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Create New Project</DialogTitle>
+          <DialogDescription>
+            Pilih template untuk memulai proyek.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-            {/* Template Selection */}
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="templateId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-foreground font-medium">Select Project Template</FormLabel>
+                  <FormLabel>Template Proyek</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={(value) => {
@@ -522,13 +520,13 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
                       {isLoadingTemplates ? (
                         <div className="flex items-center justify-center py-8">
                           <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                          <span>Loading templates...</span>
+                          <span>Memuat template...</span>
                         </div>
                       ) : templates.length === 0 ? (
-                        <div className="text-center py-8 border-2 border-dashed border-border rounded-lg bg-muted/50">
+                        <div className="text-center py-8 border-2 border-dashed rounded-lg bg-muted/50">
                           <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                          <p className="text-sm text-muted-foreground">No project templates available</p>
-                          <p className="text-xs text-muted-foreground mt-1">Please contact your administrator to create templates</p>
+                          <p className="text-sm text-muted-foreground">Tidak ada template</p>
+                          <p className="text-xs text-muted-foreground mt-1">Hubungi admin</p>
                         </div>
                       ) : (
                         templates.map((template) => {
@@ -554,7 +552,9 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
                                       <span>{duration}</span>
                                     </div>
                                   </div>
-                                  <p className="text-sm text-muted-foreground mt-1">{template.description}</p>
+                                  {template.description && (
+                                    <p className="text-sm text-muted-foreground mt-1">{template.description}</p>
+                                  )}
                                   <div className="flex flex-wrap gap-1 mt-2">
                                     {instruments.map((instrument: string) => (
                                       <Badge key={instrument} variant="secondary" className="text-xs">
@@ -580,11 +580,10 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-foreground font-medium">Project Title</FormLabel>
+                  <FormLabel>Judul Proyek</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Community Garden Project"
-                      className="border-border focus:border-primary focus:ring-primary"
+                      placeholder="Proyek Kebun Sekolah"
                       {...field}
                     />
                   </FormControl>
@@ -597,17 +596,13 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
               name="theme"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-foreground font-medium">Theme (Optional)</FormLabel>
+                  <FormLabel>Tema (Opsional)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Green Living"
-                      className="border-border focus:border-primary focus:ring-primary"
+                      placeholder="Hidup Hijau"
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription className="text-muted-foreground">
-                    Customize the theme to match your specific implementation context.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -617,12 +612,11 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-foreground font-medium">Description</FormLabel>
+                  <FormLabel>Deskripsi</FormLabel>
                   <FormControl>
                     <Textarea
-                      rows={4}
-                      placeholder="Specific objectives and expected outcomes for your class project."
-                      className="border-border focus:border-primary focus:ring-primary"
+                      rows={3}
+                      placeholder="Tujuan proyek"
                       {...field}
                     />
                   </FormControl>
@@ -633,27 +627,25 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
             {formError && (
               <p className="text-sm text-red-600">{formError}</p>
             )}
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
-                className="border-border text-foreground hover:bg-accent"
               >
-                Cancel
+                Batal
               </Button>
               <Button
                 type="submit"
                 disabled={isPending}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 {isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Creating...
+                    Membuat...
                   </>
                 ) : (
-                  "Create Project"
+                  "Buat Proyek"
                 )}
               </Button>
             </div>
