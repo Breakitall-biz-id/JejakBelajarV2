@@ -787,80 +787,26 @@ function ProjectCard({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 text-xs"
-              onClick={() => setShowDetailDialog(true)}
-            >
-              View Details
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="h-7 w-7 p-0"
-            >
-              {isExpanded ? (
-                <ChevronUp className="h-3 w-3" />
-              ) : (
-                <ChevronDown className="h-3 w-3" />
-              )}
-            </Button>
-          </div>
-        </div>
-
-        {/* Stages List */}
-        {displayStages.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-border">
-            <div className="flex items-center justify-between mb-2">
-              <h5 className="text-xs font-medium text-muted-foreground">
-                {isExpanded ? "All Stages" : "Early Stages"}
-                {isExpanded && (
-                  <span className="text-xs text-muted-foreground ml-1">({project.stages.length})</span>
-                )}
-              </h5>
-              {hasMoreStages && (
-                <Badge variant="outline" className="text-xs">
-                  +{project.stages.length - 2} more
-                </Badge>
-              )}
+      {/* Expandable Content */}
+      {isExpanded && (
+        <div className="border-t border-border bg-muted/50 p-4 space-y-6">
+          {/* Quick Stats */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <p className="text-lg font-bold text-foreground">{project.stages.length}</p>
+              <p className="text-xs text-muted-foreground">Stages</p>
             </div>
-            <div className={`space-y-1 ${isExpanded ? "max-h-64 overflow-y-auto pr-2" : ""}`}>
-              {displayStages.map((stage, index) => (
-                <div key={stage.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded-md hover:bg-muted/50 transition-colors">
-                  <Badge variant="secondary" className="text-xs h-5 px-2 flex-shrink-0">
-                    {index + 1}
-                  </Badge>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-medium text-foreground truncate">{stage.name}</span>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        {stage.unlocksAt && (
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(stage.unlocksAt).toLocaleDateString()}
-                          </span>
-                        )}
-                        {stage.dueAt && (
-                          <span className="text-xs text-muted-foreground">
-                            • {new Date(stage.dueAt).toLocaleDateString()}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  {stage.instruments.length > 0 && (
-                    <Badge variant="outline" className="text-xs flex-shrink-0">
-                      {stage.instruments.length}
-                    </Badge>
-                  )}
-                </div>
-              ))}
+            <div className="text-center">
+              <p className="text-lg font-bold text-foreground">{project.groups.length}</p>
+              <p className="text-xs text-muted-foreground">Groups</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold text-foreground">
+                {project.groups.reduce((acc, group) => acc + group.members.length, 0)}
+              </p>
+              <p className="text-xs text-muted-foreground">Students</p>
             </div>
           </div>
-        )}
-      </div>
 
       {/* Expandable Content */}
       {isExpanded && (
@@ -870,63 +816,18 @@ function ProjectCard({
             <DeleteProjectButton projectId={project.id} router={router} />
           </div>
 
-          {/* Compact Groups List */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h5 className="text-sm font-medium text-foreground">Groups ({project.groups.length})</h5>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-6 text-xs"
-                onClick={() => router.push(`/dashboard/teacher/projects/${project.id}`)}
-              >
-                Manage Groups
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {project.groups.map((group) => (
-                <div key={group.id} className="flex items-center justify-between p-2 bg-background border border-border rounded-md hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <Users className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                    <span className="text-xs font-medium text-foreground truncate">{group.name}</span>
-                    <Badge variant="secondary" className="text-xs flex-shrink-0">
-                      {group.members.length}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <EditGroupDialog
-                      group={group}
-                      projectId={project.id}
-                      router={router}
-                    />
-                    <EditGroupMembersDialog
-                      group={group}
-                      projectId={project.id}
-                      students={students}
-                      router={router}
-                    />
-                    <DeleteGroupButton groupId={group.id} router={router} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            {project.groups.length === 0 && (
-              <div className="text-center py-4 border border-dashed border-border rounded-md bg-muted/20">
-                <Users className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">No groups created yet</p>
-                <p className="text-xs text-muted-foreground mt-1">Create groups to organize students</p>
-              </div>
-            )}
-          </div>
+          <ProjectStagesSection
+            project={project}
+            instrumentOptions={instrumentOptions}
+            router={router}
+          />
+          <Separator />
+          <ProjectGroupsSection
+            project={project}
+            students={students}
+            router={router}
+          />
         </div>
-      )}
-
-      {showDetailDialog && (
-        <ProjectDetailDialog
-          project={project}
-          open={showDetailDialog}
-          onOpenChange={setShowDetailDialog}
-        />
       )}
     </div>
   )
@@ -1184,342 +1085,57 @@ function DeleteProjectButton({ projectId, router }: { projectId: string; router:
   )
 }
 
-function ProjectDetailDialog({
-  project,
-  open,
-  onOpenChange
-}: {
+type ProjectStagesSectionProps = {
   project: TeacherDashboardData["projects"][number]
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) {
-  const [showStageDetailDialog, setShowStageDetailDialog] = useState(false)
-  const [selectedStage, setSelectedStage] = useState<typeof project.stages[number] | null>(null)
+  instrumentOptions: readonly string[]
+  router: ReturnType<typeof useRouter>
+}
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "PUBLISHED": return "text-green-600"
-      case "DRAFT": return "text-blue-600"
-      case "ARCHIVED": return "text-gray-600"
-      default: return "text-gray-600"
-    }
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "PUBLISHED": return <CheckCircle2 className="h-4 w-4" />
-      case "DRAFT": return <Edit className="h-4 w-4" />
-      case "ARCHIVED": return <Archive className="h-4 w-4" />
-      default: return <Clock className="h-4 w-4" />
-    }
-  }
-
-  const formatDate = (date: string | null) => {
-    if (!date) return "—"
-    try {
-      return new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(date))
-    } catch {
-      return date
-    }
-  }
-
-  const handleStageClick = (stage: typeof project.stages[number]) => {
-    setSelectedStage(stage)
-    setShowStageDetailDialog(true)
-  }
+function ProjectStagesSection({ project, instrumentOptions, router }: ProjectStagesSectionProps) {
+  const hasStages = project.stages.length > 0
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-0" showCloseButton={false}>
-          {/* Header */}
-          <div className="sticky top-0 bg-background border-b p-6">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-xl font-semibold">{project.title}</h2>
-                  <Badge
-                    variant="outline"
-                    className={`${getStatusColor(project.status)} border-current bg-transparent`}
-                  >
-                    {getStatusIcon(project.status)}
-                    <span className="ml-1">{project.status}</span>
-                  </Badge>
-                </div>
-                {project.theme && (
-                  <p className="text-sm text-muted-foreground">Theme: {project.theme}</p>
-                )}
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onOpenChange(false)}
-                className="h-6 w-6 p-0"
-              >
-                ✕
-              </Button>
-            </div>
+    <section className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-muted rounded-lg">
+            <ListChecks className="h-5 w-5 text-foreground" />
           </div>
-
-          {/* Content */}
-          <div className="p-6 space-y-6">
-            {/* Description */}
-            {project.description && (
-              <div>
-                <h3 className="text-sm font-medium text-foreground mb-2">Description</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{project.description}</p>
-              </div>
-            )}
-
-            {/* Stages */}
-            <div>
-              <h3 className="text-sm font-medium text-foreground mb-3">Project Stages ({project.stages.length})</h3>
-              <div className="space-y-2">
-                {project.stages.map((stage, index) => (
-                  <div
-                    key={stage.id}
-                    className="bg-background border border-border rounded-lg p-3 hover:bg-muted/30 transition-colors cursor-pointer"
-                    onClick={() => handleStageClick(stage)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="secondary" className="text-xs">Stage {index + 1}</Badge>
-                          <h4 className="font-medium text-sm">{stage.name}</h4>
-                          <div className="ml-auto text-xs text-muted-foreground">
-                            Click for details →
-                          </div>
-                        </div>
-                        {stage.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{stage.description}</p>
-                        )}
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          {stage.unlocksAt && (
-                            <span>Unlocks: {formatDate(stage.unlocksAt)}</span>
-                          )}
-                          {stage.dueAt && (
-                            <span>Due: {formatDate(stage.dueAt)}</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Instruments */}
-                    {stage.instruments.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-border">
-                        <div className="flex flex-wrap gap-1">
-                          {stage.instruments.map((instrument) => (
-                            <Badge
-                              key={instrument.id}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {instrument.instrumentType.replace(/_/g, " ").toLowerCase()}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Groups */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-foreground">Student Groups ({project.groups.length})</h3>
-                <Badge variant="outline" className="text-xs">
-                  {project.groups.reduce((total, group) => total + group.members.length, 0)} students
-                </Badge>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {project.groups.map((group) => (
-                  <div key={group.id} className="bg-background border border-border rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-sm">{group.name}</h4>
-                      <Badge variant="secondary" className="text-xs">
-                        {group.members.length} members
-                      </Badge>
-                    </div>
-                    {group.members.length > 0 && (
-                      <div className="text-xs text-muted-foreground">
-                        {group.members.slice(0, 3).map(member => member.studentName).join(", ")}
-                        {group.members.length > 3 && ` +${group.members.length - 3} more`}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div>
+            <h3 className="font-semibold text-foreground">Project Stages</h3>
+            <p className="text-sm text-muted-foreground">
+              Sequential PjBL stages with assessment instruments
+            </p>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+        <CreateStageDialog projectId={project.id} router={router} />
+      </div>
 
-      {showStageDetailDialog && selectedStage && (
-        <StageDetailDialog
-          stage={selectedStage}
-          stageNumber={project.stages.findIndex(s => s.id === selectedStage.id) + 1}
-          open={showStageDetailDialog}
-          onOpenChange={setShowStageDetailDialog}
-        />
+      {hasStages ? (
+        <div className="space-y-2">
+          {project.stages.map((stage, index) => (
+            <StageItem
+              key={stage.id}
+              stage={stage}
+              project={project}
+              index={index}
+              totalStages={project.stages.length}
+              instrumentOptions={instrumentOptions}
+              router={router}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-6 border-2 border-dashed border-border rounded-lg bg-muted/50">
+          <ListChecks className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">No stages configured yet</p>
+          <p className="text-xs text-muted-foreground mt-1">Add PjBL stages to enable student submissions</p>
+        </div>
       )}
-    </>
+    </section>
   )
 }
 
-function StageDetailDialog({
-  stage,
-  stageNumber,
-  open,
-  onOpenChange
-}: {
-  stage: TeacherDashboardData["projects"][number]["stages"][number]
-  stageNumber: number
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) {
-  const formatDate = (date: string | null) => {
-    if (!date) return "—"
-    try {
-      return new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(date))
-    } catch {
-      return date
-    }
-  }
-
-  const getInstrumentDescription = (instrumentType: string) => {
-    switch (instrumentType) {
-      case "JOURNAL":
-        return "Student reflection journal entries for qualitative feedback"
-      case "SELF_ASSESSMENT":
-        return "Self-evaluation aligned to P5 dimensions"
-      case "PEER_ASSESSMENT":
-        return "Peer review within the project group"
-      case "OBSERVATION":
-        return "Teacher observation and notes"
-      case "DAILY_NOTE":
-        return "Quick daily notes capturing student progress"
-      default:
-        return "Assessment instrument"
-    }
-  }
-
-  const getInstrumentIcon = (instrumentType: string) => {
-    switch (instrumentType) {
-      case "JOURNAL":
-        return <FileText className="h-4 w-4" />
-      case "SELF_ASSESSMENT":
-        return <MessageSquare className="h-4 w-4" />
-      case "PEER_ASSESSMENT":
-        return <Users className="h-4 w-4" />
-      case "OBSERVATION":
-        return <Eye className="h-4 w-4" />
-      case "DAILY_NOTE":
-        return <Clock className="h-4 w-4" />
-      default:
-        return <BookOpen className="h-4 w-4" />
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto p-0" showCloseButton={false}>
-        {/* Header */}
-        <div className="sticky top-0 bg-background border-b p-5">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <Badge variant="secondary" className="text-xs">Stage {stageNumber}</Badge>
-                <h2 className="text-lg font-semibold">{stage.name}</h2>
-              </div>
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                {stage.unlocksAt && (
-                  <span>Unlocks: {formatDate(stage.unlocksAt)}</span>
-                )}
-                {stage.dueAt && (
-                  <span>Due: {formatDate(stage.dueAt)}</span>
-                )}
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onOpenChange(false)}
-              className="h-6 w-6 p-0"
-            >
-              ✕
-            </Button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-5 space-y-5">
-          {/* Description */}
-          {stage.description && (
-            <div>
-              <h3 className="text-sm font-medium text-foreground mb-2">Description</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
-            </div>
-          )}
-
-          {/* Timeline */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-muted/30 rounded-lg p-3">
-              <div className="text-xs text-muted-foreground mb-1">Unlock Date</div>
-              <div className="text-sm font-medium">
-                {stage.unlocksAt ? formatDate(stage.unlocksAt) : "Immediate"}
-              </div>
-            </div>
-            <div className="bg-muted/30 rounded-lg p-3">
-              <div className="text-xs text-muted-foreground mb-1">Due Date</div>
-              <div className="text-sm font-medium">
-                {stage.dueAt ? formatDate(stage.dueAt) : "No deadline"}
-              </div>
-            </div>
-          </div>
-
-          {/* Assessment Instruments */}
-          {stage.instruments.length > 0 && (
-            <div>
-              <h3 className="text-sm font-medium text-foreground mb-3">
-                Assessment Instruments ({stage.instruments.length})
-              </h3>
-              <div className="space-y-3">
-                {stage.instruments.map((instrument) => (
-                  <div key={instrument.id} className="bg-background border border-border rounded-lg p-3">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                        {getInstrumentIcon(instrument.instrumentType)}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="text-sm font-medium text-foreground capitalize">
-                          {instrument.instrumentType.replace(/_/g, " ").toLowerCase()}
-                        </h4>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {getInstrumentDescription(instrument.instrumentType)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Empty state for instruments */}
-          {stage.instruments.length === 0 && (
-            <div className="text-center py-4 border border-dashed border-border rounded-lg bg-muted/20">
-              <MessageSquare className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">No assessment instruments assigned</p>
-              <p className="text-xs text-muted-foreground mt-1">Students will not be able to submit evidence</p>
-            </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
 
 type StageItemProps = {
   stage: TeacherDashboardData["projects"][number]["stages"][number]
