@@ -288,7 +288,7 @@ function ClassProjectsCard({
           </div>
           <Badge
             variant={classInfo.termStatus === "ACTIVE" ? "default" : "secondary"}
-            className="px-3 py-1"
+            className={`px-3 py-1 ${classInfo.termStatus === "ACTIVE" ? "bg-green-600 text-white hover:bg-green-700" : ""}`}
           >
             {classInfo.termStatus === "ACTIVE" ? "Active" : "Inactive"}
           </Badge>
@@ -822,6 +822,9 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
   const [open, setOpen] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [showCreateStageDialog, setShowCreateStageDialog] = useState(false)
+  const [showEditStageDialog, setShowEditStageDialog] = useState(false)
+  const [selectedStage, setSelectedStage] = useState<typeof project.stages[number] | null>(null)
 
   const formSchema = useMemo(
     () =>
@@ -864,6 +867,22 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
     })
   }
 
+  const handleCreateStageSuccess = () => {
+    setShowCreateStageDialog(false)
+    router.refresh()
+  }
+
+  const handleEditStageSuccess = () => {
+    setShowEditStageDialog(false)
+    setSelectedStage(null)
+    router.refresh()
+  }
+
+  const handleEditStage = (stage: typeof project.stages[number]) => {
+    setSelectedStage(stage)
+    setShowEditStageDialog(true)
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -871,54 +890,94 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
           <Edit className="mr-2 h-4 w-4" /> Edit project
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit project</DialogTitle>
-          <DialogDescription>Update the project information for this class.</DialogDescription>
+          <DialogDescription>Update the project information and stages for this class.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Project title</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="theme"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Theme</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea rows={4} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project title</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="theme"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Theme</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea rows={3} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold">Project Stages</h4>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCreateStageDialog(true)}
+                >
+                  <Plus className="mr-1 h-3 w-3" />
+                  Add Stage
+                </Button>
+              </div>
+
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                {project.stages.length === 0 ? (
+                  <div className="text-center py-4 text-sm text-muted-foreground border border-dashed border-border rounded">
+                    No stages yet. Click "Add Stage" to create one.
+                  </div>
+                ) : (
+                  project.stages.map((stage, index) => (
+                    <StageItem
+                      key={stage.id}
+                      stage={stage}
+                      project={project}
+                      index={index}
+                      totalStages={project.stages.length}
+                      instrumentOptions={["SELF_ASSESSMENT", "PEER_ASSESSMENT", "JOURNAL", "OBSERVATION"]}
+                      router={router}
+                      isCompact={true}
+                      onEdit={() => handleEditStage(stage)}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
+
             {formError && <p className="text-sm text-destructive">{formError}</p>}
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 pt-4 border-t">
               <Button
                 type="button"
                 variant="ghost"
@@ -936,6 +995,27 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
           </form>
         </Form>
       </DialogContent>
+
+      {showCreateStageDialog && (
+        <CreateStageDialog
+          projectId={project.id}
+          router={router}
+          open={showCreateStageDialog}
+          onOpenChange={setShowCreateStageDialog}
+          onSuccess={handleCreateStageSuccess}
+        />
+      )}
+
+      {showEditStageDialog && selectedStage && (
+        <EditStageDialog
+          stage={selectedStage}
+          project={project}
+          router={router}
+          open={showEditStageDialog}
+          onOpenChange={setShowEditStageDialog}
+          onSuccess={handleEditStageSuccess}
+        />
+      )}
     </Dialog>
   )
 }
@@ -1043,6 +1123,8 @@ type StageItemProps = {
   totalStages: number
   instrumentOptions: readonly string[]
   router: ReturnType<typeof useRouter>
+  isCompact?: boolean
+  onEdit?: () => void
 }
 
 function StageItem({
@@ -1052,6 +1134,8 @@ function StageItem({
   totalStages,
   instrumentOptions,
   router,
+  isCompact = false,
+  onEdit,
 }: StageItemProps) {
   const [isDeleting, startDelete] = useTransition()
   const [isReordering, startReorder] = useTransition()
@@ -1100,6 +1184,40 @@ function StageItem({
     })
   }
 
+  if (isCompact) {
+    return (
+      <div className="rounded-lg border bg-muted/10 p-3">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="text-xs">Stage {index + 1}</Badge>
+              <h4 className="font-semibold text-sm">{stage.name}</h4>
+            </div>
+            {stage.description && (
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                {stage.description}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-1">
+            {onEdit ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onEdit}
+                className="h-7 w-7 p-0"
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+            ) : (
+              <EditStageDialog stage={stage} project={project} router={router} />
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="rounded-lg border bg-muted/10 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -1133,7 +1251,18 @@ function StageItem({
           >
             <ChevronDown className="h-4 w-4" />
           </Button>
-          <EditStageDialog stage={stage} project={project} router={router} />
+          {onEdit ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onEdit}
+              className="h-8 w-8 p-0"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          ) : (
+            <EditStageDialog stage={stage} project={project} router={router} />
+          )}
           <StageInstrumentsDialog
             stage={stage}
             instrumentOptions={instrumentOptions}
@@ -1194,8 +1323,23 @@ function formatDate(value: string | null) {
   }
 }
 
-function CreateStageDialog({ projectId, router }: { projectId: string; router: ReturnType<typeof useRouter> }) {
-  const [open, setOpen] = useState(false)
+function CreateStageDialog({
+  projectId,
+  router,
+  open,
+  onOpenChange,
+  onSuccess
+}: {
+  projectId: string;
+  router: ReturnType<typeof useRouter>
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  onSuccess?: () => void
+}) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = open !== undefined
+  const dialogOpen = isControlled ? open : internalOpen
+  const setDialogOpen = isControlled ? onOpenChange! : setInternalOpen
   const [formError, setFormError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -1238,18 +1382,21 @@ function CreateStageDialog({ projectId, router }: { projectId: string; router: R
 
       toast.success("Stage created.")
       form.reset()
-      setOpen(false)
+      setDialogOpen(false)
+      onSuccess?.()
       router.refresh()
     })
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" variant="outline">
-          <Plus className="mr-2 h-4 w-4" /> Add stage
-        </Button>
-      </DialogTrigger>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button size="sm" variant="outline">
+            <Plus className="mr-2 h-4 w-4" /> Add stage
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Add stage</DialogTitle>
@@ -1315,7 +1462,7 @@ function CreateStageDialog({ projectId, router }: { projectId: string; router: R
             </div>
             {formError && <p className="text-sm text-destructive">{formError}</p>}
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
@@ -1333,10 +1480,23 @@ type EditStageDialogProps = {
   stage: TeacherDashboardData["projects"][number]["stages"][number]
   project: TeacherDashboardData["projects"][number]
   router: ReturnType<typeof useRouter>
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  onSuccess?: () => void
 }
 
-function EditStageDialog({ stage, project, router }: EditStageDialogProps) {
-  const [open, setOpen] = useState(false)
+function EditStageDialog({
+  stage,
+  project,
+  router,
+  open,
+  onOpenChange,
+  onSuccess
+}: EditStageDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = open !== undefined
+  const dialogOpen = isControlled ? open : internalOpen
+  const setDialogOpen = isControlled ? onOpenChange! : setInternalOpen
   const [formError, setFormError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -1379,18 +1539,21 @@ function EditStageDialog({ stage, project, router }: EditStageDialogProps) {
       }
 
       toast.success("Stage updated.")
-      setOpen(false)
+      setDialogOpen(false)
+      onSuccess?.()
       router.refresh()
     })
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Edit className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button variant="outline" size="icon">
+            <Edit className="h-4 w-4" />
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Edit stage</DialogTitle>
@@ -1453,7 +1616,7 @@ function EditStageDialog({ stage, project, router }: EditStageDialogProps) {
             </div>
             {formError && <p className="text-sm text-destructive">{formError}</p>}
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
