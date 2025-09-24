@@ -223,6 +223,7 @@ async function evaluateStageCompletion(
     .select({
       instrumentType: projectStageInstruments.instrumentType,
       isRequired: projectStageInstruments.isRequired,
+      description: projectStageInstruments.description,
     })
     .from(projectStageInstruments)
     .where(eq(projectStageInstruments.projectStageId, stageId))

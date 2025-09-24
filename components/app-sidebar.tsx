@@ -53,14 +53,9 @@ const teacherNav: Array<{ title: string; url: string; icon: Icon }> = [
 ]
 
 const studentNav: Array<{ title: string; url: string; icon: Icon }> = [
-  { title: "My Projects", url: "/dashboard/student", icon: IconDashboard },
+  { title: "Home", url: "/dashboard/student", icon: IconDashboard },
 ]
 
-const adminResources = [
-  { name: "Data Library", url: "#", icon: IconDatabase },
-  { name: "Reports", url: "#", icon: IconReport },
-  { name: "Word Assistant", url: "#", icon: IconFileWord },
-]
 
 const secondaryNav = [
   { title: "Settings", url: "#", icon: IconSettings },
@@ -87,8 +82,6 @@ export function AppSidebar({ initialRole, initialUser, ...props }: AppSidebarPro
 
   const resolvedRole = (session?.user?.role ?? initialRole ?? "GUEST") as ExtendedRole
   const userNav = NAV_BY_ROLE[resolvedRole]
-  const showQuickAction = resolvedRole === "ADMIN"
-  const showResources = resolvedRole === "ADMIN"
 
   const userData = useMemo(() => {
     const fallback = {

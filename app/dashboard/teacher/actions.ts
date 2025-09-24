@@ -263,26 +263,50 @@ export async function createProject(
         .where(eq(templateStageConfigs.templateId, parsed.data.templateId))
         .orderBy(asc(templateStageConfigs.displayOrder))
 
-      // Create project stages from template configs
+
+      // Group configs by stageName and instrumentType to preserve descriptions
+      const stageMap = new Map()
       for (const config of stageConfigs) {
+        const key = `${config.stageName}`
+        if (!stageMap.has(key)) {
+          stageMap.set(key, {
+            stageName: config.stageName,
+            description: config.description,
+            displayOrder: config.displayOrder,
+            estimatedDuration: config.estimatedDuration,
+            instruments: new Map(),
+          })
+        }
+        stageMap.get(key).instruments.set(config.instrumentType, config.description)
+      }
+
+      // Insert project stages (one per unique stageName)
+      const stageNameToId = new Map()
+      let orderCounter = 1
+      for (const [stageName, stageObj] of stageMap.entries()) {
         const [stage] = await tx
           .insert(projectStages)
           .values({
             projectId: created.id,
-            name: config.stageName,
-            description: config.description,
-            order: config.displayOrder,
+            name: stageObj.stageName,
+            description: stageObj.description,
+            order: orderCounter++,
           })
           .returning({ id: projectStages.id })
+        stageNameToId.set(stageName, stage.id)
+      }
 
-        // Create stage instruments
-        await tx
-          .insert(projectStageInstruments)
-          .values({
-            projectStageId: stage.id,
-            instrumentType: config.instrumentType,
+      // Insert instruments for each stage with their descriptions
+      for (const [stageName, stageObj] of stageMap.entries()) {
+        const stageId = stageNameToId.get(stageName)
+        for (const [instrumentType, description] of stageObj.instruments.entries()) {
+          await tx.insert(projectStageInstruments).values({
+            projectStageId: stageId,
+            instrumentType,
             isRequired: true,
+            description,
           })
+        }
       }
 
       return created
@@ -626,6 +650,19 @@ export async function setStageInstruments(
     await ensureTeacherOwnsProject(teacher.id, stage.projectId)
 
     await db.transaction(async (tx) => {
+      // Get existing instruments to preserve descriptions
+      const existingInstruments = await tx
+        .select({
+          instrumentType: projectStageInstruments.instrumentType,
+          description: projectStageInstruments.description,
+        })
+        .from(projectStageInstruments)
+        .where(eq(projectStageInstruments.projectStageId, stage.id))
+
+      const existingMap = new Map(
+        existingInstruments.map(inst => [inst.instrumentType, inst.description])
+      )
+
       await tx.delete(projectStageInstruments).where(eq(projectStageInstruments.projectStageId, stage.id))
 
       const uniqueInstrumentTypes = Array.from(new Set(parsed.data.instrumentTypes))
@@ -641,6 +678,7 @@ export async function setStageInstruments(
             projectStageId: stage.id,
             instrumentType,
             isRequired: true,
+            description: existingMap.get(instrumentType) || null,
           })),
         )
     })

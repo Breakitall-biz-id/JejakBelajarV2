@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react"
 import Link from "next/link"
-import { BookOpen, ChevronRight, ChevronDown, MoreHorizontal, Loader2, Eye } from "lucide-react"
+import { ChevronRight, ChevronDown, MoreHorizontal, Loader2, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -37,7 +37,6 @@ type ProjectCardProps = {
 
 export function ProjectCard({
   project,
-  students,
   projectStatusOptions,
   onStatusChange,
   onEdit,

@@ -212,6 +212,7 @@ export async function getTeacherDashboardData(
     projectStageId: string
     instrumentType: string
     isRequired: boolean
+    description: string | null
   }
 
   const instrumentRows: InstrumentRow[] = stageIds.length
@@ -221,6 +222,7 @@ export async function getTeacherDashboardData(
           projectStageId: projectStageInstruments.projectStageId,
           instrumentType: projectStageInstruments.instrumentType,
           isRequired: projectStageInstruments.isRequired,
+          description: projectStageInstruments.description,
         })
         .from(projectStageInstruments)
         .where(inArray(projectStageInstruments.projectStageId, stageIds))

@@ -200,6 +200,7 @@ export const projectStageInstruments = pgTable(
       .references(() => projectStages.id, { onDelete: "cascade" }),
     instrumentType: instrumentTypeEnum("instrument_type").notNull(),
     isRequired: boolean("is_required").default(true).notNull(),
+    description: text("description"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },

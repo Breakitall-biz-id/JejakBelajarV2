@@ -38,7 +38,10 @@ const submissionSchema = z.object({
   projectId: z.string().uuid(),
   stageId: z.string().uuid(),
   instrumentType: studentInstrumentSchema,
-  content: z.object({ text: z.string().trim().min(1, "Response is required") }),
+  content: z.union([
+    z.object({ text: z.string().trim().min(1, "Response is required") }),
+    z.object({ answers: z.array(z.number().min(1).max(4)).min(1) })
+  ]),
   targetStudentId: z.string().uuid().optional().nullable(),
 })
 
@@ -47,7 +50,6 @@ const studentInstrumentTypes = new Set([
   "SELF_ASSESSMENT",
   "PEER_ASSESSMENT",
   "DAILY_NOTE",
-  "OBSERVATION",
 ])
 
 export async function submitStageInstrument(
@@ -64,6 +66,7 @@ export async function submitStageInstrument(
   }
 
   const { projectId, stageId, instrumentType, content, targetStudentId } = parsed.data
+
 
   if (instrumentType === "PEER_ASSESSMENT" && !targetStudentId) {
     return {
@@ -132,6 +135,7 @@ export async function submitStageInstrument(
         .select({
           instrumentType: projectStageInstruments.instrumentType,
           isRequired: projectStageInstruments.isRequired,
+          description: projectStageInstruments.description,
         })
         .from(projectStageInstruments)
         .where(eq(projectStageInstruments.projectStageId, stageId))
@@ -152,7 +156,6 @@ export async function submitStageInstrument(
         await validatePeerTarget(tx, student.user.id, projectId, targetStudentId)
       }
 
-      // Find the template stage config for this instrument type
       const templateConfig = await tx
         .select({ id: templateStageConfigs.id })
         .from(templateStageConfigs)
@@ -350,6 +353,7 @@ async function evaluateStageCompletion(
     .select({
       instrumentType: projectStageInstruments.instrumentType,
       isRequired: projectStageInstruments.isRequired,
+      description: projectStageInstruments.description,
     })
     .from(projectStageInstruments)
     .where(eq(projectStageInstruments.projectStageId, stageId))
@@ -476,13 +480,7 @@ const questionnaireInstrumentSchema = z.enum([
   "OBSERVATION",
 ] as const)
 
-const questionnaireSchema = z.object({
-  projectId: z.string().uuid(),
-  stageId: z.string().uuid(),
-  instrumentType: questionnaireInstrumentSchema,
-  content: z.record(z.string(), z.number().min(1).max(4)),
-  targetStudentId: z.string().uuid().optional(),
-})
+
 
 export async function getTemplateQuestions(
   stageId: string

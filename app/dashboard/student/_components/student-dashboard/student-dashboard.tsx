@@ -31,13 +31,7 @@ export function StudentDashboard({ student, data }: StudentDashboardProps) {
 
   return (
     <div className="space-y-8 px-4 pb-12 pt-6 lg:px-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Your Projects</h1>
-        <p className="text-muted-foreground">
-          Work through each project stage in order. Submit the required reflections and assessments
-          to unlock the next steps of your PjBL journey.
-        </p>
-      </header>
+
 
       <div className="space-y-6">
         {data.projects.map((project) => (

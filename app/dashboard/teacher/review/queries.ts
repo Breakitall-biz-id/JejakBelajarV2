@@ -112,6 +112,7 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
     .select({
       projectStageId: projectStageInstruments.projectStageId,
       instrumentType: projectStageInstruments.instrumentType,
+      description: projectStageInstruments.description,
     })
     .from(projectStageInstruments)
     .where(inArray(projectStageInstruments.projectStageId, stageRows.map((stage) => stage.id)))
