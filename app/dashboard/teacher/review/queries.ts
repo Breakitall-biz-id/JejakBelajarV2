@@ -32,6 +32,9 @@ export type TeacherReviewData = {
         id: string
         name: string
         order: number
+        description: string | null
+        unlocksAt: Date | null
+        dueAt: Date | null
         instruments: Array<string>
         students: Array<{
           id: string
@@ -104,6 +107,9 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
       projectId: projectStages.projectId,
       name: projectStages.name,
       order: projectStages.order,
+      description: projectStages.description,
+      unlocksAt: projectStages.unlocksAt,
+      dueAt: projectStages.dueAt,
     })
     .from(projectStages)
     .where(inArray(projectStages.projectId, projectIds))
@@ -235,6 +241,9 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
         id: stage.id,
         name: stage.name,
         order: stage.order,
+        description: stage.description,
+        unlocksAt: stage.unlocksAt,
+        dueAt: stage.dueAt,
         instruments,
         students,
       }
