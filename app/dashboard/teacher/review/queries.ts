@@ -11,6 +11,7 @@ import {
   projectStages,
   projects,
   submissions,
+  templateStageConfigs,
   userClassAssignments,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
@@ -157,13 +158,14 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
       id: submissions.id,
       studentId: submissions.studentId,
       projectStageId: submissions.projectStageId,
-      instrumentType: submissions.instrumentType,
+      instrumentType: templateStageConfigs.instrumentType,
       score: submissions.score,
       feedback: submissions.feedback,
       content: submissions.content,
       submittedAt: submissions.submittedAt,
     })
     .from(submissions)
+    .innerJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
     .where(
       and(
         inArray(submissions.projectStageId, stageIds),
@@ -224,7 +226,7 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
             content: submission.content,
             score: submission.score,
             feedback: submission.feedback,
-            submittedAt: submission.submittedAt.toISOString(),
+            submittedAt: submission.submittedAt ? submission.submittedAt.toISOString() : new Date().toISOString(),
           })),
         }
       })

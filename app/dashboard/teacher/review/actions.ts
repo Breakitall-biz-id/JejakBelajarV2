@@ -10,6 +10,7 @@ import {
   projectStages,
   projects,
   submissions,
+  templateStageConfigs,
   userClassAssignments,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
@@ -63,7 +64,7 @@ export async function gradeSubmission(
         .from(submissions)
         .where(eq(submissions.id, parsed.data.submissionId))
         .limit(1)
-        .then((rows) => rows[0])
+        .then((rows: any) => rows[0])
 
       if (!submission) {
         throw new ForbiddenError("Submission not found.")
@@ -119,7 +120,7 @@ export async function overrideStageStatus(
         .from(projectStages)
         .where(eq(projectStages.id, parsed.data.stageId))
         .limit(1)
-        .then((rows) => rows[0])
+        .then((rows: any) => rows[0])
 
       if (!stageRecord || stageRecord.projectId !== parsed.data.projectId) {
         throw new ForbiddenError("Stage not found for this project.")
@@ -170,7 +171,7 @@ function handleError(error: unknown, fallback: string): ActionResult {
 }
 
 async function ensureTeacherOwnsProject(
-  tx: Parameters<typeof db.transaction>[0],
+  tx: any,
   teacherId: string,
   projectId: string,
 ) {
@@ -179,7 +180,7 @@ async function ensureTeacherOwnsProject(
     .from(projects)
     .where(eq(projects.id, projectId))
     .limit(1)
-    .then((rows) => rows[0])
+    .then((rows: any) => rows[0])
 
   if (!project) {
     throw new ForbiddenError("Project not found.")
@@ -195,7 +196,7 @@ async function ensureTeacherOwnsProject(
       ),
     )
     .limit(1)
-    .then((rows) => rows[0])
+    .then((rows: any) => rows[0])
 
   if (!assignment) {
     throw new ForbiddenError("You do not manage this project.")
@@ -203,7 +204,7 @@ async function ensureTeacherOwnsProject(
 }
 
 async function evaluateStageCompletion(
-  tx: Parameters<typeof db.transaction>[0],
+  tx: any,
   studentId: string,
   projectId: string,
   stageId: string,
@@ -213,7 +214,7 @@ async function evaluateStageCompletion(
     .from(projectStages)
     .where(eq(projectStages.id, stageId))
     .limit(1)
-    .then((rows) => rows[0])
+    .then((rows: any) => rows[0])
 
   if (!stage) {
     return
@@ -226,7 +227,7 @@ async function evaluateStageCompletion(
     })
     .from(projectStageInstruments)
     .where(eq(projectStageInstruments.projectStageId, stageId))
-    .then((rows) => rows.filter((row) => row.isRequired && row.instrumentType === "OBSERVATION"))
+    .then((rows: any) => rows.filter((row: any) => row.isRequired && row.instrumentType === "OBSERVATION"))
 
   if (requiredTeacherInstruments.length === 0) {
     return
@@ -238,16 +239,17 @@ async function evaluateStageCompletion(
       score: submissions.score,
     })
     .from(submissions)
+    .innerJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
     .where(
       and(
         eq(submissions.studentId, studentId),
         eq(submissions.projectId, projectId),
         eq(submissions.projectStageId, stageId),
-        eq(submissions.instrumentType, "OBSERVATION"),
+        eq(templateStageConfigs.instrumentType, "OBSERVATION"),
       ),
     )
     .limit(1)
-    .then((rows) => rows[0])
+    .then((rows: any) => rows[0])
 
   if (!observationSubmission || observationSubmission.score === null) {
     return
@@ -271,7 +273,7 @@ async function evaluateStageCompletion(
 }
 
 async function unlockNextStage(
-  tx: Parameters<typeof db.transaction>[0],
+  tx: any,
   studentId: string,
   projectId: string,
   currentOrder: number,
@@ -282,7 +284,7 @@ async function unlockNextStage(
     .where(and(eq(projectStages.projectId, projectId), gt(projectStages.order, currentOrder)))
     .orderBy(asc(projectStages.order))
     .limit(1)
-    .then((rows) => rows[0])
+    .then((rows: any) => rows[0])
 
   if (!nextStage) {
     return
