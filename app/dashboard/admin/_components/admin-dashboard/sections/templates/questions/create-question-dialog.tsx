@@ -34,15 +34,26 @@ import {
 import { toast } from "sonner"
 import { Textarea } from "@/components/ui/textarea"
 
-const createQuestionSchema = z.object({
+const getQuestionTypeEnum = (instrumentType: string) => {
+  switch (instrumentType) {
+    case 'SELF_ASSESSMENT':
+      return z.enum(["STATEMENT"], {
+        message: "Question type is required",
+      })
+    default:
+      return z.enum(["STATEMENT", "ESSAY_PROMPT"], {
+        message: "Question type is required",
+      })
+  }
+}
+
+const createQuestionSchema = (instrumentType: string) => z.object({
   questionText: z.string().min(1, "Question text is required"),
-  questionType: z.enum(["STATEMENT", "ESSAY_PROMPT"], {
-    message: "Question type is required",
-  }),
+  questionType: getQuestionTypeEnum(instrumentType),
   scoringGuide: z.string().optional(),
 })
 
-type CreateQuestionSchema = z.infer<typeof createQuestionSchema>
+type CreateQuestionSchema = z.infer<ReturnType<typeof createQuestionSchema>>
 
 type CreateQuestionDialogProps = {
   configId: string
@@ -62,7 +73,7 @@ export function CreateQuestionDialog({
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<CreateQuestionSchema>({
-    resolver: zodResolver(createQuestionSchema),
+    resolver: zodResolver(createQuestionSchema(instrumentType)),
     defaultValues: {
       questionText: "",
       questionType: "STATEMENT",
@@ -125,6 +136,21 @@ export function CreateQuestionDialog({
     }
   }
 
+  const getAvailableQuestionTypes = (type: string) => {
+    switch (type) {
+      case 'SELF_ASSESSMENT':
+        return [{ value: "STATEMENT", label: "Statement (Skala)" }]
+      case 'JOURNAL':
+      case 'PEER_ASSESSMENT':
+      case 'OBSERVATION':
+      default:
+        return [
+          { value: "STATEMENT", label: "Statement (Skala)" },
+          { value: "ESSAY_PROMPT", label: "Essay Prompt (Jawaban Bebas)" }
+        ]
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg px-8 py-6">
@@ -178,7 +204,14 @@ export function CreateQuestionDialog({
                           <span tabIndex={0} className="cursor-pointer"><Info className="w-4 h-4 text-muted-foreground" /></span>
                         </TooltipTrigger>
                         <TooltipContent side="top" className="max-w-xs text-xs">
-                          <span className="font-semibold">Statement:</span> Skala (Selalu/Sering/Kadang/Tidak Pernah). <span className="font-semibold">Essay Prompt:</span> Jawaban bebas.
+                          {instrumentType === 'SELF_ASSESSMENT' ? (
+                            <div><span className="font-semibold">Statement (Skala):</span> Pertanyaan dengan pilihan skala (Selalu/Sering/Kadang/Tidak Pernah)</div>
+                          ) : (
+                            <div className="space-y-1">
+                              <div><span className="font-semibold">Statement (Skala):</span> Pertanyaan dengan pilihan skala (Selalu/Sering/Kadang/Tidak Pernah)</div>
+                              <div><span className="font-semibold">Essay Prompt (Jawaban Bebas):</span> Pertanyaan dengan jawaban teks bebas</div>
+                            </div>
+                          )}
                         </TooltipContent>
                       </Tooltip>
                     </div>
@@ -189,8 +222,11 @@ export function CreateQuestionDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="STATEMENT">Statement</SelectItem>
-                        <SelectItem value="ESSAY_PROMPT">Essay Prompt</SelectItem>
+                        {getAvailableQuestionTypes(instrumentType).map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
