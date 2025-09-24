@@ -843,9 +843,6 @@ function ProjectCard({
                         )}
                       </div>
                     </div>
-                    {stage.description && (
-                      <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{stage.description}</p>
-                    )}
                   </div>
                   {stage.instruments.length > 0 && (
                     <Badge variant="outline" className="text-xs flex-shrink-0">
