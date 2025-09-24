@@ -10,7 +10,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import {
   BookOpen,
   ChevronDown,
-  ChevronRight,
   ChevronUp,
   Edit,
   ListChecks,
@@ -87,7 +86,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import {
   RadioGroup,
@@ -335,7 +333,6 @@ function ClassProjectsCard({
                 classId={classInfo.id}
                 students={students}
                 projectStatusOptions={projectStatusOptions}
-                instrumentOptions={instrumentOptions}
                 router={router}
               />
             ))}
@@ -387,7 +384,7 @@ function GroupCard({ group, projectId, students, router }: {
           )}
         </div>
 
-        <div className="flex gap-2 ml-4">
+        <div className="flex gap-1 ml-4">
           <EditGroupDialog
             group={group}
             projectId={projectId}
@@ -518,55 +515,64 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
                       className="space-y-3"
                     >
                       {isLoadingTemplates ? (
-                        <div className="flex items-center justify-center py-8">
-                          <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                          <span>Memuat template...</span>
+                        <div className="flex flex-col items-center justify-center py-12">
+                          <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
+                          <span className="text-sm text-muted-foreground">Memuat template...</span>
                         </div>
                       ) : templates.length === 0 ? (
-                        <div className="text-center py-8 border-2 border-dashed rounded-lg bg-muted/50">
-                          <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                          <p className="text-sm text-muted-foreground">Tidak ada template</p>
-                          <p className="text-xs text-muted-foreground mt-1">Hubungi admin</p>
+                        <div className="text-center py-12 border-2 border-dashed border-muted-foreground/30 rounded-xl bg-background">
+                          <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                          <h3 className="text-base font-medium text-foreground mb-1">Tidak ada template</h3>
+                          <p className="text-sm text-muted-foreground">Hubungi admin untuk menambahkan template proyek</p>
                         </div>
                       ) : (
-                        templates.map((template) => {
-                          const totalStages = new Set(template.stageConfigs.map((c) => c.stageName)).size
-                          const instruments = Array.from(new Set(template.stageConfigs.map((c) => c.instrumentType)))
-                          const duration = template.stageConfigs.length > 0
-                            ? `${Math.ceil(template.stageConfigs.length / 2)} weeks`
-                            : "Flexible"
+                        <div className="grid gap-3 max-h-96 overflow-y-auto pr-2">
+                          {templates.map((template) => {
+                            const totalStages = new Set(template.stageConfigs.map((c) => c.stageName)).size
+                            const instruments = Array.from(new Set(template.stageConfigs.map((c) => c.instrumentType)))
+                            const duration = template.stageConfigs.length > 0
+                              ? `${Math.ceil(template.stageConfigs.length / 2)} weeks`
+                              : "Flexible"
 
-                          return (
-                            <div key={template.id} className="flex items-center space-x-2">
-                              <RadioGroupItem value={template.id} id={template.id} />
-                              <label
-                                htmlFor={template.id}
-                                className="flex flex-1 cursor-pointer rounded-lg border p-3 hover:bg-muted/50 [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary/5"
-                              >
-                                <div className="flex-1">
-                                  <div className="flex items-center justify-between">
-                                    <div className="font-medium">{template.templateName}</div>
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                      <span>{totalStages} stages</span>
-                                      <span>•</span>
-                                      <span>{duration}</span>
+                            return (
+                              <div key={template.id} className="flex items-start space-x-3 p-1">
+                                <RadioGroupItem
+                                  value={template.id}
+                                  id={template.id}
+                                  className="mt-3"
+                                />
+                                <label
+                                  htmlFor={template.id}
+                                  className="flex flex-1 cursor-pointer rounded-xl border border-border hover:border-primary/50 hover:shadow-sm transition-all duration-200 p-4 [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary/5 [&:has([data-state=checked])]:shadow-md"
+                                >
+                                  <div className="flex flex-col w-full gap-3">
+                                    <div className="flex items-center justify-between">
+                                      <div className="font-semibold text-foreground">{template.templateName}</div>
+                                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <span className="bg-muted px-2 py-1 rounded-md">{totalStages} stages</span>
+                                        <span className="bg-muted px-2 py-1 rounded-md">{duration}</span>
+                                      </div>
+                                    </div>
+                                    {template.description && (
+                                      <p className="text-sm text-muted-foreground leading-relaxed">{template.description}</p>
+                                    )}
+                                    <div className="flex flex-wrap gap-2">
+                                      {instruments.map((instrument: string) => (
+                                        <Badge
+                                          key={instrument}
+                                          variant="outline"
+                                          className="text-xs px-2 py-1 border-muted-foreground/50"
+                                        >
+                                          {instrument.replace(/_/g, " ").toLowerCase()}
+                                        </Badge>
+                                      ))}
                                     </div>
                                   </div>
-                                  {template.description && (
-                                    <p className="text-sm text-muted-foreground mt-1">{template.description}</p>
-                                  )}
-                                  <div className="flex flex-wrap gap-1 mt-2">
-                                    {instruments.map((instrument: string) => (
-                                      <Badge key={instrument} variant="secondary" className="text-xs">
-                                        {instrument.replace(/_/g, " ")}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                </div>
-                              </label>
-                            </div>
-                          )
-                        })
+                                </label>
+                              </div>
+                            )
+                          })}
+                        </div>
                       )}
                     </RadioGroup>
                   </FormControl>
@@ -661,7 +667,6 @@ type ProjectCardProps = {
   classId: string
   students: TeacherDashboardData["studentsByClass"][string] | []
   projectStatusOptions: readonly string[]
-  instrumentOptions: readonly string[]
   router: ReturnType<typeof useRouter>
 }
 
@@ -670,7 +675,6 @@ function ProjectCard({
   classId,
   students,
   projectStatusOptions,
-  instrumentOptions,
   router,
 }: ProjectCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -707,47 +711,40 @@ function ProjectCard({
     })
   }
 
+  const displayStages = isExpanded ? project.stages : project.stages.slice(0, 2)
+  const hasMoreStages = !isExpanded && project.stages.length > 2
+
   return (
-    <div className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+    <div className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-all duration-200 bg-card">
       {/* Project Header */}
-      <div className="p-4 bg-card">
+      <div className="p-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="p-1 hover:bg-muted rounded-md transition-colors"
-              >
-                {isExpanded ? (
-                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                ) : (
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                )}
-              </button>
-              <div className="flex-1">
-                <h4 className="font-semibold text-foreground">{project.title}</h4>
-                {project.theme && (
-                  <p className="text-sm text-muted-foreground">Theme: {project.theme}</p>
-                )}
-              </div>
+            <div className="flex items-center gap-2 mb-1">
+              <h4 className="font-semibold text-foreground text-sm truncate">{project.title}</h4>
+              {project.theme && (
+                <Badge variant="secondary" className="text-xs">
+                  {project.theme}
+                </Badge>
+              )}
             </div>
-            <p className="text-sm text-muted-foreground ml-8">
+            <p className="text-xs text-muted-foreground line-clamp-2">
               {project.description ?? "No description provided."}
             </p>
           </div>
 
-          <div className="flex items-center gap-2 ml-4">
-            <Badge className={statusColors[project.status]}>
+          <div className="flex items-center gap-2 ml-3 flex-shrink-0">
+            <Badge className={`${statusColors[project.status]} text-xs px-2 py-1`}>
               {statusIcons[project.status]}
               <span className="ml-1">{project.status}</span>
             </Badge>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                   {isStatusPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-3 w-3 animate-spin" />
                   ) : (
-                    <MoreHorizontal className="h-4 w-4" />
+                    <MoreHorizontal className="h-3 w-3" />
                   )}
                 </Button>
               </DropdownMenuTrigger>
@@ -767,45 +764,157 @@ function ProjectCard({
             </DropdownMenu>
           </div>
         </div>
+
+        {/* Quick Stats */}
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+          <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-1">
+              <ListChecks className="h-3 w-3 text-muted-foreground" />
+              <span className="text-muted-foreground">{project.stages.length} stages</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Users className="h-3 w-3 text-muted-foreground" />
+              <span className="text-muted-foreground">{project.groups.length} groups</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Target className="h-3 w-3 text-muted-foreground" />
+              <span className="text-muted-foreground">
+                {project.groups.reduce((acc, group) => acc + group.members.length, 0)} students
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link href={`/dashboard/teacher/projects/${project.id}`}>
+              <Button variant="outline" size="sm" className="h-7 text-xs">
+                View Details
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="h-7 w-7 p-0"
+            >
+              {isExpanded ? (
+                <ChevronUp className="h-3 w-3" />
+              ) : (
+                <ChevronDown className="h-3 w-3" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Stages List */}
+        {displayStages.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-border">
+            <div className="flex items-center justify-between mb-2">
+              <h5 className="text-xs font-medium text-muted-foreground">
+                {isExpanded ? "All Stages" : "Early Stages"}
+                {isExpanded && (
+                  <span className="text-xs text-muted-foreground ml-1">({project.stages.length})</span>
+                )}
+              </h5>
+              {hasMoreStages && (
+                <Badge variant="outline" className="text-xs">
+                  +{project.stages.length - 2} more
+                </Badge>
+              )}
+            </div>
+            <div className={`space-y-1 ${isExpanded ? "max-h-64 overflow-y-auto pr-2" : ""}`}>
+              {displayStages.map((stage, index) => (
+                <div key={stage.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded-md hover:bg-muted/50 transition-colors">
+                  <Badge variant="secondary" className="text-xs h-5 px-2 flex-shrink-0">
+                    {index + 1}
+                  </Badge>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium text-foreground truncate">{stage.name}</span>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        {stage.unlocksAt && (
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(stage.unlocksAt).toLocaleDateString()}
+                          </span>
+                        )}
+                        {stage.dueAt && (
+                          <span className="text-xs text-muted-foreground">
+                            • {new Date(stage.dueAt).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {stage.description && (
+                      <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{stage.description}</p>
+                    )}
+                  </div>
+                  {stage.instruments.length > 0 && (
+                    <Badge variant="outline" className="text-xs flex-shrink-0">
+                      {stage.instruments.length}
+                    </Badge>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Expandable Content */}
       {isExpanded && (
-        <div className="border-t border-border bg-muted/50 p-4 space-y-6">
-          {/* Quick Stats */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <p className="text-lg font-bold text-foreground">{project.stages.length}</p>
-              <p className="text-xs text-muted-foreground">Stages</p>
-            </div>
-            <div className="text-center">
-              <p className="text-lg font-bold text-foreground">{project.groups.length}</p>
-              <p className="text-xs text-muted-foreground">Groups</p>
-            </div>
-            <div className="text-center">
-              <p className="text-lg font-bold text-foreground">
-                {project.groups.reduce((acc, group) => acc + group.members.length, 0)}
-              </p>
-              <p className="text-xs text-muted-foreground">Students</p>
-            </div>
-          </div>
-
+        <div className="border-t border-border bg-muted/30 p-3 space-y-4">
           <div className="flex gap-2">
             <EditProjectDialog project={project} classId={classId} router={router} />
             <DeleteProjectButton projectId={project.id} router={router} />
           </div>
 
-          <ProjectStagesSection
-            project={project}
-            instrumentOptions={instrumentOptions}
-            router={router}
-          />
-          <Separator />
-          <ProjectGroupsSection
-            project={project}
-            students={students}
-            router={router}
-          />
+          {/* Compact Groups List */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h5 className="text-sm font-medium text-foreground">Groups ({project.groups.length})</h5>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-6 text-xs"
+                onClick={() => router.push(`/dashboard/teacher/projects/${project.id}`)}
+              >
+                Manage Groups
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {project.groups.map((group) => (
+                <div key={group.id} className="flex items-center justify-between p-2 bg-background border border-border rounded-md hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <Users className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                    <span className="text-xs font-medium text-foreground truncate">{group.name}</span>
+                    <Badge variant="secondary" className="text-xs flex-shrink-0">
+                      {group.members.length}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <EditGroupDialog
+                      group={group}
+                      projectId={project.id}
+                      router={router}
+                    />
+                    <EditGroupMembersDialog
+                      group={group}
+                      projectId={project.id}
+                      students={students}
+                      router={router}
+                    />
+                    <DeleteGroupButton groupId={group.id} router={router} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            {project.groups.length === 0 && (
+              <div className="text-center py-4 border border-dashed border-border rounded-md bg-muted/20">
+                <Users className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">No groups created yet</p>
+                <p className="text-xs text-muted-foreground mt-1">Create groups to organize students</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -984,56 +1093,6 @@ function DeleteProjectButton({ projectId, router }: { projectId: string; router:
   )
 }
 
-type ProjectStagesSectionProps = {
-  project: TeacherDashboardData["projects"][number]
-  instrumentOptions: readonly string[]
-  router: ReturnType<typeof useRouter>
-}
-
-function ProjectStagesSection({ project, instrumentOptions, router }: ProjectStagesSectionProps) {
-  const hasStages = project.stages.length > 0
-
-  return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-muted rounded-lg">
-            <ListChecks className="h-5 w-5 text-foreground" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground">Project Stages</h3>
-            <p className="text-sm text-muted-foreground">
-              Sequential PjBL stages with assessment instruments
-            </p>
-          </div>
-        </div>
-        <CreateStageDialog projectId={project.id} router={router} />
-      </div>
-
-      {hasStages ? (
-        <div className="space-y-2">
-          {project.stages.map((stage, index) => (
-            <StageItem
-              key={stage.id}
-              stage={stage}
-              project={project}
-              index={index}
-              totalStages={project.stages.length}
-              instrumentOptions={instrumentOptions}
-              router={router}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-6 border-2 border-dashed border-border rounded-lg bg-muted/50">
-          <ListChecks className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">No stages configured yet</p>
-          <p className="text-xs text-muted-foreground mt-1">Add PjBL stages to enable student submissions</p>
-        </div>
-      )}
-    </section>
-  )
-}
 
 
 type StageItemProps = {
@@ -1588,52 +1647,6 @@ function instrumentDescription(instrument: string) {
   }
 }
 
-type ProjectGroupsSectionProps = {
-  project: TeacherDashboardData["projects"][number]
-  students: TeacherDashboardData["studentsByClass"][string] | []
-  router: ReturnType<typeof useRouter>
-}
-
-function ProjectGroupsSection({ project, students, router }: ProjectGroupsSectionProps) {
-  return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-muted rounded-lg">
-            <Users className="h-5 w-5 text-foreground" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground">Student Groups</h3>
-            <p className="text-sm text-muted-foreground">
-              Collaborative groups for project-based learning
-            </p>
-          </div>
-        </div>
-        <CreateGroupDialog projectId={project.id} router={router} />
-      </div>
-
-      {project.groups.length === 0 ? (
-        <div className="text-center py-6 border-2 border-dashed border-border rounded-lg bg-muted/50">
-          <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">No groups created yet</p>
-          <p className="text-xs text-muted-foreground mt-1">Create groups to organize students for collaboration</p>
-        </div>
-      ) : (
-        <div className="grid gap-3">
-          {project.groups.map((group) => (
-            <GroupCard
-              key={group.id}
-              group={group}
-              projectId={project.id}
-              students={students}
-              router={router}
-            />
-          ))}
-        </div>
-      )}
-    </section>
-  )
-}
 
 function CreateGroupDialog({ projectId, router }: { projectId: string; router: ReturnType<typeof useRouter> }) {
   const [open, setOpen] = useState(false)
@@ -1743,8 +1756,8 @@ function EditGroupDialog({ group, projectId, router }: EditGroupDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Edit className="mr-2 h-4 w-4" /> Rename
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Rename group">
+          <Edit className="h-3 w-3" />
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -1846,8 +1859,8 @@ function EditGroupMembersDialog({
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          Manage members
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Manage members">
+          <Users className="h-3 w-3" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg">
@@ -1919,9 +1932,8 @@ function DeleteGroupButton({ groupId, router }: { groupId: string; router: Retur
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm" disabled={isPending}>
-          {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash className="mr-2 h-4 w-4" />}
-          Delete
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10" disabled={isPending} title="Delete group">
+          {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash className="h-3 w-3" />}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
