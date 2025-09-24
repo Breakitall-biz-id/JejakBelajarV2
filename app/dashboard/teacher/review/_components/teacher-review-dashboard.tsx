@@ -365,10 +365,12 @@ function SubmissionFeedbackCard({ submission, stage, studentId, router }: Submis
         if (result.fieldErrors && typeof result.fieldErrors === 'object' && result.fieldErrors !== null) {
           try {
             const fieldErrors = result.fieldErrors as Record<string, string[]>
-            for (const [key, messages] of Object.entries(fieldErrors)) {
-              form.setError(key as keyof typeof values, {
-                message: messages?.[0] ?? result.error,
-              })
+            if (fieldErrors) {
+              for (const [key, messages] of Object.entries(fieldErrors)) {
+                form.setError(key as keyof typeof values, {
+                  message: (Array.isArray(messages) ? messages?.[0] : messages) ?? result.error,
+                })
+              }
             }
           } catch (error) {
             console.error('Error processing fieldErrors:', error)
