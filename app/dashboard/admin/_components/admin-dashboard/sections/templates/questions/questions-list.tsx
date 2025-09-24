@@ -176,6 +176,7 @@ export function QuestionsList({
         {showEditDialog && selectedQuestion && (
           <EditQuestionDialog
             question={selectedQuestion}
+            instrumentType={instrumentType}
             open={showEditDialog}
             onOpenChange={setShowEditDialog}
             onSuccess={handleEditSuccess}

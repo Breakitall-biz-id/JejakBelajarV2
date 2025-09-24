@@ -34,15 +34,26 @@ import { Info } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { toast } from "sonner"
 
-const editQuestionSchema = z.object({
+const getQuestionTypeEnum = (instrumentType: string) => {
+  switch (instrumentType) {
+    case 'SELF_ASSESSMENT':
+      return z.enum(["STATEMENT"], {
+        message: "Question type is required",
+      })
+    default:
+      return z.enum(["STATEMENT", "ESSAY_PROMPT"], {
+        message: "Question type is required",
+      })
+  }
+}
+
+const editQuestionSchema = (instrumentType: string) => z.object({
   questionText: z.string().min(1, "Question text is required"),
-  questionType: z.enum(["STATEMENT", "ESSAY_PROMPT"], {
-    message: "Question type is required",
-  }),
+  questionType: getQuestionTypeEnum(instrumentType),
   scoringGuide: z.string().optional(),
 })
 
-type EditQuestionSchema = z.infer<typeof editQuestionSchema>
+type EditQuestionSchema = z.infer<ReturnType<typeof editQuestionSchema>>
 
 type TemplateQuestion = {
   id: string
@@ -54,6 +65,7 @@ type TemplateQuestion = {
 
 type EditQuestionDialogProps = {
   question: TemplateQuestion
+  instrumentType: string
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
@@ -61,6 +73,7 @@ type EditQuestionDialogProps = {
 
 export function EditQuestionDialog({
   question,
+  instrumentType,
   open,
   onOpenChange,
   onSuccess,
@@ -68,7 +81,7 @@ export function EditQuestionDialog({
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<EditQuestionSchema>({
-    resolver: zodResolver(editQuestionSchema),
+    resolver: zodResolver(editQuestionSchema(instrumentType)),
     defaultValues: {
       questionText: "",
       questionType: "STATEMENT",
@@ -76,15 +89,41 @@ export function EditQuestionDialog({
     },
   })
 
+  const getAvailableQuestionTypes = (type: string) => {
+    switch (type) {
+      case 'SELF_ASSESSMENT':
+        return [{ value: "STATEMENT", label: "Statement (Skala)" }]
+      case 'JOURNAL':
+      case 'PEER_ASSESSMENT':
+      case 'OBSERVATION':
+      default:
+        return [
+          { value: "STATEMENT", label: "Statement (Skala)" },
+          { value: "ESSAY_PROMPT", label: "Essay Prompt (Jawaban Bebas)" }
+        ]
+    }
+  }
+
   useEffect(() => {
     if (question) {
-      form.reset({
-        questionText: question.questionText,
-        questionType: question.questionType as "STATEMENT" | "ESSAY_PROMPT",
-        scoringGuide: question.scoringGuide || "",
-      })
+      // For Self Assessment, ensure only STATEMENT is allowed
+      if (instrumentType === 'SELF_ASSESSMENT') {
+        form.reset({
+          questionText: question.questionText,
+          questionType: "STATEMENT" as const,
+          scoringGuide: question.scoringGuide || "",
+        })
+      } else {
+        // For other instruments, use the actual question type
+        const resetData = {
+          questionText: question.questionText,
+          questionType: question.questionType as "STATEMENT" | "ESSAY_PROMPT",
+          scoringGuide: question.scoringGuide || "",
+        }
+        form.reset(resetData as any)
+      }
     }
-  }, [question, form])
+  }, [question, form, instrumentType])
 
   const onSubmit = async (values: EditQuestionSchema) => {
     setIsSubmitting(true)
@@ -164,7 +203,14 @@ export function EditQuestionDialog({
                           <span tabIndex={0} className="cursor-pointer"><Info className="w-4 h-4 text-muted-foreground" /></span>
                         </TooltipTrigger>
                         <TooltipContent side="top" className="max-w-xs text-xs">
-                          <span className="font-semibold">Statement:</span> Skala (Selalu/Sering/Kadang/Tidak Pernah). <span className="font-semibold">Essay Prompt:</span> Jawaban bebas.
+                          {instrumentType === 'SELF_ASSESSMENT' ? (
+                            <div><span className="font-semibold">Statement (Skala):</span> Pertanyaan dengan pilihan skala (Selalu/Sering/Kadang/Tidak Pernah)</div>
+                          ) : (
+                            <div className="space-y-1">
+                              <div><span className="font-semibold">Statement (Skala):</span> Pertanyaan dengan pilihan skala (Selalu/Sering/Kadang/Tidak Pernah)</div>
+                              <div><span className="font-semibold">Essay Prompt (Jawaban Bebas):</span> Pertanyaan dengan jawaban teks bebas</div>
+                            </div>
+                          )}
                         </TooltipContent>
                       </Tooltip>
                     </div>
@@ -175,8 +221,11 @@ export function EditQuestionDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="STATEMENT">Statement</SelectItem>
-                        <SelectItem value="ESSAY_PROMPT">Essay Prompt</SelectItem>
+                        {getAvailableQuestionTypes(instrumentType).map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
