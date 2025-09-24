@@ -13,6 +13,7 @@ import {
   Loader2,
   MessageSquareText,
   NotebookPen,
+  User,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -27,21 +28,18 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
-  FormDescription,
-  FormField,
+    FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 
 type TeacherReviewDashboardProps = {
   teacher: CurrentUser
@@ -50,10 +48,10 @@ type TeacherReviewDashboardProps = {
 
 export function TeacherReviewDashboard({ teacher, data }: TeacherReviewDashboardProps) {
   const router = useRouter()
-  const defaultClassId = data.classes[0]?.id ?? ""
+  const defaultClassId = data.classes && data.classes.length > 0 ? data.classes[0]?.id ?? "" : ""
   const [selectedClass, setSelectedClass] = useState(defaultClassId)
 
-  if (data.classes.length === 0) {
+  if (!data.classes || !Array.isArray(data.classes) || data.classes.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <header className="border-b bg-card">
@@ -82,7 +80,7 @@ export function TeacherReviewDashboard({ teacher, data }: TeacherReviewDashboard
     )
   }
 
-  const classProjects = data.classProjects[selectedClass] ?? []
+  const classProjects = (data.classProjects && selectedClass) ? data.classProjects[selectedClass] ?? [] : []
 
   return (
     <div className="min-h-screen bg-background">
@@ -139,66 +137,71 @@ export function TeacherReviewDashboard({ teacher, data }: TeacherReviewDashboard
               </Card>
             ) : (
               classProjects.map((project) => (
-                <Card key={project.id} className="border-muted shadow-sm">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between">
+                <div key={project.id} className="rounded-lg border border-muted bg-background">
+                  <div className="space-y-2 border-b p-6">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="space-y-1">
-                        <CardTitle className="text-xl">{project.title}</CardTitle>
-                        <CardDescription>
+                        <h2 className="text-lg font-semibold">{project.title}</h2>
+                        <p className="text-sm text-muted-foreground">
                           Review student progress stage by stage. Update observation scores to unlock subsequent stages.
-                        </CardDescription>
+                        </p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline">
-                          {project.stages.length} stages
-                        </Badge>
-                        <Badge variant="outline">
-                          {project.status}
-                        </Badge>
-                      </div>
+                      <Badge variant="outline">
+                        {project.stages.length} stages
+                      </Badge>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {project.stages.map((stage, index) => (
-                        <div key={stage.id} className="border border-border rounded-lg overflow-hidden">
-                          <div className="bg-card border-b">
-                            <Accordion type="single" value={stage.id} className="w-full">
-                              <AccordionItem value={stage.id} className="border-0">
-                                <AccordionTrigger className="px-6 py-4 hover:no-underline group">
-                                  <div className="flex items-center justify-between w-full pr-4">
-                                    <div className="flex items-center gap-4">
-                                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-muted text-foreground font-semibold">
-                                        {index + 1}
-                                      </div>
-                                      <div className="text-left">
-                                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                                          {stage.name}
-                                        </h3>
-                                        <StageInstrumentSummary instruments={stage.instruments} />
-                                      </div>
-                                    </div>
-                                    <Badge variant="outline" className="ml-4">
-                                      {stage.students.length} student{stage.students.length !== 1 ? 's' : ''}
-                                    </Badge>
-                                  </div>
-                                </AccordionTrigger>
-                                <AccordionContent className="px-6 py-4">
-                                  <StageStudentsTable
-                                    stage={stage}
-                                    projectId={project.id}
-                                    teacher={teacher}
-                                    router={router}
-                                  />
-                                </AccordionContent>
-                              </AccordionItem>
-                            </Accordion>
+                  </div>
+
+                  <div className="space-y-6 p-6">
+                    {project.stages.map((stage, index) => (
+                      <section key={stage.id} className="space-y-4 rounded-lg border border-muted bg-muted/10 p-4">
+                        <header className="flex flex-wrap items-start justify-between gap-3">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary">
+                                Stage {index + 1} of {project.stages.length}
+                              </Badge>
+                              <span className="font-semibold">{stage.name}</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {stage.description || "No description provided."}
+                            </p>
+                            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                              {stage.unlocksAt && <span>Unlocks {formatDate(stage.unlocksAt.toISOString())}</span>}
+                              {stage.dueAt && <span>Due {formatDate(stage.dueAt.toISOString())}</span>}
+                              <span>{stage.students.length} student{stage.students.length !== 1 ? 's' : ''}</span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                          <Badge variant="outline" className="capitalize">
+                            {stage.students.length > 0 ? "Active" : "No Students"}
+                          </Badge>
+                        </header>
+
+                        {stage.students.length > 0 ? (
+                          <div className="space-y-4">
+                            <h4 className="text-sm font-semibold">Student Submissions</h4>
+                            <div className="grid gap-4 md:grid-cols-2">
+                              {stage.students.map((student) => (
+                                <StudentReviewCard
+                                  key={student.id}
+                                  student={student}
+                                  stage={stage}
+                                  projectId={project.id}
+                                  router={router}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-2 rounded-md border border-dashed bg-muted/30 p-4 text-sm text-muted-foreground">
+                            <AlertCircle className="h-4 w-4" />
+                            <span>No students enrolled in this stage.</span>
+                          </div>
+                        )}
+                      </section>
+                    ))}
+                  </div>
+                </div>
               ))
             )}
           </TabsContent>
@@ -209,62 +212,15 @@ export function TeacherReviewDashboard({ teacher, data }: TeacherReviewDashboard
   )
 }
 
-function StageInstrumentSummary({ instruments }: { instruments: string[] }) {
-  if (instruments.length === 0) {
-    return <span className="text-sm text-muted-foreground">No instruments configured.</span>
-  }
 
-  return (
-    <div className="flex flex-wrap gap-1.5 text-sm text-muted-foreground">
-      {instruments.map((instrument) => (
-        <span key={instrument} className="px-2 py-1 bg-muted rounded-md text-xs capitalize">
-          {instrument.replace(/_/g, " ")}
-        </span>
-      ))}
-    </div>
-  )
-}
-
-type StageStudentsTableProps = {
+type StudentReviewCardProps = {
+  student: TeacherReviewData["classProjects"][string][number]["stages"][number]["students"][number]
   stage: TeacherReviewData["classProjects"][string][number]["stages"][number]
   projectId: string
-  teacher: CurrentUser
   router: ReturnType<typeof useRouter>
 }
 
-function StageStudentsTable({ stage, projectId, teacher, router }: StageStudentsTableProps) {
-  if (stage.students.length === 0) {
-    return <p className="text-sm text-muted-foreground">No students enrolled in this class.</p>
-  }
-
-  const studentRows = useMemo(
-    () => [...stage.students].sort((a, b) => (a.name ?? "").localeCompare(b.name ?? "")),
-    [stage.students],
-  )
-
-  return (
-    <div className="space-y-4">
-      {studentRows.map((student) => (
-        <StudentReviewPanel
-          key={student.id}
-          stage={stage}
-          student={student}
-          projectId={projectId}
-          router={router}
-        />
-      ))}
-    </div>
-  )
-}
-
-type StudentReviewPanelProps = {
-  stage: StageStudentsTableProps["stage"]
-  student: StageStudentsTableProps["stage"]["students"][number]
-  projectId: string
-  router: ReturnType<typeof useRouter>
-}
-
-function StudentReviewPanel({ stage, student, projectId, router }: StudentReviewPanelProps) {
+function StudentReviewCard({ student, stage, projectId, router }: StudentReviewCardProps) {
   const [isStatusTransition, startStatusTransition] = useTransition()
   const progressLabel = getProgressBadge(student.progress.status)
   const currentStudent = useMemo(
@@ -292,67 +248,78 @@ function StudentReviewPanel({ stage, student, projectId, router }: StudentReview
   }
 
   return (
-    <div className="rounded-lg border bg-card shadow-sm hover:shadow-md transition-shadow">
-      <header className="p-6 border-b bg-muted/30">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-              <span className="font-semibold text-sm">
-                {(student.name ?? "UN").charAt(0)}
-              </span>
-            </div>
-            <div>
-              <h4 className="font-semibold text-foreground">{student.name ?? "Unnamed learner"}</h4>
-              <p className="text-sm text-muted-foreground">
-                {student.groupName ? `Group: ${student.groupName}` : "Independent work"}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Badge variant={progressLabel.variant}>{progressLabel.label}</Badge>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => onOverrideStatus("IN_PROGRESS")}
-                disabled={isStatusTransition}
-              >
-                Reactivate
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => onOverrideStatus("COMPLETED")}
-                disabled={isStatusTransition}
-              >
-                Mark complete
-              </Button>
-            </div>
-          </div>
+    <Card className="h-full">
+      <CardHeader className="flex flex-row items-start gap-3 space-y-0 pb-3">
+        <div className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/10 text-primary">
+          <User className="h-4 w-4" />
         </div>
-      </header>
-
-      <div className="p-6">
+        <div className="flex-1 space-y-1">
+          <CardTitle className="text-base font-semibold">{student.name ?? "Unnamed learner"}</CardTitle>
+          <CardDescription>
+            {student.groupName ? `Group: ${student.groupName}` : "Independent work"}
+          </CardDescription>
+        </div>
+        <Badge variant={progressLabel.variant} className="capitalize text-xs">
+          {progressLabel.label}
+        </Badge>
+      </CardHeader>
+      <CardContent className="pt-0">
         <div className="space-y-4">
-          {currentStudent?.submissions.map((submission) => (
-            <SubmissionFeedbackCard
-              key={submission.id}
-              submission={submission}
-              stage={stage}
-              studentId={student.id}
-              router={router}
-            />
-          ))}
+          {/* Status Actions */}
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onOverrideStatus("IN_PROGRESS")}
+              disabled={isStatusTransition}
+            >
+              Reactivate
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => onOverrideStatus("COMPLETED")}
+              disabled={isStatusTransition}
+            >
+              Mark complete
+            </Button>
+          </div>
 
-          {(currentStudent?.submissions.length ?? 0) === 0 && (
-            <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/20 bg-muted/20 p-8 text-center text-muted-foreground">
-              <AlertCircle className="h-5 w-5" />
-              <span className="font-medium">No submissions yet for this stage.</span>
+          {/* Submissions */}
+          {currentStudent?.submissions && Array.isArray(currentStudent.submissions) && currentStudent.submissions.length > 0 ? (
+            <div className="space-y-3">
+              <h5 className="text-sm font-medium">Submissions</h5>
+              <div className="space-y-2">
+                {currentStudent.submissions.map((submission) => (
+                  <div key={submission.id} className="rounded-md border bg-background p-3 text-sm">
+                    <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground mb-2">
+                      <span className="font-medium capitalize">
+                        {submission.instrumentType.replace(/_/g, " ")}
+                      </span>
+                      <span>{formatDate(submission.submittedAt)}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground whitespace-pre-wrap mb-2">
+                      {extractSubmissionText(submission.content)}
+                    </p>
+                    <SubmissionFeedbackCard
+                      submission={submission}
+                      stage={stage}
+                      studentId={student.id}
+                      router={router}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center gap-2 rounded-md border border-dashed bg-muted/30 p-3 text-xs text-muted-foreground">
+              <AlertCircle className="h-3 w-3" />
+              <span>No submissions yet</span>
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -361,8 +328,8 @@ const overrideStatusSchema = z.object({
 })
 
 type SubmissionFeedbackCardProps = {
-  submission: StageStudentsTableProps["stage"]["students"][number]["submissions"][number]
-  stage: StageStudentsTableProps["stage"]
+  submission: TeacherReviewData["classProjects"][string][number]["stages"][number]["students"][number]["submissions"][number]
+  stage: TeacherReviewData["classProjects"][string][number]["stages"][number]
   studentId: string
   router: ReturnType<typeof useRouter>
 }
@@ -372,20 +339,7 @@ function SubmissionFeedbackCard({ submission, stage, studentId, router }: Submis
   const formSchema = useMemo(
     () =>
       z.object({
-        score: z
-          .string()
-          .optional()
-          .transform((value) => {
-            if (!value) return null
-            const parsed = Number(value)
-            if (Number.isNaN(parsed)) {
-              return null
-            }
-            return parsed
-          })
-          .refine((value) => value === null || (value >= 0 && value <= 100), {
-            message: "Score must be between 0 and 100.",
-          }),
+        score: z.string().optional(),
         feedback: z.string().trim().min(1, "Feedback is required."),
       }),
     [],
@@ -403,16 +357,21 @@ function SubmissionFeedbackCard({ submission, stage, studentId, router }: Submis
     startSubmitting(async () => {
       const result = await gradeSubmission({
         submissionId: submission.id,
-        score: values.score,
+        score: values.score ? Number(values.score) : null,
         feedback: values.feedback,
       })
 
       if (!result.success) {
-        if (result.fieldErrors) {
-          for (const [key, messages] of Object.entries(result.fieldErrors)) {
-            form.setError(key as keyof typeof values, {
-              message: messages?.[0] ?? result.error,
-            })
+        if (result.fieldErrors && typeof result.fieldErrors === 'object' && result.fieldErrors !== null) {
+          try {
+            const fieldErrors = result.fieldErrors as Record<string, string[]>
+            for (const [key, messages] of Object.entries(fieldErrors)) {
+              form.setError(key as keyof typeof values, {
+                message: messages?.[0] ?? result.error,
+              })
+            }
+          } catch (error) {
+            console.error('Error processing fieldErrors:', error)
           }
         }
 

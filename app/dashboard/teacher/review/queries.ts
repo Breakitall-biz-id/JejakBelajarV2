@@ -11,6 +11,7 @@ import {
   projectStages,
   projects,
   submissions,
+  templateStageConfigs,
   userClassAssignments,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
@@ -31,6 +32,9 @@ export type TeacherReviewData = {
         id: string
         name: string
         order: number
+        description: string | null
+        unlocksAt: Date | null
+        dueAt: Date | null
         instruments: Array<string>
         students: Array<{
           id: string
@@ -103,6 +107,9 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
       projectId: projectStages.projectId,
       name: projectStages.name,
       order: projectStages.order,
+      description: projectStages.description,
+      unlocksAt: projectStages.unlocksAt,
+      dueAt: projectStages.dueAt,
     })
     .from(projectStages)
     .where(inArray(projectStages.projectId, projectIds))
@@ -158,13 +165,14 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
       id: submissions.id,
       studentId: submissions.studentId,
       projectStageId: submissions.projectStageId,
-      instrumentType: submissions.instrumentType,
+      instrumentType: templateStageConfigs.instrumentType,
       score: submissions.score,
       feedback: submissions.feedback,
       content: submissions.content,
       submittedAt: submissions.submittedAt,
     })
     .from(submissions)
+    .innerJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
     .where(
       and(
         inArray(submissions.projectStageId, stageIds),
@@ -225,7 +233,7 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
             content: submission.content,
             score: submission.score,
             feedback: submission.feedback,
-            submittedAt: submission.submittedAt.toISOString(),
+            submittedAt: submission.submittedAt ? submission.submittedAt.toISOString() : new Date().toISOString(),
           })),
         }
       })
@@ -234,6 +242,9 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
         id: stage.id,
         name: stage.name,
         order: stage.order,
+        description: stage.description,
+        unlocksAt: stage.unlocksAt,
+        dueAt: stage.dueAt,
         instruments,
         students,
       }
