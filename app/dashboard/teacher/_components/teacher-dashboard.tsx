@@ -26,6 +26,8 @@ import {
   Target,
   Clock,
   FileText,
+  MessageSquare,
+  Eye,
 } from "lucide-react"
 
 import type { CurrentUser } from "@/lib/auth/session"
@@ -674,6 +676,7 @@ function ProjectCard({
   router,
 }: ProjectCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [showDetailDialog, setShowDetailDialog] = useState(false)
   const [isStatusPending, startStatusTransition] = useTransition()
 
   const statusColors: Record<string, string> = {
@@ -778,9 +781,53 @@ function ProjectCard({
               <p className="text-lg font-bold text-foreground">{project.stages.length}</p>
               <p className="text-xs text-muted-foreground">Stages</p>
             </div>
+<<<<<<< HEAD
             <div className="text-center">
               <p className="text-lg font-bold text-foreground">{project.groups.length}</p>
               <p className="text-xs text-muted-foreground">Groups</p>
+=======
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => setShowDetailDialog(true)}
+            >
+              View Details
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="h-7 w-7 p-0"
+            >
+              {isExpanded ? (
+                <ChevronUp className="h-3 w-3" />
+              ) : (
+                <ChevronDown className="h-3 w-3" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Stages List */}
+        {displayStages.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-border">
+            <div className="flex items-center justify-between mb-2">
+              <h5 className="text-xs font-medium text-muted-foreground">
+                {isExpanded ? "All Stages" : "Early Stages"}
+                {isExpanded && (
+                  <span className="text-xs text-muted-foreground ml-1">({project.stages.length})</span>
+                )}
+              </h5>
+              {hasMoreStages && (
+                <Badge variant="outline" className="text-xs">
+                  +{project.stages.length - 2} more
+                </Badge>
+              )}
+>>>>>>> 73a3631 (feat: add view detail in project)
             </div>
             <div className="text-center">
               <p className="text-lg font-bold text-foreground">
@@ -807,6 +854,14 @@ function ProjectCard({
             router={router}
           />
         </div>
+      )}
+
+      {showDetailDialog && (
+        <ProjectDetailDialog
+          project={project}
+          open={showDetailDialog}
+          onOpenChange={setShowDetailDialog}
+        />
       )}
     </div>
   )
@@ -956,7 +1011,7 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
               <div className="space-y-2 max-h-[300px] overflow-y-auto">
                 {project.stages.length === 0 ? (
                   <div className="text-center py-4 text-sm text-muted-foreground border border-dashed border-border rounded">
-                    No stages yet. Click "Add Stage" to create one.
+                    No stages yet. Click &quot;Add Stage&quot; to create one.
                   </div>
                 ) : (
                   project.stages.map((stage, index) => (
@@ -1064,6 +1119,7 @@ function DeleteProjectButton({ projectId, router }: { projectId: string; router:
   )
 }
 
+<<<<<<< HEAD
 type ProjectStagesSectionProps = {
   project: TeacherDashboardData["projects"][number]
   instrumentOptions: readonly string[]
@@ -1114,7 +1170,344 @@ function ProjectStagesSection({ project, instrumentOptions, router }: ProjectSta
     </section>
   )
 }
+=======
+function ProjectDetailDialog({
+  project,
+  open,
+  onOpenChange
+}: {
+  project: TeacherDashboardData["projects"][number]
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  const [showStageDetailDialog, setShowStageDetailDialog] = useState(false)
+  const [selectedStage, setSelectedStage] = useState<typeof project.stages[number] | null>(null)
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "PUBLISHED": return "text-green-600"
+      case "DRAFT": return "text-blue-600"
+      case "ARCHIVED": return "text-gray-600"
+      default: return "text-gray-600"
+    }
+  }
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "PUBLISHED": return <CheckCircle2 className="h-4 w-4" />
+      case "DRAFT": return <Edit className="h-4 w-4" />
+      case "ARCHIVED": return <Archive className="h-4 w-4" />
+      default: return <Clock className="h-4 w-4" />
+    }
+  }
+
+  const formatDate = (date: string | null) => {
+    if (!date) return "—"
+    try {
+      return new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(date))
+    } catch {
+      return date
+    }
+  }
+
+  const handleStageClick = (stage: typeof project.stages[number]) => {
+    setSelectedStage(stage)
+    setShowStageDetailDialog(true)
+  }
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-0" showCloseButton={false}>
+          {/* Header */}
+          <div className="sticky top-0 bg-background border-b p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h2 className="text-xl font-semibold">{project.title}</h2>
+                  <Badge
+                    variant="outline"
+                    className={`${getStatusColor(project.status)} border-current bg-transparent`}
+                  >
+                    {getStatusIcon(project.status)}
+                    <span className="ml-1">{project.status}</span>
+                  </Badge>
+                </div>
+                {project.theme && (
+                  <p className="text-sm text-muted-foreground">Theme: {project.theme}</p>
+                )}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+                className="h-6 w-6 p-0"
+              >
+                ✕
+              </Button>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-6 space-y-6">
+            {/* Description */}
+            {project.description && (
+              <div>
+                <h3 className="text-sm font-medium text-foreground mb-2">Description</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{project.description}</p>
+              </div>
+            )}
+
+            {/* Stages */}
+            <div>
+              <h3 className="text-sm font-medium text-foreground mb-3">Project Stages ({project.stages.length})</h3>
+              <div className="space-y-2">
+                {project.stages.map((stage, index) => (
+                  <div
+                    key={stage.id}
+                    className="bg-background border border-border rounded-lg p-3 hover:bg-muted/30 transition-colors cursor-pointer"
+                    onClick={() => handleStageClick(stage)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="secondary" className="text-xs">Stage {index + 1}</Badge>
+                          <h4 className="font-medium text-sm">{stage.name}</h4>
+                          <div className="ml-auto text-xs text-muted-foreground">
+                            Click for details →
+                          </div>
+                        </div>
+                        {stage.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{stage.description}</p>
+                        )}
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          {stage.unlocksAt && (
+                            <span>Unlocks: {formatDate(stage.unlocksAt)}</span>
+                          )}
+                          {stage.dueAt && (
+                            <span>Due: {formatDate(stage.dueAt)}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Instruments */}
+                    {stage.instruments.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-border">
+                        <div className="flex flex-wrap gap-1">
+                          {stage.instruments.map((instrument) => (
+                            <Badge
+                              key={instrument.id}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {instrument.instrumentType.replace(/_/g, " ").toLowerCase()}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+>>>>>>> 73a3631 (feat: add view detail in project)
+
+            {/* Groups */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-foreground">Student Groups ({project.groups.length})</h3>
+                <Badge variant="outline" className="text-xs">
+                  {project.groups.reduce((total, group) => total + group.members.length, 0)} students
+                </Badge>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {project.groups.map((group) => (
+                  <div key={group.id} className="bg-background border border-border rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm">{group.name}</h4>
+                      <Badge variant="secondary" className="text-xs">
+                        {group.members.length} members
+                      </Badge>
+                    </div>
+                    {group.members.length > 0 && (
+                      <div className="text-xs text-muted-foreground">
+                        {group.members.slice(0, 3).map(member => member.studentName).join(", ")}
+                        {group.members.length > 3 && ` +${group.members.length - 3} more`}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {showStageDetailDialog && selectedStage && (
+        <StageDetailDialog
+          stage={selectedStage}
+          stageNumber={project.stages.findIndex(s => s.id === selectedStage.id) + 1}
+          open={showStageDetailDialog}
+          onOpenChange={setShowStageDetailDialog}
+        />
+      )}
+    </>
+  )
+}
+
+function StageDetailDialog({
+  stage,
+  stageNumber,
+  open,
+  onOpenChange
+}: {
+  stage: TeacherDashboardData["projects"][number]["stages"][number]
+  stageNumber: number
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  const formatDate = (date: string | null) => {
+    if (!date) return "—"
+    try {
+      return new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(date))
+    } catch {
+      return date
+    }
+  }
+
+  const getInstrumentDescription = (instrumentType: string) => {
+    switch (instrumentType) {
+      case "JOURNAL":
+        return "Student reflection journal entries for qualitative feedback"
+      case "SELF_ASSESSMENT":
+        return "Self-evaluation aligned to P5 dimensions"
+      case "PEER_ASSESSMENT":
+        return "Peer review within the project group"
+      case "OBSERVATION":
+        return "Teacher observation and notes"
+      case "DAILY_NOTE":
+        return "Quick daily notes capturing student progress"
+      default:
+        return "Assessment instrument"
+    }
+  }
+
+  const getInstrumentIcon = (instrumentType: string) => {
+    switch (instrumentType) {
+      case "JOURNAL":
+        return <FileText className="h-4 w-4" />
+      case "SELF_ASSESSMENT":
+        return <MessageSquare className="h-4 w-4" />
+      case "PEER_ASSESSMENT":
+        return <Users className="h-4 w-4" />
+      case "OBSERVATION":
+        return <Eye className="h-4 w-4" />
+      case "DAILY_NOTE":
+        return <Clock className="h-4 w-4" />
+      default:
+        return <BookOpen className="h-4 w-4" />
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto p-0" showCloseButton={false}>
+        {/* Header */}
+        <div className="sticky top-0 bg-background border-b p-5">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <Badge variant="secondary" className="text-xs">Stage {stageNumber}</Badge>
+                <h2 className="text-lg font-semibold">{stage.name}</h2>
+              </div>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                {stage.unlocksAt && (
+                  <span>Unlocks: {formatDate(stage.unlocksAt)}</span>
+                )}
+                {stage.dueAt && (
+                  <span>Due: {formatDate(stage.dueAt)}</span>
+                )}
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+              className="h-6 w-6 p-0"
+            >
+              ✕
+            </Button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-5 space-y-5">
+          {/* Description */}
+          {stage.description && (
+            <div>
+              <h3 className="text-sm font-medium text-foreground mb-2">Description</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
+            </div>
+          )}
+
+          {/* Timeline */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-muted/30 rounded-lg p-3">
+              <div className="text-xs text-muted-foreground mb-1">Unlock Date</div>
+              <div className="text-sm font-medium">
+                {stage.unlocksAt ? formatDate(stage.unlocksAt) : "Immediate"}
+              </div>
+            </div>
+            <div className="bg-muted/30 rounded-lg p-3">
+              <div className="text-xs text-muted-foreground mb-1">Due Date</div>
+              <div className="text-sm font-medium">
+                {stage.dueAt ? formatDate(stage.dueAt) : "No deadline"}
+              </div>
+            </div>
+          </div>
+
+          {/* Assessment Instruments */}
+          {stage.instruments.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-foreground mb-3">
+                Assessment Instruments ({stage.instruments.length})
+              </h3>
+              <div className="space-y-3">
+                {stage.instruments.map((instrument) => (
+                  <div key={instrument.id} className="bg-background border border-border rounded-lg p-3">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                        {getInstrumentIcon(instrument.instrumentType)}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-medium text-foreground capitalize">
+                          {instrument.instrumentType.replace(/_/g, " ").toLowerCase()}
+                        </h4>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {getInstrumentDescription(instrument.instrumentType)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Empty state for instruments */}
+          {stage.instruments.length === 0 && (
+            <div className="text-center py-4 border border-dashed border-border rounded-lg bg-muted/20">
+              <MessageSquare className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No assessment instruments assigned</p>
+              <p className="text-xs text-muted-foreground mt-1">Students will not be able to submit evidence</p>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
 
 type StageItemProps = {
   stage: TeacherDashboardData["projects"][number]["stages"][number]
