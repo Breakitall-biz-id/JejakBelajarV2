@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import {
   BookOpen,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   Edit,
   ListChecks,
@@ -25,8 +26,6 @@ import {
   Target,
   Clock,
   FileText,
-  MessageSquare,
-  Eye,
 } from "lucide-react"
 
 import type { CurrentUser } from "@/lib/auth/session"
@@ -88,6 +87,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import {
   RadioGroup,
@@ -288,7 +288,7 @@ function ClassProjectsCard({
           </div>
           <Badge
             variant={classInfo.termStatus === "ACTIVE" ? "default" : "secondary"}
-            className={`px-3 py-1 ${classInfo.termStatus === "ACTIVE" ? "bg-green-600 text-white hover:bg-green-700" : ""}`}
+            className="px-3 py-1"
           >
             {classInfo.termStatus === "ACTIVE" ? "Active" : "Inactive"}
           </Badge>
@@ -335,6 +335,7 @@ function ClassProjectsCard({
                 classId={classInfo.id}
                 students={students}
                 projectStatusOptions={projectStatusOptions}
+                instrumentOptions={instrumentOptions}
                 router={router}
               />
             ))}
@@ -386,7 +387,7 @@ function GroupCard({ group, projectId, students, router }: {
           )}
         </div>
 
-        <div className="flex gap-1 ml-4">
+        <div className="flex gap-2 ml-4">
           <EditGroupDialog
             group={group}
             projectId={projectId}
@@ -517,64 +518,55 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
                       className="space-y-3"
                     >
                       {isLoadingTemplates ? (
-                        <div className="flex flex-col items-center justify-center py-12">
-                          <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
-                          <span className="text-sm text-muted-foreground">Memuat template...</span>
+                        <div className="flex items-center justify-center py-8">
+                          <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                          <span>Memuat template...</span>
                         </div>
                       ) : templates.length === 0 ? (
-                        <div className="text-center py-12 border-2 border-dashed border-muted-foreground/30 rounded-xl bg-background">
-                          <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                          <h3 className="text-base font-medium text-foreground mb-1">Tidak ada template</h3>
-                          <p className="text-sm text-muted-foreground">Hubungi admin untuk menambahkan template proyek</p>
+                        <div className="text-center py-8 border-2 border-dashed rounded-lg bg-muted/50">
+                          <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                          <p className="text-sm text-muted-foreground">Tidak ada template</p>
+                          <p className="text-xs text-muted-foreground mt-1">Hubungi admin</p>
                         </div>
                       ) : (
-                        <div className="grid gap-3 max-h-96 overflow-y-auto pr-2">
-                          {templates.map((template) => {
-                            const totalStages = new Set(template.stageConfigs.map((c) => c.stageName)).size
-                            const instruments = Array.from(new Set(template.stageConfigs.map((c) => c.instrumentType)))
-                            const duration = template.stageConfigs.length > 0
-                              ? `${Math.ceil(template.stageConfigs.length / 2)} weeks`
-                              : "Flexible"
+                        templates.map((template) => {
+                          const totalStages = new Set(template.stageConfigs.map((c) => c.stageName)).size
+                          const instruments = Array.from(new Set(template.stageConfigs.map((c) => c.instrumentType)))
+                          const duration = template.stageConfigs.length > 0
+                            ? `${Math.ceil(template.stageConfigs.length / 2)} weeks`
+                            : "Flexible"
 
-                            return (
-                              <div key={template.id} className="flex items-start space-x-3 p-1">
-                                <RadioGroupItem
-                                  value={template.id}
-                                  id={template.id}
-                                  className="mt-3"
-                                />
-                                <label
-                                  htmlFor={template.id}
-                                  className="flex flex-1 cursor-pointer rounded-xl border border-border hover:border-primary/50 hover:shadow-sm transition-all duration-200 p-4 [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary/5 [&:has([data-state=checked])]:shadow-md"
-                                >
-                                  <div className="flex flex-col w-full gap-3">
-                                    <div className="flex items-center justify-between">
-                                      <div className="font-semibold text-foreground">{template.templateName}</div>
-                                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                        <span className="bg-muted px-2 py-1 rounded-md">{totalStages} stages</span>
-                                        <span className="bg-muted px-2 py-1 rounded-md">{duration}</span>
-                                      </div>
-                                    </div>
-                                    {template.description && (
-                                      <p className="text-sm text-muted-foreground leading-relaxed">{template.description}</p>
-                                    )}
-                                    <div className="flex flex-wrap gap-2">
-                                      {instruments.map((instrument: string) => (
-                                        <Badge
-                                          key={instrument}
-                                          variant="outline"
-                                          className="text-xs px-2 py-1 border-muted-foreground/50"
-                                        >
-                                          {instrument.replace(/_/g, " ").toLowerCase()}
-                                        </Badge>
-                                      ))}
+                          return (
+                            <div key={template.id} className="flex items-center space-x-2">
+                              <RadioGroupItem value={template.id} id={template.id} />
+                              <label
+                                htmlFor={template.id}
+                                className="flex flex-1 cursor-pointer rounded-lg border p-3 hover:bg-muted/50 [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary/5"
+                              >
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <div className="font-medium">{template.templateName}</div>
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                      <span>{totalStages} stages</span>
+                                      <span>•</span>
+                                      <span>{duration}</span>
                                     </div>
                                   </div>
-                                </label>
-                              </div>
-                            )
-                          })}
-                        </div>
+                                  {template.description && (
+                                    <p className="text-sm text-muted-foreground mt-1">{template.description}</p>
+                                  )}
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {instruments.map((instrument: string) => (
+                                      <Badge key={instrument} variant="secondary" className="text-xs">
+                                        {instrument.replace(/_/g, " ")}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              </label>
+                            </div>
+                          )
+                        })
                       )}
                     </RadioGroup>
                   </FormControl>
@@ -669,6 +661,7 @@ type ProjectCardProps = {
   classId: string
   students: TeacherDashboardData["studentsByClass"][string] | []
   projectStatusOptions: readonly string[]
+  instrumentOptions: readonly string[]
   router: ReturnType<typeof useRouter>
 }
 
@@ -677,10 +670,10 @@ function ProjectCard({
   classId,
   students,
   projectStatusOptions,
+  instrumentOptions,
   router,
 }: ProjectCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [showDetailDialog, setShowDetailDialog] = useState(false)
   const [isStatusPending, startStatusTransition] = useTransition()
 
   const statusColors: Record<string, string> = {
@@ -714,40 +707,47 @@ function ProjectCard({
     })
   }
 
-  const displayStages = isExpanded ? project.stages : project.stages.slice(0, 2)
-  const hasMoreStages = !isExpanded && project.stages.length > 2
-
   return (
-    <div className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-all duration-200 bg-card">
+    <div className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
       {/* Project Header */}
-      <div className="p-3">
+      <div className="p-4 bg-card">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h4 className="font-semibold text-foreground text-sm truncate">{project.title}</h4>
-              {project.theme && (
-                <Badge variant="secondary" className="text-xs">
-                  {project.theme}
-                </Badge>
-              )}
+            <div className="flex items-center gap-3 mb-2">
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="p-1 hover:bg-muted rounded-md transition-colors"
+              >
+                {isExpanded ? (
+                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                )}
+              </button>
+              <div className="flex-1">
+                <h4 className="font-semibold text-foreground">{project.title}</h4>
+                {project.theme && (
+                  <p className="text-sm text-muted-foreground">Theme: {project.theme}</p>
+                )}
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground line-clamp-2">
+            <p className="text-sm text-muted-foreground ml-8">
               {project.description ?? "No description provided."}
             </p>
           </div>
 
-          <div className="flex items-center gap-2 ml-3 flex-shrink-0">
-            <Badge className={`${statusColors[project.status]} text-xs px-2 py-1`}>
+          <div className="flex items-center gap-2 ml-4">
+            <Badge className={statusColors[project.status]}>
               {statusIcons[project.status]}
               <span className="ml-1">{project.status}</span>
             </Badge>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   {isStatusPending ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <MoreHorizontal className="h-3 w-3" />
+                    <MoreHorizontal className="h-4 w-4" />
                   )}
                 </Button>
               </DropdownMenuTrigger>
@@ -767,25 +767,7 @@ function ProjectCard({
             </DropdownMenu>
           </div>
         </div>
-
-        {/* Quick Stats */}
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-          <div className="flex items-center gap-4 text-xs">
-            <div className="flex items-center gap-1">
-              <ListChecks className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">{project.stages.length} stages</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Users className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">{project.groups.length} groups</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Target className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">
-                {project.groups.reduce((acc, group) => acc + group.members.length, 0)} students
-              </span>
-            </div>
-          </div>
+      </div>
 
       {/* Expandable Content */}
       {isExpanded && (
@@ -808,9 +790,6 @@ function ProjectCard({
             </div>
           </div>
 
-      {/* Expandable Content */}
-      {isExpanded && (
-        <div className="border-t border-border bg-muted/30 p-3 space-y-4">
           <div className="flex gap-2">
             <EditProjectDialog project={project} classId={classId} router={router} />
             <DeleteProjectButton projectId={project.id} router={router} />
@@ -843,9 +822,6 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
   const [open, setOpen] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
-  const [showCreateStageDialog, setShowCreateStageDialog] = useState(false)
-  const [showEditStageDialog, setShowEditStageDialog] = useState(false)
-  const [selectedStage, setSelectedStage] = useState<typeof project.stages[number] | null>(null)
 
   const formSchema = useMemo(
     () =>
@@ -888,22 +864,6 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
     })
   }
 
-  const handleCreateStageSuccess = () => {
-    setShowCreateStageDialog(false)
-    router.refresh()
-  }
-
-  const handleEditStageSuccess = () => {
-    setShowEditStageDialog(false)
-    setSelectedStage(null)
-    router.refresh()
-  }
-
-  const handleEditStage = (stage: typeof project.stages[number]) => {
-    setSelectedStage(stage)
-    setShowEditStageDialog(true)
-  }
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -911,94 +871,54 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
           <Edit className="mr-2 h-4 w-4" /> Edit project
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Edit project</DialogTitle>
-          <DialogDescription>Update the project information and stages for this class.</DialogDescription>
+          <DialogDescription>Update the project information for this class.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Project title</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="theme"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Theme</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea rows={3} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-semibold">Project Stages</h4>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowCreateStageDialog(true)}
-                >
-                  <Plus className="mr-1 h-3 w-3" />
-                  Add Stage
-                </Button>
-              </div>
-
-              <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {project.stages.length === 0 ? (
-                  <div className="text-center py-4 text-sm text-muted-foreground border border-dashed border-border rounded">
-                    No stages yet. Click &quot;Add Stage&quot; to create one.
-                  </div>
-                ) : (
-                  project.stages.map((stage, index) => (
-                    <StageItem
-                      key={stage.id}
-                      stage={stage}
-                      project={project}
-                      index={index}
-                      totalStages={project.stages.length}
-                      instrumentOptions={["SELF_ASSESSMENT", "PEER_ASSESSMENT", "JOURNAL", "OBSERVATION"]}
-                      router={router}
-                      isCompact={true}
-                      onEdit={() => handleEditStage(stage)}
-                    />
-                  ))
-                )}
-              </div>
-            </div>
-
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project title</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="theme"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Theme</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea rows={4} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             {formError && <p className="text-sm text-destructive">{formError}</p>}
-            <div className="flex justify-end gap-2 pt-4 border-t">
+            <div className="flex justify-end gap-2">
               <Button
                 type="button"
                 variant="ghost"
@@ -1016,27 +936,6 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
           </form>
         </Form>
       </DialogContent>
-
-      {showCreateStageDialog && (
-        <CreateStageDialog
-          projectId={project.id}
-          router={router}
-          open={showCreateStageDialog}
-          onOpenChange={setShowCreateStageDialog}
-          onSuccess={handleCreateStageSuccess}
-        />
-      )}
-
-      {showEditStageDialog && selectedStage && (
-        <EditStageDialog
-          stage={selectedStage}
-          project={project}
-          router={router}
-          open={showEditStageDialog}
-          onOpenChange={setShowEditStageDialog}
-          onSuccess={handleEditStageSuccess}
-        />
-      )}
     </Dialog>
   )
 }
@@ -1144,8 +1043,6 @@ type StageItemProps = {
   totalStages: number
   instrumentOptions: readonly string[]
   router: ReturnType<typeof useRouter>
-  isCompact?: boolean
-  onEdit?: () => void
 }
 
 function StageItem({
@@ -1155,8 +1052,6 @@ function StageItem({
   totalStages,
   instrumentOptions,
   router,
-  isCompact = false,
-  onEdit,
 }: StageItemProps) {
   const [isDeleting, startDelete] = useTransition()
   const [isReordering, startReorder] = useTransition()
@@ -1205,40 +1100,6 @@ function StageItem({
     })
   }
 
-  if (isCompact) {
-    return (
-      <div className="rounded-lg border bg-muted/10 p-3">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-xs">Stage {index + 1}</Badge>
-              <h4 className="font-semibold text-sm">{stage.name}</h4>
-            </div>
-            {stage.description && (
-              <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-                {stage.description}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-1">
-            {onEdit ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onEdit}
-                className="h-7 w-7 p-0"
-              >
-                <Edit className="h-3 w-3" />
-              </Button>
-            ) : (
-              <EditStageDialog stage={stage} project={project} router={router} />
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="rounded-lg border bg-muted/10 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -1272,18 +1133,7 @@ function StageItem({
           >
             <ChevronDown className="h-4 w-4" />
           </Button>
-          {onEdit ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onEdit}
-              className="h-8 w-8 p-0"
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          ) : (
-            <EditStageDialog stage={stage} project={project} router={router} />
-          )}
+          <EditStageDialog stage={stage} project={project} router={router} />
           <StageInstrumentsDialog
             stage={stage}
             instrumentOptions={instrumentOptions}
@@ -1344,23 +1194,8 @@ function formatDate(value: string | null) {
   }
 }
 
-function CreateStageDialog({
-  projectId,
-  router,
-  open,
-  onOpenChange,
-  onSuccess
-}: {
-  projectId: string;
-  router: ReturnType<typeof useRouter>
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  onSuccess?: () => void
-}) {
-  const [internalOpen, setInternalOpen] = useState(false)
-  const isControlled = open !== undefined
-  const dialogOpen = isControlled ? open : internalOpen
-  const setDialogOpen = isControlled ? onOpenChange! : setInternalOpen
+function CreateStageDialog({ projectId, router }: { projectId: string; router: ReturnType<typeof useRouter> }) {
+  const [open, setOpen] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -1403,21 +1238,18 @@ function CreateStageDialog({
 
       toast.success("Stage created.")
       form.reset()
-      setDialogOpen(false)
-      onSuccess?.()
+      setOpen(false)
       router.refresh()
     })
   }
 
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      {!isControlled && (
-        <DialogTrigger asChild>
-          <Button size="sm" variant="outline">
-            <Plus className="mr-2 h-4 w-4" /> Add stage
-          </Button>
-        </DialogTrigger>
-      )}
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">
+          <Plus className="mr-2 h-4 w-4" /> Add stage
+        </Button>
+      </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Add stage</DialogTitle>
@@ -1483,7 +1315,7 @@ function CreateStageDialog({
             </div>
             {formError && <p className="text-sm text-destructive">{formError}</p>}
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)}>
+              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
@@ -1501,23 +1333,10 @@ type EditStageDialogProps = {
   stage: TeacherDashboardData["projects"][number]["stages"][number]
   project: TeacherDashboardData["projects"][number]
   router: ReturnType<typeof useRouter>
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  onSuccess?: () => void
 }
 
-function EditStageDialog({
-  stage,
-  project,
-  router,
-  open,
-  onOpenChange,
-  onSuccess
-}: EditStageDialogProps) {
-  const [internalOpen, setInternalOpen] = useState(false)
-  const isControlled = open !== undefined
-  const dialogOpen = isControlled ? open : internalOpen
-  const setDialogOpen = isControlled ? onOpenChange! : setInternalOpen
+function EditStageDialog({ stage, project, router }: EditStageDialogProps) {
+  const [open, setOpen] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -1560,21 +1379,18 @@ function EditStageDialog({
       }
 
       toast.success("Stage updated.")
-      setDialogOpen(false)
-      onSuccess?.()
+      setOpen(false)
       router.refresh()
     })
   }
 
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      {!isControlled && (
-        <DialogTrigger asChild>
-          <Button variant="outline" size="icon">
-            <Edit className="h-4 w-4" />
-          </Button>
-        </DialogTrigger>
-      )}
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="icon">
+          <Edit className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Edit stage</DialogTitle>
@@ -1637,7 +1453,7 @@ function EditStageDialog({
             </div>
             {formError && <p className="text-sm text-destructive">{formError}</p>}
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)}>
+              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
@@ -1772,6 +1588,52 @@ function instrumentDescription(instrument: string) {
   }
 }
 
+type ProjectGroupsSectionProps = {
+  project: TeacherDashboardData["projects"][number]
+  students: TeacherDashboardData["studentsByClass"][string] | []
+  router: ReturnType<typeof useRouter>
+}
+
+function ProjectGroupsSection({ project, students, router }: ProjectGroupsSectionProps) {
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-muted rounded-lg">
+            <Users className="h-5 w-5 text-foreground" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">Student Groups</h3>
+            <p className="text-sm text-muted-foreground">
+              Collaborative groups for project-based learning
+            </p>
+          </div>
+        </div>
+        <CreateGroupDialog projectId={project.id} router={router} />
+      </div>
+
+      {project.groups.length === 0 ? (
+        <div className="text-center py-6 border-2 border-dashed border-border rounded-lg bg-muted/50">
+          <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">No groups created yet</p>
+          <p className="text-xs text-muted-foreground mt-1">Create groups to organize students for collaboration</p>
+        </div>
+      ) : (
+        <div className="grid gap-3">
+          {project.groups.map((group) => (
+            <GroupCard
+              key={group.id}
+              group={group}
+              projectId={project.id}
+              students={students}
+              router={router}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
 
 function CreateGroupDialog({ projectId, router }: { projectId: string; router: ReturnType<typeof useRouter> }) {
   const [open, setOpen] = useState(false)
@@ -1881,8 +1743,8 @@ function EditGroupDialog({ group, projectId, router }: EditGroupDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Rename group">
-          <Edit className="h-3 w-3" />
+        <Button variant="outline" size="sm">
+          <Edit className="mr-2 h-4 w-4" /> Rename
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -1984,8 +1846,8 @@ function EditGroupMembersDialog({
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Manage members">
-          <Users className="h-3 w-3" />
+        <Button variant="outline" size="sm">
+          Manage members
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg">
@@ -2057,8 +1919,9 @@ function DeleteGroupButton({ groupId, router }: { groupId: string; router: Retur
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10" disabled={isPending} title="Delete group">
-          {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash className="h-3 w-3" />}
+        <Button variant="destructive" size="sm" disabled={isPending}>
+          {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash className="mr-2 h-4 w-4" />}
+          Delete
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
