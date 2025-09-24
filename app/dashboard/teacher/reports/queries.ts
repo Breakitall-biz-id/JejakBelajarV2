@@ -7,6 +7,7 @@ import {
   projectStages,
   projectStageProgress,
   submissions,
+  templateStageConfigs,
   userClassAssignments,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
@@ -119,13 +120,14 @@ export async function getTeacherReportData(teacher: CurrentUser): Promise<Teache
     ? await db
         .select({
           classId: projects.classId,
-          instrumentType: submissions.instrumentType,
+          instrumentType: templateStageConfigs.instrumentType,
           score: submissions.score,
           submittedAt: submissions.submittedAt,
         })
         .from(submissions)
+        .innerJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
         .innerJoin(projects, eq(submissions.projectId, projects.id))
-        .where(and(inArray(projects.id, projectIds), inArray(submissions.instrumentType, TEACHER_GRADED_INSTRUMENTS)))
+        .where(and(inArray(projects.id, projectIds), inArray(templateStageConfigs.instrumentType, TEACHER_GRADED_INSTRUMENTS)))
     : []
 
   const metricsMap = new Map<string, MetricsAccumulator>()
