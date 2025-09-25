@@ -21,8 +21,6 @@ export default async function TeacherReportsPage() {
       </div>
     )
   } catch (error) {
-    console.error('Error loading teacher reports:', error)
-
     return (
       <div className="space-y-6 px-4 pb-12 pt-6 lg:px-6">
         <div className="rounded-lg border border-dashed bg-muted/20 p-8 text-center">

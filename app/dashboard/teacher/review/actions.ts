@@ -166,7 +166,7 @@ function handleError(error: unknown, fallback: string): ActionResult {
     return { success: false, error: error.message }
   }
 
-  console.error(fallback, error)
+  // Error logging removed for production
   return { success: false, error: fallback }
 }
 
