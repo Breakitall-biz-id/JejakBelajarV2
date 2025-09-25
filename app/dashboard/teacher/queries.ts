@@ -288,7 +288,7 @@ export async function getTeacherDashboardData(
         acc[stage.projectId] = []
       }
 
-        const existingStageIndex = acc[stage.projectId].findIndex(s => s.name === stage.name)
+      const existingStageIndex = acc[stage.projectId].findIndex(s => s.name === stage.name)
 
       if (existingStageIndex >= 0) {
         const existingStage = acc[stage.projectId][existingStageIndex]
