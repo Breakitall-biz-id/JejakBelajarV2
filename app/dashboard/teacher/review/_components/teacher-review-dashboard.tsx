@@ -50,10 +50,10 @@ type TeacherReviewDashboardProps = {
 
 export function TeacherReviewDashboard({ teacher, data }: TeacherReviewDashboardProps) {
   const router = useRouter()
-  const defaultClassId = data.classes[0]?.id ?? ""
+  const defaultClassId = data.classes && data.classes.length > 0 ? data.classes[0]?.id ?? "" : ""
   const [selectedClass, setSelectedClass] = useState(defaultClassId)
 
-  if (data.classes.length === 0) {
+  if (!data.classes || !Array.isArray(data.classes) || data.classes.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <header className="border-b bg-card">
@@ -82,7 +82,7 @@ export function TeacherReviewDashboard({ teacher, data }: TeacherReviewDashboard
     )
   }
 
-  const classProjects = data.classProjects[selectedClass] ?? []
+  const classProjects = (data.classProjects && selectedClass) ? data.classProjects[selectedClass] ?? [] : []
 
   return (
     <div className="min-h-screen bg-background">
@@ -152,10 +152,7 @@ export function TeacherReviewDashboard({ teacher, data }: TeacherReviewDashboard
                         <Badge variant="outline">
                           {project.stages.length} stages
                         </Badge>
-                        <Badge variant="outline">
-                          {project.status}
-                        </Badge>
-                      </div>
+                        </div>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -233,14 +230,19 @@ type StageStudentsTableProps = {
 }
 
 function StageStudentsTable({ stage, projectId, teacher, router }: StageStudentsTableProps) {
-  if (stage.students.length === 0) {
-    return <p className="text-sm text-muted-foreground">No students enrolled in this class.</p>
-  }
-
   const studentRows = useMemo(
-    () => [...stage.students].sort((a, b) => (a.name ?? "").localeCompare(b.name ?? "")),
+    () => {
+      if (!stage.students || !Array.isArray(stage.students)) {
+        return []
+      }
+      return [...stage.students].sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))
+    },
     [stage.students],
   )
+
+  if (!stage.students || !Array.isArray(stage.students) || stage.students.length === 0) {
+    return <p className="text-sm text-muted-foreground">No students enrolled in this class.</p>
+  }
 
   return (
     <div className="space-y-4">
@@ -334,7 +336,7 @@ function StudentReviewPanel({ stage, student, projectId, router }: StudentReview
 
       <div className="p-6">
         <div className="space-y-4">
-          {currentStudent?.submissions.map((submission) => (
+          {currentStudent?.submissions && Array.isArray(currentStudent.submissions) && currentStudent.submissions.map((submission) => (
             <SubmissionFeedbackCard
               key={submission.id}
               submission={submission}
@@ -344,7 +346,7 @@ function StudentReviewPanel({ stage, student, projectId, router }: StudentReview
             />
           ))}
 
-          {(currentStudent?.submissions.length ?? 0) === 0 && (
+          {(!currentStudent?.submissions || !Array.isArray(currentStudent.submissions) || currentStudent.submissions.length === 0) && (
             <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/20 bg-muted/20 p-8 text-center text-muted-foreground">
               <AlertCircle className="h-5 w-5" />
               <span className="font-medium">No submissions yet for this stage.</span>
@@ -408,11 +410,16 @@ function SubmissionFeedbackCard({ submission, stage, studentId, router }: Submis
       })
 
       if (!result.success) {
-        if (result.fieldErrors) {
-          for (const [key, messages] of Object.entries(result.fieldErrors)) {
-            form.setError(key as keyof typeof values, {
-              message: messages?.[0] ?? result.error,
-            })
+        if (result.fieldErrors && typeof result.fieldErrors === 'object' && result.fieldErrors !== null) {
+          try {
+            const fieldErrors = result.fieldErrors as Record<string, string[]>
+            for (const [key, messages] of Object.entries(fieldErrors)) {
+              form.setError(key as keyof typeof values, {
+                message: messages?.[0] ?? result.error,
+              })
+            }
+          } catch (error) {
+            console.error('Error processing fieldErrors:', error)
           }
         }
 
