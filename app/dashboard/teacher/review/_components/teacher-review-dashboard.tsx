@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
 } from "@/components/ui/card"
-import { ProjectProgressBar } from "../../../student/_components/student-dashboard/project-progress-bar"
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
@@ -13,8 +12,29 @@ import { Badge } from "@/components/ui/badge"
 type TeacherProject = {
   id: string;
   title: string;
-  theme: string;
-  description?: string;
+  description: string | null;
+  theme: string | null;
+  status: string;
+  class: {
+    id: string;
+    name: string;
+    academicYear: string;
+    semester: string;
+  };
+  teacher: {
+    id: string | null;
+    name: string | null;
+    email: string | null;
+  };
+  group: {
+    id: string;
+    name: string;
+    members: Array<{
+      studentId: string;
+      name: string;
+      email: string;
+    }>;
+  } | null;
   stages: Array<{
     id: string;
     name: string;
@@ -22,20 +42,32 @@ type TeacherProject = {
     order: number;
     unlocksAt: string | null;
     dueAt: string | null;
-    status: string;
+    status: "LOCKED" | "IN_PROGRESS" | "COMPLETED";
     requiredInstruments: Array<{
       id: string;
       instrumentType: string;
       isRequired: boolean;
       description?: string | null;
     }>;
+    submissions: Array<{
+      id: string;
+      instrumentType: string;
+      content: unknown;
+      submittedAt: string;
+      score?: number | null;
+      feedback?: string | null;
+    }>;
     submissionsByInstrument: Record<string, unknown[]>;
     students: Array<{
       id: string;
       name: string;
-      groupName?: string;
-      groupId?: string;
-      progress: { status: string };
+      groupName?: string | null;
+      groupId?: string | null;
+      progress: {
+        status: string;
+        unlockedAt: string | null;
+        completedAt: string | null;
+      };
       submissions: Array<{
         id: string;
         instrumentType: string;
@@ -46,16 +78,42 @@ type TeacherProject = {
       }>;
     }>;
   }>;
-  group?: {
-    members: Array<{
-      studentId: string;
-      name: string;
-      email: string;
-    }>;
-  };
   currentStudentId?: string;
 };
 
+
+function ProjectProgressBar({ project }: { project: TeacherProject }) {
+  const groupedStages = React.useMemo(() => {
+    const map = new Map<string, typeof project.stages[number]>()
+    for (const stage of project.stages) {
+      if (!map.has(stage.name)) {
+        map.set(stage.name, stage)
+      } else {
+        const existing = map.get(stage.name)!
+        if (stage.order < existing.order) {
+          map.set(stage.name, stage)
+        }
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.order - b.order)
+  }, [project])
+
+  const totalStages = groupedStages.length
+  const completedStages = groupedStages.filter(s => s.status === "COMPLETED").length
+  const percent = totalStages === 0 ? 0 : Math.round((completedStages / totalStages) * 100)
+
+  return (
+    <div className="w-full mt-2">
+      <div className="flex justify-between text-xs mb-1">
+        <span>{percent}% selesai</span>
+        <span>{completedStages}/{totalStages} Tahapan</span>
+      </div>
+      <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+        <div className="h-2 bg-primary rounded-full transition-all" style={{ width: `${percent}%` }} />
+      </div>
+    </div>
+  )
+}
 
 function ProjectCard({ project, onNavigate }: { project: TeacherProject; onNavigate: () => void }) {
   const completedStages = project.stages.filter(stage =>
@@ -98,53 +156,40 @@ export function TeacherReviewDashboard({ data }: { data: TeacherReviewData }) {
   const [selectedClass, setSelectedClass] = React.useState(defaultClassId)
 
   const classProjects = (data.classProjects && selectedClass) ? data.classProjects[selectedClass] ?? [] : []
+  const selectedClassInfo = data.classes.find(c => c.id === selectedClass)
 
-  // Transform data to match student dashboard structure
   const teacherProjects: TeacherProject[] = classProjects.map(project => ({
     id: project.id,
     title: project.title,
     theme: project.title,
-    description: project.description,
+    description: null,
+    status: "IN_PROGRESS",
+    class: {
+      id: selectedClass,
+      name: selectedClassInfo?.name || "",
+      academicYear: "",
+      semester: ""
+    },
+    teacher: {
+      id: null,
+      name: null,
+      email: null
+    },
     stages: project.stages.map(stage => ({
       id: stage.id,
       name: stage.name,
       description: stage.description,
-      order: 0,
+      order: stage.order,
       unlocksAt: stage.unlocksAt?.toISOString() || null,
       dueAt: stage.dueAt?.toISOString() || null,
-      status: "IN_PROGRESS",
-      requiredInstruments: [
-        {
-          id: "journal",
-          instrumentType: "JOURNAL",
-          isRequired: true,
-          description: "Refleksi harian selama proses pengerjaan proyek"
-        },
-        {
-          id: "self",
-          instrumentType: "SELF_ASSESSMENT",
-          isRequired: true,
-          description: "Penilaian diri terhadap proses dan hasil belajar"
-        },
-        {
-          id: "peer",
-          instrumentType: "PEER_ASSESSMENT",
-          isRequired: true,
-          description: "Penilaian antar anggota kelompok"
-        },
-        {
-          id: "observation",
-          instrumentType: "OBSERVATION",
-          isRequired: true,
-          description: "Penilaian observasi oleh guru"
-        },
-        {
-          id: "daily",
-          instrumentType: "DAILY_NOTE",
-          isRequired: true,
-          description: "Catatan kemajuan harian"
-        }
-      ],
+      status: "IN_PROGRESS" as const,
+      requiredInstruments: stage.instruments.map(instrument => ({
+        id: instrument,
+        instrumentType: instrument,
+        isRequired: true,
+        description: null
+      })),
+      submissions: stage.students.flatMap(student => student.submissions),
       submissionsByInstrument: stage.students.reduce((acc, student) => {
         student.submissions.forEach(submission => {
           if (!acc[submission.instrumentType]) {
@@ -154,15 +199,26 @@ export function TeacherReviewDashboard({ data }: { data: TeacherReviewData }) {
         })
         return acc
       }, {} as Record<string, unknown[]>),
-      students: stage.students
+      students: stage.students.map(student => ({
+        id: student.id,
+        name: student.name || "",
+        groupName: student.groupName,
+        groupId: student.groupId,
+        progress: {
+          status: student.progress.status,
+          unlockedAt: student.progress.unlockedAt,
+          completedAt: student.progress.completedAt
+        },
+        submissions: student.submissions
+      }))
     })),
     group: {
+      id: "default-group",
+      name: "Default Group",
       members: []
-    }
+    },
+    currentStudentId: undefined
   }))
-
-  // Get selected class for display
-  const selectedClassInfo = data.classes.find(c => c.id === selectedClass)
 
   return (
     <div className="max-w-7xl mx-auto w-full px-2 sm:px-4 py-6">
@@ -183,11 +239,10 @@ export function TeacherReviewDashboard({ data }: { data: TeacherReviewData }) {
               <button
                 key={classInfo.id}
                 onClick={() => setSelectedClass(classInfo.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedClass === classInfo.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedClass === classInfo.id
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }`}
               >
                 {classInfo.name}
               </button>
