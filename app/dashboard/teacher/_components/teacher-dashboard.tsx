@@ -1077,7 +1077,7 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
               <div className="space-y-2 max-h-[300px] overflow-y-auto">
                 {project.stages.length === 0 ? (
                   <div className="text-center py-4 text-sm text-muted-foreground border border-dashed border-border rounded">
-                    No stages yet. Click "Add Stage" to create one.
+                    No stages yet. Click &quot;Add Stage&quot; to create one.
                   </div>
                 ) : (
                   project.stages.map((stage, index) => (
