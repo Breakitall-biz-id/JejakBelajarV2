@@ -194,49 +194,66 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
   const classProjects: TeacherReviewData["classProjects"] = {}
 
   for (const project of projectsRows) {
-    const stages = stageRows.filter((stage) => stage.projectId === project.id)
+    const stages = stageRows ? stageRows.filter((stage) => stage.projectId === project.id) : []
     const studentsInClass = classStudentRows
-      .filter((row) => row.classId === project.classId)
-      .map((row) => ({ id: row.studentId, name: row.studentName, email: row.studentEmail }))
+      ? classStudentRows
+        .filter((row) => row.classId === project.classId)
+        .map((row) => ({ id: row.studentId, name: row.studentName, email: row.studentEmail }))
+      : []
 
     const stageData = stages.map((stage) => {
       const instruments = instrumentRows
         .filter((instrument) => instrument.projectStageId === stage.id)
         .map((instrument) => instrument.instrumentType)
 
-      const students = studentsInClass.map((student) => {
-        const progress = progressRows.find(
-          (row) => row.projectStageId === stage.id && row.studentId === student.id,
-        )
+      const students = studentsInClass
+        .filter((student) => {
+          // Only show students who have either progress, submissions, or group membership for this project
+          const hasProgress = progressRows.some(
+            (row) => row.projectStageId === stage.id && row.studentId === student.id,
+          )
+          const hasSubmission = submissionRows.some(
+            (submission) => submission.projectStageId === stage.id && submission.studentId === student.id,
+          )
+          const hasGroupMembership = groupRows.some(
+            (group) => group.projectId === project.id && group.studentId === student.id,
+          )
 
-        const submissionsForStage = submissionRows.filter(
-          (submission) => submission.projectStageId === stage.id && submission.studentId === student.id,
-        )
+          return hasProgress || hasSubmission || hasGroupMembership
+        })
+        .map((student) => {
+          const progress = progressRows.find(
+            (row) => row.projectStageId === stage.id && row.studentId === student.id,
+          )
 
-        const groupMembership = groupRows.find(
-          (group) => group.projectId === project.id && group.studentId === student.id,
-        )
+          const submissionsForStage = submissionRows.filter(
+            (submission) => submission.projectStageId === stage.id && submission.studentId === student.id,
+          )
 
-        return {
-          id: student.id,
-          name: student.name,
-          groupId: groupMembership?.groupId ?? null,
-          groupName: groupMembership?.groupName ?? null,
-          progress: {
-            status: progress?.status ?? "LOCKED",
-            unlockedAt: progress?.unlockedAt?.toISOString() ?? null,
-            completedAt: progress?.completedAt?.toISOString() ?? null,
-          },
-          submissions: submissionsForStage.map((submission) => ({
-            id: submission.id,
-            instrumentType: submission.instrumentType,
-            content: submission.content,
-            score: submission.score,
-            feedback: submission.feedback,
-            submittedAt: submission.submittedAt ? submission.submittedAt.toISOString() : new Date().toISOString(),
-          })),
-        }
-      })
+          const groupMembership = groupRows.find(
+            (group) => group.projectId === project.id && group.studentId === student.id,
+          )
+
+          return {
+            id: student.id,
+            name: student.name,
+            groupId: groupMembership?.groupId ?? null,
+            groupName: groupMembership?.groupName ?? null,
+            progress: {
+              status: progress?.status ?? "LOCKED",
+              unlockedAt: progress?.unlockedAt?.toISOString() ?? null,
+              completedAt: progress?.completedAt?.toISOString() ?? null,
+            },
+            submissions: submissionsForStage.map((submission) => ({
+              id: submission.id,
+              instrumentType: submission.instrumentType,
+              content: submission.content,
+              score: submission.score,
+              feedback: submission.feedback,
+              submittedAt: submission.submittedAt ? submission.submittedAt.toISOString() : new Date().toISOString(),
+            })),
+          }
+        })
 
       return {
         id: stage.id,
