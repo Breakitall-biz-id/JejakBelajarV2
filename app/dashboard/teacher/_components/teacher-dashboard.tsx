@@ -58,6 +58,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import {
   Form,
   FormControl,
@@ -138,7 +139,7 @@ export function TeacherDashboard({
   }, [data.projects])
 
   const activeProjects = data.projects.filter(p => p.status === 'PUBLISHED').length
-  const totalStudents = Object.values(data.studentsByClass).reduce((acc, students) => acc + students.length, 0)
+  const totalStudents = data.studentsByClass ? Object.values(data.studentsByClass).reduce((acc, students) => acc + students.length, 0) : 0
   const totalClasses = data.classes.length
 
   return (
@@ -1232,6 +1233,9 @@ function ProjectDetailDialog({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-0" showCloseButton={false}>
+          <VisuallyHidden>
+            <DialogTitle>Project Details</DialogTitle>
+          </VisuallyHidden>
           {/* Header */}
           <div className="sticky top-0 bg-background border-b p-6">
             <div className="flex items-start justify-between">
@@ -1425,6 +1429,9 @@ function StageDetailDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto p-0" showCloseButton={false}>
+        <VisuallyHidden>
+          <DialogTitle>Stage Details</DialogTitle>
+        </VisuallyHidden>
         {/* Header */}
         <div className="sticky top-0 bg-background border-b p-5">
           <div className="flex items-start justify-between">
