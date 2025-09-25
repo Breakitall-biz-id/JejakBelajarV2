@@ -1,8 +1,10 @@
-import { and, eq, inArray } from "drizzle-orm"
+import { and, eq, inArray, isNotNull } from "drizzle-orm"
 
 import { db } from "@/db"
 import {
   classes,
+  groups,
+  groupMembers,
   projects,
   projectStages,
   projectStageProgress,
@@ -11,6 +13,7 @@ import {
   userClassAssignments,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
+import { user as targetStudent } from "@/db/schema/auth"
 import type { CurrentUser } from "@/lib/auth/session"
 
 export type TeacherReportData = {
@@ -28,6 +31,26 @@ export type TeacherReportData = {
       dailyNote: number | null
     }
     lastSubmissionAt: string | null
+  }>
+  peerAssessments: Array<{
+    id: string
+    projectId: string
+    stageId: string
+    projectTitle: string
+    stageName: string
+    groupName: string
+    className: string
+    members: Array<{
+      id: string
+      name: string
+    }>
+    submissions: Array<{
+      id: string
+      assessorName: string
+      targetStudentName: string
+      answers: number[]
+      submittedAt: string
+    }>
   }>
   generatedAt: string
 }
@@ -66,7 +89,7 @@ export async function getTeacherReportData(teacher: CurrentUser): Promise<Teache
     .orderBy(classes.name)
 
   if (classRows.length === 0) {
-    return { classes: [], generatedAt: new Date().toISOString() }
+    return { classes: [], peerAssessments: [], generatedAt: new Date().toISOString() }
   }
 
   const classIds = classRows.map((row) => row.classId)
@@ -77,7 +100,7 @@ export async function getTeacherReportData(teacher: CurrentUser): Promise<Teache
       classId: projects.classId,
     })
     .from(projects)
-    .where(and(eq(projects.teacherId, teacher.id), inArray(projects.classId, classIds)))
+    .where(inArray(projects.classId, classIds))
 
   const projectIds = projectsRows.map((row) => row.id)
 
@@ -237,8 +260,163 @@ export async function getTeacherReportData(teacher: CurrentUser): Promise<Teache
     }
   })
 
+  // Query peer assessment data - simplified approach
+  const peerAssessmentSubmissions = classIds.length > 0
+    ? await db
+        .select({
+          submissionId: submissions.id,
+          studentId: submissions.studentId,
+          targetStudentId: submissions.targetStudentId,
+          projectId: submissions.projectId,
+          projectStageId: submissions.projectStageId,
+          answers: submissions.content,
+          submittedAt: submissions.submittedAt,
+        })
+        .from(submissions)
+        .innerJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
+        .innerJoin(projectStages, eq(submissions.projectStageId, projectStages.id))
+        .innerJoin(projects, eq(submissions.projectId, projects.id))
+        .where(
+          and(
+            inArray(projects.classId, classIds),
+            eq(templateStageConfigs.instrumentType, "PEER_ASSESSMENT"),
+            isNotNull(submissions.targetStudentId)
+          )
+        )
+        .orderBy(projects.title, projectStages.name, submissions.submittedAt)
+    : []
+
+  // Get additional data for peer assessments
+  const peerAssessmentProjectIds = [...new Set(peerAssessmentSubmissions.map(s => s.projectId))]
+  const projectData = peerAssessmentProjectIds.length > 0
+    ? await db
+        .select({
+          id: projects.id,
+          title: projects.title,
+          classId: projects.classId,
+        })
+        .from(projects)
+        .where(inArray(projects.id, peerAssessmentProjectIds))
+    : []
+
+  const stageIds = [...new Set(peerAssessmentSubmissions.map(s => s.projectStageId).filter(Boolean))]
+  const stageData = stageIds.length > 0
+    ? await db
+        .select({
+          id: projectStages.id,
+          name: projectStages.name,
+        })
+        .from(projectStages)
+        .where(inArray(projectStages.id, stageIds as string[]))
+    : []
+
+  const userIds = [...new Set([
+    ...peerAssessmentSubmissions.map(s => s.studentId),
+    ...peerAssessmentSubmissions.map(s => s.targetStudentId).filter((id): id is string => Boolean(id))
+  ])]
+  const userData = userIds.length > 0
+    ? await db
+        .select({
+          id: user.id,
+          name: user.name,
+        })
+        .from(user)
+        .where(inArray(user.id, userIds))
+    : []
+
+  // Create lookup maps
+  const projectMap = new Map(projectData.map(p => [p.id, p]))
+  const stageMap = new Map(stageData.map(s => [s.id, s]))
+  const userMap = new Map(userData.map(u => [u.id, u]))
+
+  // Get class data
+  const classIdsSet = new Set(projectData.map(p => p.classId))
+  const classData = classIdsSet.size > 0
+    ? await db
+        .select({
+          id: classes.id,
+          name: classes.name,
+        })
+        .from(classes)
+        .where(inArray(classes.id, Array.from(classIdsSet)))
+    : []
+  const classMap = new Map(classData.map(c => [c.id, c]))
+
+  // Process peer assessment data
+  const peerAssessmentsMap = new Map<string, {
+    id: string
+    projectId: string
+    stageId: string
+    projectTitle: string
+    stageName: string
+    className: string
+    groupName: string
+    members: Array<{ id: string, name: string }>
+    submissions: Array<{
+      id: string
+      assessorName: string
+      targetStudentName: string
+      answers: number[]
+      submittedAt: string
+    }>
+  }>()
+
+  for (const submission of peerAssessmentSubmissions) {
+    const key = `${submission.projectId}-${submission.projectStageId}`
+
+    if (!peerAssessmentsMap.has(key)) {
+      const project = projectMap.get(submission.projectId)
+      const stage = stageMap.get(submission.projectStageId || "")
+      const projectClass = project ? classMap.get(project.classId) : undefined
+
+      // Get group members (simplified - assume all users in this project/stage are group members)
+      const members = userData
+        .filter(u => peerAssessmentSubmissions.some(s =>
+          s.projectId === submission.projectId &&
+          (s.studentId === u.id || s.targetStudentId === u.id)
+        ))
+        .map(u => ({ id: u.id, name: u.name || "" }))
+
+      peerAssessmentsMap.set(key, {
+        id: key,
+        projectId: submission.projectId,
+        stageId: submission.projectStageId || "",
+        projectTitle: project?.title || "Unknown Project",
+        stageName: stage?.name || "Unknown Stage",
+        className: projectClass?.name || "Unknown Class",
+        groupName: `Group ${key.slice(-4)}`,
+        members,
+        submissions: []
+      })
+    }
+
+    const assessment = peerAssessmentsMap.get(key)!
+    if (submission.answers && typeof submission.answers === 'object' && 'answers' in submission.answers && Array.isArray(submission.answers.answers)) {
+      assessment.submissions.push({
+        id: submission.submissionId,
+        assessorName: userMap.get(submission.studentId)?.name || "Unknown",
+        targetStudentName: userMap.get(submission.targetStudentId || "")?.name || "Unknown",
+        answers: submission.answers.answers,
+        submittedAt: submission.submittedAt.toISOString()
+      })
+    }
+  }
+
+  const peerAssessments = Array.from(peerAssessmentsMap.values()).map(assessment => ({
+    id: assessment.id,
+    projectId: assessment.projectId,
+    stageId: assessment.stageId,
+    projectTitle: assessment.projectTitle,
+    stageName: assessment.stageName,
+    groupName: assessment.groupName,
+    className: assessment.className,
+    members: assessment.members,
+    submissions: assessment.submissions
+  }))
+
   return {
     classes: reportClasses,
+    peerAssessments,
     generatedAt: new Date().toISOString(),
   }
 }

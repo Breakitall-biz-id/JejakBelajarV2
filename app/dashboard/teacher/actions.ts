@@ -31,6 +31,7 @@ import {
   projects,
   projectStatusEnum,
   projectTemplates,
+  submissions,
   templateStageConfigs,
   templateQuestions,
   userClassAssignments,
@@ -149,7 +150,7 @@ const handleError = (error: unknown, fallback: string): ActionResult => {
     return { success: false, error: "You are not allowed to perform this action." }
   }
 
-  console.error(fallback, error)
+  // Error logging removed for production
   return { success: false, error: fallback }
 }
 
@@ -978,7 +979,276 @@ export async function getProjectTemplates(): Promise<ProjectTemplate[]> {
       stageConfigs: configsByTemplate[template.id] || [],
     }))
   } catch (error) {
-    console.error("Error fetching project templates:", error)
+    // Error logging removed for production
     throw error
+  }
+}
+
+// Teacher Report submission - similar to peer assessment but for teachers
+const teacherReportSchema = z.object({
+  projectId: z.string().uuid(),
+  stageId: z.string().uuid(),
+  instrumentType: z.enum(["OBSERVATION"]),
+  content: z.object({ answers: z.array(z.number().min(1).max(4)).min(1) }),
+  targetStudentId: z.string().uuid().optional().nullable(),
+})
+
+export async function submitTeacherReport(
+  values: z.input<typeof teacherReportSchema>,
+): Promise<ActionResult> {
+  const parsed = teacherReportSchema.safeParse(values)
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Please review your submission.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    }
+  }
+
+  const { projectId, stageId, instrumentType, content, targetStudentId } = parsed.data
+
+  try {
+    const teacher = await requireTeacherUser()
+
+    await db.transaction(async (tx) => {
+      const projectRecord = await tx
+        .select({
+          id: projects.id,
+          classId: projects.classId,
+          status: projects.status,
+        })
+        .from(projects)
+        .where(eq(projects.id, projectId))
+        .limit(1)
+        .then((rows) => rows[0])
+
+      if (!projectRecord || projectRecord.status !== "PUBLISHED") {
+        throw new ForbiddenError("Project not available.")
+      }
+
+      // Verify teacher teaches this class
+      const classAssignment = await tx
+        .select({ userId: userClassAssignments.userId })
+        .from(userClassAssignments)
+        .where(
+          and(
+            eq(userClassAssignments.userId, teacher.user.id),
+            eq(userClassAssignments.classId, projectRecord.classId),
+          ),
+        )
+        .limit(1)
+        .then((rows) => rows[0])
+
+      if (!classAssignment) {
+        throw new ForbiddenError("You are not assigned to this project.")
+      }
+
+      const stageRecord = await tx
+        .select({
+          id: projectStages.id,
+          projectId: projectStages.projectId,
+          order: projectStages.order,
+          name: projectStages.name,
+        })
+        .from(projectStages)
+        .where(
+          and(
+            eq(projectStages.id, stageId),
+            eq(projectStages.projectId, projectId),
+          ),
+        )
+        .limit(1)
+        .then((rows) => rows[0])
+
+      if (!stageRecord) {
+        throw new ForbiddenError("Stage not found.")
+      }
+
+      // Verify student is in this project's class
+      if (targetStudentId) {
+        const studentInClass = await tx
+          .select({ userId: userClassAssignments.userId })
+          .from(userClassAssignments)
+          .where(
+            and(
+              eq(userClassAssignments.userId, targetStudentId),
+              eq(userClassAssignments.classId, projectRecord.classId),
+            ),
+          )
+          .limit(1)
+          .then((rows) => rows[0])
+
+        if (!studentInClass) {
+          throw new ForbiddenError("Student not found in this class.")
+        }
+      }
+
+      const templateConfig = await tx
+        .select({ id: templateStageConfigs.id })
+        .from(templateStageConfigs)
+        .innerJoin(projects, eq(templateStageConfigs.templateId, projects.templateId))
+        .innerJoin(projectStages, eq(projects.id, projectStages.projectId))
+        .where(
+          and(
+            eq(projectStages.id, stageId),
+            eq(templateStageConfigs.instrumentType, instrumentType),
+          ),
+        )
+        .limit(1)
+        .then((rows) => rows[0])
+
+      if (!templateConfig) {
+        throw new ForbiddenError("Instrument configuration not found for this stage.")
+      }
+
+      const existingSubmission = await tx
+        .select({ id: submissions.id })
+        .from(submissions)
+        .where(
+          and(
+            eq(submissions.studentId, teacher.user.id),
+            eq(submissions.projectId, projectId),
+            eq(submissions.projectStageId, stageId),
+            eq(submissions.templateStageConfigId, templateConfig.id),
+            ...(targetStudentId ? [eq(submissions.targetStudentId, targetStudentId)] : []),
+          ),
+        )
+        .limit(1)
+        .then((rows) => rows[0])
+
+      if (existingSubmission) {
+        await tx
+          .update(submissions)
+          .set({
+            content,
+            submittedAt: new Date(),
+            targetStudentId: targetStudentId ?? null,
+            updatedAt: new Date(),
+          })
+          .where(eq(submissions.id, existingSubmission.id))
+      } else {
+        await tx.insert(submissions).values({
+          studentId: teacher.user.id,
+          projectId,
+          projectStageId: stageId,
+          templateStageConfigId: templateConfig.id,
+          content,
+          targetStudentId: targetStudentId ?? null,
+        })
+      }
+    })
+
+    return { success: true }
+  } catch (error) {
+    return handleError(error, "Unable to save your teacher report.")
+  }
+}
+
+export async function getStudentsByClass(classId: string) {
+  try {
+    const teacher = await requireTeacherUser()
+
+    // Verify teacher has access to this class
+    const classAssignment = await db.query.userClassAssignments.findFirst({
+      where: and(
+        eq(userClassAssignments.userId, teacher.user.id),
+        eq(userClassAssignments.classId, classId)
+      )
+    })
+
+    if (!classAssignment) {
+      throw new ForbiddenError("You don't have access to this class")
+    }
+
+    // Fetch students for this class
+    const students = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      })
+      .from(userClassAssignments)
+      .innerJoin(user, eq(userClassAssignments.userId, user.id))
+      .where(
+        and(
+          eq(userClassAssignments.classId, classId),
+          eq(user.role, "STUDENT")
+        )
+      )
+      .orderBy(asc(user.name))
+
+    return { success: true, data: students }
+  } catch (error) {
+    return handleError(error, "Unable to fetch students.")
+  }
+}
+
+export async function getGroupsWithMembers(classId: string) {
+  try {
+    const teacher = await requireTeacherUser()
+
+    // Verify teacher has access to this class
+    const classAssignment = await db.query.userClassAssignments.findFirst({
+      where: and(
+        eq(userClassAssignments.userId, teacher.user.id),
+        eq(userClassAssignments.classId, classId)
+      )
+    })
+
+    if (!classAssignment) {
+      throw new ForbiddenError("You don't have access to this class")
+    }
+
+    // Fetch groups with their members for this class
+    const groupData = await db
+      .select({
+        groupId: groups.id,
+        groupName: groups.name,
+        projectId: projects.id,
+        projectTitle: projects.title,
+        studentId: user.id,
+        studentName: user.name,
+        studentEmail: user.email,
+      })
+      .from(groups)
+      .innerJoin(projects, eq(groups.projectId, projects.id))
+      .innerJoin(groupMembers, eq(groups.id, groupMembers.groupId))
+      .innerJoin(user, eq(groupMembers.studentId, user.id))
+      .where(
+        and(
+          eq(projects.classId, classId),
+          eq(user.role, "STUDENT")
+        )
+      )
+      .orderBy(asc(groups.name), asc(user.name))
+
+    // Transform the flat data into grouped structure
+    const groupsMap = new Map()
+
+    for (const row of groupData) {
+      if (!groupsMap.has(row.groupId)) {
+        groupsMap.set(row.groupId, {
+          id: row.groupId,
+          name: row.groupName,
+          projectId: row.projectId,
+          projectTitle: row.projectTitle,
+          members: []
+        })
+      }
+
+      groupsMap.get(row.groupId).members.push({
+        id: row.studentId,
+        name: row.studentName || row.studentEmail || 'Unknown Student',
+        email: row.studentEmail
+      })
+    }
+
+    return {
+      success: true,
+      data: Array.from(groupsMap.values())
+    }
+  } catch (error) {
+    return handleError(error, "Unable to fetch groups.")
   }
 }

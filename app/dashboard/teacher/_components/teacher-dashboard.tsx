@@ -426,7 +426,7 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
       const templateData = await getProjectTemplates()
       setTemplates(templateData)
     } catch (error) {
-      console.error("Failed to load templates:", error)
+      // Error logging removed for production
       setFormError("Failed to load project templates")
     } finally {
       setIsLoadingTemplates(false)
@@ -1730,7 +1730,7 @@ function formatDate(value: string | null) {
   try {
     return new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(value))
   } catch (error) {
-    console.warn("Unable to format date", value, error)
+    // Date formatting error removed for production
     return value
   }
 }
