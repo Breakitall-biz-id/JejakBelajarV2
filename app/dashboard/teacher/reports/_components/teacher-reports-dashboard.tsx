@@ -1,7 +1,7 @@
 "use client"
 
-import { useMemo, type ComponentType, type SVGProps } from "react"
-import { Download, LineChart, Users, Layers3 } from "lucide-react"
+import { useMemo, useState } from "react"
+import { Download, Users, BookOpen, Target, TrendingUp, Search } from "lucide-react"
 
 import type { TeacherReportData } from "../queries"
 import {
@@ -21,19 +21,31 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 type TeacherReportsDashboardProps = {
   data: TeacherReportData
 }
 
 export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedClass, setSelectedClass] = useState<string>("all")
+  const [selectedAssignment, setSelectedAssignment] = useState<string>("all")
+
   const aggregate = useMemo(() => {
     if (!data?.classes || !Array.isArray(data.classes) || data.classes.length === 0) {
       return {
         totalStudents: 0,
         totalProjects: 0,
         averageCompletion: 0,
+        averageGrade: 0,
         latestSubmissionAt: null as string | null,
       }
     }
@@ -42,6 +54,18 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
     const totalProjects = data.classes.reduce((acc, item) => acc + (item.totalProjects || 0), 0)
     const averageCompletion = Math.round(
       data.classes.reduce((acc, item) => acc + (item.completionRate || 0), 0) / data.classes.length,
+    )
+
+    const averageGrade = Math.round(
+      data.classes.reduce((acc, item) => {
+        const scores = [
+          item.averageScores?.observation || 0,
+          item.averageScores?.journal || 0,
+          item.averageScores?.dailyNote || 0
+        ].filter(score => score > 0)
+        const avgScore = scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / scores.length : 0
+        return acc + avgScore
+      }, 0) / data.classes.length
     )
 
     const latestSubmissionAt = data.classes
@@ -54,158 +78,267 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
       totalStudents,
       totalProjects,
       averageCompletion,
+      averageGrade,
       latestSubmissionAt,
     }
   }, [data?.classes])
 
+  const filteredClasses = useMemo(() => {
+    if (!data?.classes) return []
+
+    return data.classes.filter(cls => {
+      const matchesSearch = cls.name.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesClass = selectedClass === "all" || cls.id === selectedClass
+      return matchesSearch && matchesClass
+    })
+  }, [data?.classes, searchTerm, selectedClass])
+
   return (
     <div className="space-y-6">
-      <Card className="border-muted/70 shadow-sm">
-        <CardHeader className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <CardTitle>Performance Snapshot</CardTitle>
-            <CardDescription>
-              Overview of facilitation coverage and assessment progress across your classes.
-            </CardDescription>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <a href="/api/teacher/reports?type=summary" download>
-                <Download className="mr-2 h-4 w-4" /> Download summary CSV
-              </a>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <a href="/api/teacher/reports?type=student" download>
-                <Download className="mr-2 h-4 w-4" /> Download student detail
-              </a>
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-3">
-          <StatTile icon={Users} label="Total students" value={aggregate.totalStudents?.toString() || '0'} helper="Across all assigned classes" />
-          <StatTile icon={Layers3} label="Projects in flight" value={aggregate.totalProjects?.toString() || '0'} helper="Draft and published projects" />
-          <StatTile
-            icon={LineChart}
-            label="Avg. stage completion"
-            value={`${aggregate.averageCompletion?.toString() || '0'}%`}
-            helper="Completed stage assignments"
-          />
-        </CardContent>
-        {aggregate.latestSubmissionAt && (
-          <div className="border-t border-muted/60 bg-muted/20 px-6 py-3 text-xs text-muted-foreground">
-            Last submission received on {new Date(aggregate.latestSubmissionAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
-          </div>
-        )}
-      </Card>
-
-      <Card className="border-muted/70 shadow-sm">
-        <CardHeader>
-          <CardTitle>Class progress overview</CardTitle>
-          <CardDescription>Monitor completion rates and scoring trends for each class you facilitate.</CardDescription>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
-          {!data?.classes || !Array.isArray(data.classes) || data.classes.length === 0 ? (
-            <div className="rounded-lg border border-dashed bg-muted/20 p-8 text-center text-sm text-muted-foreground">
-              No classes assigned yet. Once your administrator links you to a class, assessment analytics will appear here.
-            </div>
-          ) : (
-            <Table className="min-w-[720px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Class</TableHead>
-                  <TableHead>Students</TableHead>
-                  <TableHead>Projects</TableHead>
-                  <TableHead>Stages</TableHead>
-                  <TableHead>Completion</TableHead>
-                  <TableHead>Observation avg.</TableHead>
-                  <TableHead>Reflection avg.</TableHead>
-                  <TableHead>Daily note avg.</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.classes.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex flex-col">
-                        <span>{item.name || 'Unknown Class'}</span>
-                        <span className="text-xs text-muted-foreground">{item.totalStages || 0} stages configured</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{item.totalStudents || 0}</TableCell>
-                    <TableCell>{item.totalProjects || 0}</TableCell>
-                    <TableCell>{item.totalStages || 0}</TableCell>
-                    <TableCell>
-                      <Badge variant={(item.completionRate || 0) >= 75 ? "default" : "secondary"}>{item.completionRate || 0}%</Badge>
-                    </TableCell>
-                    <TableCell>{formatScore(item.averageScores?.observation)}</TableCell>
-                    <TableCell>{formatScore(item.averageScores?.journal)}</TableCell>
-                    <TableCell>{formatScore(item.averageScores?.dailyNote)}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={`/api/teacher/reports?type=student&classId=${item.id}`} download>
-                          <Download className="mr-2 h-4 w-4" /> Detail CSV
-                        </a>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="border-muted/70 shadow-sm">
-        <CardHeader>
-          <CardTitle>How to use these exports</CardTitle>
-          <CardDescription>Share progress updates with stakeholders or import results into analytics tools.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <div>
-            <strong>Summary CSV</strong> &mdash; class-level overview covering student counts, configured stages, and average teacher-scored instruments.
-          </div>
-          <Separator />
-          <div>
-            <strong>Student detail CSV</strong> &mdash; row-per-student export including stage status, group membership, and instrument feedback for deeper analysis.
-          </div>
-          <Separator />
-          <div>
-            Tip: combine these exports with spreadsheets or BI dashboards to track trends across semesters.
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-type StatTileProps = {
-  icon: ComponentType<SVGProps<SVGSVGElement>>
-  label: string
-  value: string
-  helper: string
-}
-
-function StatTile({ icon: Icon, label, value, helper }: StatTileProps) {
-  return (
-    <div className="rounded-lg border bg-muted/20 p-4">
-      <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <Icon className="h-5 w-5" />
-        </span>
-        <div className="space-y-1">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">{label}</p>
-          <p className="text-2xl font-semibold leading-tight">{value}</p>
-          <p className="text-xs text-muted-foreground">{helper}</p>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Grades</h1>
+          <p className="text-muted-foreground">
+            Track student progress and assignment completion across all your classes
+          </p>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <a href="/api/teacher/reports?type=summary" download>
+              <Download className="mr-2 h-4 w-4" />
+              Export Summary
+            </a>
+          </Button>
+          <Button size="sm" asChild>
+            <a href="/api/teacher/reports?type=student" download>
+              <Download className="mr-2 h-4 w-4" />
+              Export All Grades
+            </a>
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{aggregate.totalStudents}</div>
+            <p className="text-xs text-muted-foreground">Across all classes</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Assignments</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{aggregate.totalProjects}</div>
+            <p className="text-xs text-muted-foreground">Projects and stages</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Average Grade</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{aggregate.averageGrade.toFixed(1)}</div>
+            <p className="text-xs text-muted-foreground">Out of 4.0 scale</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{aggregate.averageCompletion}%</div>
+            <p className="text-xs text-muted-foreground">Average completion</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Content */}
+      <div className="space-y-4">
+        {/* Tabs removed - only showing classes overview */}
+
+        {/* Classes Overview */}
+          {/* Filters */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search classes..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Select value={selectedClass} onValueChange={setSelectedClass}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="All classes" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Classes</SelectItem>
+                    {data?.classes?.map((cls) => (
+                      <SelectItem key={cls.id} value={cls.id}>
+                        {cls.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Classes Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Class Overview</CardTitle>
+              <CardDescription>
+                Monitor progress and performance for each class
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!filteredClasses.length ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No classes found matching your search criteria.
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Class Name</TableHead>
+                        <TableHead>Students</TableHead>
+                        <TableHead>Projects</TableHead>
+                        <TableHead>Avg. Grade</TableHead>
+                        <TableHead>Completion</TableHead>
+                        <TableHead>Last Activity</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredClasses.map((cls) => (
+                        <TableRow key={cls.id}>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{cls.name}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {cls.totalStages} stages configured
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Users className="h-4 w-4 text-muted-foreground" />
+                              {cls.totalStudents}
+                            </div>
+                          </TableCell>
+                          <TableCell>{cls.totalProjects}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">
+                                {calculateOverallGrade(cls.averageScores).toFixed(1)}
+                              </span>
+                              <GradeBadge grade={calculateOverallGrade(cls.averageScores)} />
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className="w-full bg-muted rounded-full h-2">
+                                <div
+                                  className="bg-primary h-2 rounded-full transition-all"
+                                  style={{ width: `${cls.completionRate}%` }}
+                                />
+                              </div>
+                              <span className="text-sm font-medium min-w-fit">
+                                {cls.completionRate}%
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {cls.lastSubmissionAt ? (
+                              <div className="text-sm">
+                                {new Date(cls.lastSubmissionAt).toLocaleDateString()}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground text-sm">No activity</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button variant="outline" size="sm" asChild>
+                                <a href={`/api/teacher/reports?type=student&classId=${cls.id}`} download>
+                                  <Download className="mr-2 h-4 w-4" />
+                                  Grades
+                                </a>
+                              </Button>
+                              <Button size="sm" asChild>
+                                <a href={`/dashboard/teacher/reports/${cls.id}`}>
+                                  View Details
+                                </a>
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
       </div>
     </div>
   )
 }
 
-function formatScore(value: number | null | undefined) {
-  if (value === null || value === undefined || Number.isNaN(value)) {
-    return "—"
+function calculateOverallGrade(scores: { observation?: number | null; journal?: number | null; dailyNote?: number | null }) {
+  const validScores = [
+    scores.observation || 0,
+    scores.journal || 0,
+    scores.dailyNote || 0
+  ].filter(score => score > 0)
+
+  return validScores.length > 0
+    ? validScores.reduce((sum, score) => sum + score, 0) / validScores.length
+    : 0
+}
+
+function GradeBadge({ grade }: { grade: number }) {
+  let variant: "default" | "secondary" | "destructive" = "secondary"
+  let label = ""
+
+  if (grade >= 3.5) {
+    variant = "default"
+    label = "Excellent"
+  } else if (grade >= 3.0) {
+    variant = "default"
+    label = "Good"
+  } else if (grade >= 2.0) {
+    variant = "secondary"
+    label = "Satisfactory"
+  } else if (grade > 0) {
+    variant = "destructive"
+    label = "Needs Improvement"
   }
-  return `${value.toFixed(1)}`
+
+  if (!label) return null
+
+  return (
+    <Badge variant={variant} className="text-xs">
+      {label}
+    </Badge>
+  )
 }
