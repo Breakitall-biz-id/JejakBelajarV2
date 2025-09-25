@@ -11,11 +11,25 @@ export const metadata: Metadata = {
 
 export default async function TeacherReportsPage() {
   const session = await requireTeacherUser()
-  const data = await getTeacherReportData(session.user)
 
-  return (
-    <div className="space-y-6 px-4 pb-12 pt-6 lg:px-6">
-      <TeacherReportsDashboard data={data} />
-    </div>
-  )
+  try {
+    const data = await getTeacherReportData(session.user)
+
+    return (
+      <div className="space-y-6 px-4 pb-12 pt-6 lg:px-6">
+        <TeacherReportsDashboard data={data || { classes: [], generatedAt: new Date().toISOString() }} />
+      </div>
+    )
+  } catch (error) {
+    console.error('Error loading teacher reports:', error)
+
+    return (
+      <div className="space-y-6 px-4 pb-12 pt-6 lg:px-6">
+        <div className="rounded-lg border border-dashed bg-muted/20 p-8 text-center">
+          <h3 className="text-lg font-semibold mb-2">Unable to load reports</h3>
+          <p className="text-sm text-muted-foreground">There was an error loading the report data. Please try again later.</p>
+        </div>
+      </div>
+    )
+  }
 }

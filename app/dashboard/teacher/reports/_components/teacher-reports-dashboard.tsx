@@ -29,7 +29,7 @@ type TeacherReportsDashboardProps = {
 
 export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) {
   const aggregate = useMemo(() => {
-    if (data.classes.length === 0) {
+    if (!data?.classes || !Array.isArray(data.classes) || data.classes.length === 0) {
       return {
         totalStudents: 0,
         totalProjects: 0,
@@ -38,10 +38,10 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
       }
     }
 
-    const totalStudents = data.classes.reduce((acc, item) => acc + item.totalStudents, 0)
-    const totalProjects = data.classes.reduce((acc, item) => acc + item.totalProjects, 0)
+    const totalStudents = data.classes.reduce((acc, item) => acc + (item.totalStudents || 0), 0)
+    const totalProjects = data.classes.reduce((acc, item) => acc + (item.totalProjects || 0), 0)
     const averageCompletion = Math.round(
-      data.classes.reduce((acc, item) => acc + item.completionRate, 0) / data.classes.length,
+      data.classes.reduce((acc, item) => acc + (item.completionRate || 0), 0) / data.classes.length,
     )
 
     const latestSubmissionAt = data.classes
@@ -56,7 +56,7 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
       averageCompletion,
       latestSubmissionAt,
     }
-  }, [data.classes])
+  }, [data?.classes])
 
   return (
     <div className="space-y-6">
@@ -82,12 +82,12 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
           </div>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-3">
-          <StatTile icon={Users} label="Total students" value={aggregate.totalStudents.toString()} helper="Across all assigned classes" />
-          <StatTile icon={Layers3} label="Projects in flight" value={aggregate.totalProjects.toString()} helper="Draft and published projects" />
+          <StatTile icon={Users} label="Total students" value={aggregate.totalStudents?.toString() || '0'} helper="Across all assigned classes" />
+          <StatTile icon={Layers3} label="Projects in flight" value={aggregate.totalProjects?.toString() || '0'} helper="Draft and published projects" />
           <StatTile
             icon={LineChart}
             label="Avg. stage completion"
-            value={`${aggregate.averageCompletion}%`}
+            value={`${aggregate.averageCompletion?.toString() || '0'}%`}
             helper="Completed stage assignments"
           />
         </CardContent>
@@ -104,7 +104,7 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
           <CardDescription>Monitor completion rates and scoring trends for each class you facilitate.</CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-          {data.classes.length === 0 ? (
+          {!data?.classes || !Array.isArray(data.classes) || data.classes.length === 0 ? (
             <div className="rounded-lg border border-dashed bg-muted/20 p-8 text-center text-sm text-muted-foreground">
               No classes assigned yet. Once your administrator links you to a class, assessment analytics will appear here.
             </div>
@@ -128,19 +128,19 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">
                       <div className="flex flex-col">
-                        <span>{item.name}</span>
-                        <span className="text-xs text-muted-foreground">{item.totalStages} stages configured</span>
+                        <span>{item.name || 'Unknown Class'}</span>
+                        <span className="text-xs text-muted-foreground">{item.totalStages || 0} stages configured</span>
                       </div>
                     </TableCell>
-                    <TableCell>{item.totalStudents}</TableCell>
-                    <TableCell>{item.totalProjects}</TableCell>
-                    <TableCell>{item.totalStages}</TableCell>
+                    <TableCell>{item.totalStudents || 0}</TableCell>
+                    <TableCell>{item.totalProjects || 0}</TableCell>
+                    <TableCell>{item.totalStages || 0}</TableCell>
                     <TableCell>
-                      <Badge variant={item.completionRate >= 75 ? "default" : "secondary"}>{item.completionRate}%</Badge>
+                      <Badge variant={(item.completionRate || 0) >= 75 ? "default" : "secondary"}>{item.completionRate || 0}%</Badge>
                     </TableCell>
-                    <TableCell>{formatScore(item.averageScores.observation)}</TableCell>
-                    <TableCell>{formatScore(item.averageScores.journal)}</TableCell>
-                    <TableCell>{formatScore(item.averageScores.dailyNote)}</TableCell>
+                    <TableCell>{formatScore(item.averageScores?.observation)}</TableCell>
+                    <TableCell>{formatScore(item.averageScores?.journal)}</TableCell>
+                    <TableCell>{formatScore(item.averageScores?.dailyNote)}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="outline" size="sm" asChild>
                         <a href={`/api/teacher/reports?type=student&classId=${item.id}`} download>
@@ -203,8 +203,8 @@ function StatTile({ icon: Icon, label, value, helper }: StatTileProps) {
   )
 }
 
-function formatScore(value: number | null) {
-  if (value === null || Number.isNaN(value)) {
+function formatScore(value: number | null | undefined) {
+  if (value === null || value === undefined || Number.isNaN(value)) {
     return "—"
   }
   return `${value.toFixed(1)}`
