@@ -60,7 +60,8 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
     open: boolean
     stageName?: string
     instrumentId?: string
-    initialValue?: number[]
+    statements?: string[]
+    initialValue?: number[][]
   }>({ open: false })
   const [globalLoading, setGlobalLoading] = React.useState(false)
 
@@ -237,14 +238,15 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
                           open: true,
                           stageName: stage.name,
                           instrumentId: ins.id,
+                          statements: ins.questions?.map((q: { questionText: string }) => q.questionText) || ["Teman saya menunjukkan sikap menghargai saat mendengarkan pendapat teman kelompok."],
                           initialValue: (() => {
                             const submission: Submission | undefined = ((stage.submissionsByInstrument[ins.instrumentType] || []) as Submission[])[0]
                             if (
                               submission?.content &&
                               typeof submission.content === "object" &&
-                              Array.isArray((submission.content as { answers: number[] }).answers)
+                              Array.isArray((submission.content as { answers: number[][] }).answers)
                             ) {
-                              return (submission.content as { answers: number[] }).answers
+                              return (submission.content as { answers: number[][] }).answers
                             }
                             return undefined
                           })()
@@ -337,6 +339,7 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
         onOpenChange={open => setPeerDialog(peerDialog => ({ ...peerDialog, open }))}
         members={(project.group?.members || []).map(m => ({ id: m.studentId, name: m.name || m.email }))}
         currentUserId={project.currentStudentId}
+        statements={peerDialog.statements || ["Teman saya menunjukkan sikap menghargai saat mendengarkan pendapat teman kelompok."]}
         initialValue={peerDialog.initialValue}
         projectId={project.id}
         stageId={(() => {
@@ -350,7 +353,6 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
           const submission = stage?.submissionsByInstrument[instrument?.instrumentType || ""]?.[0]
           return !!submission
         })()}
-        prompt="Teman saya menunjukkan sikap menghargai saat mendengarkan pendapat teman kelompok."
         onSubmitSuccess={async () => {
           setGlobalLoading(true)
           await new Promise(res => setTimeout(res, 300))

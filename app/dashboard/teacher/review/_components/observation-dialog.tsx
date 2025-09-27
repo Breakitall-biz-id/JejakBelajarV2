@@ -16,7 +16,7 @@ const SCALE = [
 
 export interface ObservationMember {
   id: string
-  name: string
+  name: string | null
 }
 
 export type ObservationDialogProps = {
@@ -88,7 +88,7 @@ export function ObservationDialog({
           targetStudentId: member.id,
         })
         if (!result.success) {
-          setError(result.error || `Gagal menyimpan penilaian untuk ${member.name}`)
+          setError(result.error || `Gagal menyimpan penilaian untuk ${member.name || "siswa"}`)
           setIsSubmitting(false)
           return
         }
@@ -117,7 +117,7 @@ export function ObservationDialog({
         <div className="flex flex-col gap-4 py-2">
           {filteredMembers.map((member, idx) => (
             <div key={member.id} className="rounded-lg border p-3 flex flex-col gap-2 bg-muted/40">
-              <div className="font-semibold text-foreground text-base mb-1">{member.name}</div>
+              <div className="font-semibold text-foreground text-base mb-1">{member.name || "Unknown Student"}</div>
                 <RadioGroup
                   value={answers[idx] ? String(answers[idx]) : undefined}
                   onValueChange={val => handleChange(idx, Number(val))}

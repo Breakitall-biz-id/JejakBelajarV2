@@ -23,7 +23,8 @@ export type PeerAssessmentDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   members: PeerAssessmentMember[]
-  initialValue?: number[]
+  statements?: string[]
+  initialValue?: number[][]
   loading?: boolean
   currentUserId?: string | null
   title?: string
@@ -32,13 +33,13 @@ export type PeerAssessmentDialogProps = {
   projectId: string
   instrumentType: "PEER_ASSESSMENT"
   onSubmitSuccess?: () => void
-  prompt?: string
 }
 
 export function PeerAssessmentDialog({
   open,
   onOpenChange,
   members,
+  statements = ["Teman saya menunjukkan sikap menghargai saat mendengarkan pendapat teman kelompok."],
   initialValue,
   loading,
   currentUserId,
@@ -48,7 +49,6 @@ export function PeerAssessmentDialog({
   projectId,
   instrumentType,
   onSubmitSuccess,
-  prompt,
 }: PeerAssessmentDialogProps) {
   // Filter out self from members
   const filteredMembers = React.useMemo(() => {
@@ -56,35 +56,50 @@ export function PeerAssessmentDialog({
     return members.filter((m) => m.id !== currentUserId)
   }, [members, currentUserId])
 
-  const [answers, setAnswers] = React.useState<number[]>(initialValue || Array(filteredMembers.length).fill(0))
+  // answers[statementIdx][peerIdx]
+  const [answers, setAnswers] = React.useState<number[][]>(
+    initialValue || Array(statements.length).fill(0).map(() => Array(filteredMembers.length).fill(0))
+  )
+  const [currentStatement, setCurrentStatement] = React.useState(0)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    setAnswers(initialValue || Array(filteredMembers.length).fill(0))
-  }, [initialValue, filteredMembers.length, open])
+    setAnswers(
+      initialValue || Array(statements.length).fill(0).map(() => Array(filteredMembers.length).fill(0))
+    )
+  }, [initialValue, filteredMembers.length, statements.length, open])
 
-  const allAnswered = answers.length === filteredMembers.length && answers.every((a) => a > 0)
+  const allAnswered =
+    answers.length === statements.length &&
+    answers.every(row => row.length === filteredMembers.length && row.every(a => a > 0))
 
-  const handleChange = (idx: number, value: number) => {
+  const handleChange = (peerIdx: number, value: number) => {
     if (!readOnly) {
-      setAnswers((ans) => ans.map((a, i) => (i === idx ? value : a)))
+      setAnswers(ans =>
+        ans.map((row, sIdx) =>
+          sIdx === currentStatement
+            ? row.map((a, pIdx) => (pIdx === peerIdx ? value : a))
+            : row
+        )
+      )
     }
   }
 
   const handleSubmit = async () => {
     setError(null)
-    if (answers.length !== filteredMembers.length || answers.some((v) => !v)) {
-      setError("Harap nilai semua teman kelompok sebelum menyimpan.")
+    if (!allAnswered) {
+      setError("Harap nilai semua teman untuk semua pertanyaan sebelum menyimpan.")
       return
     }
     setIsSubmitting(true)
     try {
       // Submit one by one for each peer
       for (let i = 0; i < filteredMembers.length; i++) {
+        // Kumpulkan semua jawaban untuk peer i (dari semua statement)
+        const memberAnswers = answers.map(row => row[i])
         const member = filteredMembers[i]
-        const answer = answers[i]
-        const content = { answers: [answer] }
+        const content = { answers: memberAnswers }
         const result = await submitStageInstrument({
           projectId,
           stageId,
@@ -116,15 +131,24 @@ export function PeerAssessmentDialog({
             {title || "Peer Assessment"}
           </DialogTitle>
         </DialogHeader>
-
-        {prompt && <div className="text-base text-center mb-2">{prompt}</div>}
-
-        <div className="flex flex-col gap-4 py-2">
-          {filteredMembers.map((member, idx) => (
-            <div key={member.id} className="rounded-lg border p-3 flex flex-col gap-2 bg-muted/40">
-              <div className="font-semibold text-foreground text-base mb-1">{member.name}</div>
+        <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-4">
+          <div
+            className="h-full bg-primary transition-all"
+            style={{ width: `${((currentStatement + 1) / statements.length) * 100}%` }}
+          ></div>
+        </div>
+        <div className="flex flex-col gap-6 py-4">
+          <div className="text-lg font-semibold text-foreground text-center" dangerouslySetInnerHTML={{ __html: statements[currentStatement] }} />
+          <div className="flex flex-col gap-4">
+            {filteredMembers.map((member, idx) => (
+              <div key={member.id} className="rounded-lg border p-3 flex flex-col gap-2 bg-muted/40">
+                <div className="font-semibold text-foreground text-base mb-1">{member.name}</div>
                 <RadioGroup
-                  value={answers[idx] ? String(answers[idx]) : undefined}
+                  value={
+                    answers[currentStatement] && typeof answers[currentStatement][idx] !== 'undefined'
+                      ? (answers[currentStatement][idx] ? String(answers[currentStatement][idx]) : undefined)
+                      : undefined
+                  }
                   onValueChange={val => handleChange(idx, Number(val))}
                   disabled={readOnly}
                   className="flex flex-row gap-4 justify-between"
@@ -134,7 +158,7 @@ export function PeerAssessmentDialog({
                     <label
                       key={scale.value}
                       className={`flex-1 flex flex-col items-center cursor-pointer select-none ${
-                        answers[idx] === scale.value ? "font-bold text-primary" : "text-foreground"
+                        answers[currentStatement][idx] === scale.value ? "font-bold text-primary" : "text-foreground"
                       }`}
                     >
                       <RadioGroupItem
@@ -142,25 +166,36 @@ export function PeerAssessmentDialog({
                         disabled={readOnly}
                         className={
                           `mb-2 size-5 border-2 transition-colors duration-150 ` +
-                          (answers[idx] === scale.value
+                          (answers[currentStatement][idx] === scale.value
                             ? "border-primary ring-2 ring-primary/30"
                             : "border-gray-300")
                         }
                       />
-                      <span className={`text-xs ${answers[idx] === scale.value ? "font-medium text-primary" : ""}`}>{scale.label}</span>
+                      <span className={`text-xs ${answers[currentStatement][idx] === scale.value ? "font-medium text-primary" : ""}`}>{scale.label}</span>
                     </label>
                   ))}
                 </RadioGroup>
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
         </div>
-
         {error && <p className="px-6 text-sm text-red-500">{error}</p>}
-
-        <DialogFooter className="flex justify-end">
-          <Button onClick={handleSubmit} disabled={loading || !allAnswered || readOnly}>
-            {isSubmitting ? "Menyimpan..." : "Simpan"}
+        <DialogFooter className="flex justify-between">
+          <Button variant="outline" disabled={currentStatement === 0} onClick={() => setCurrentStatement(currentStatement - 1)}>
+            Previous
           </Button>
+          {currentStatement < statements.length - 1 ? (
+            <Button onClick={() => setCurrentStatement(currentStatement + 1)} disabled={loading}>
+              Next Question
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSubmit}
+              disabled={loading || !allAnswered || readOnly}
+            >
+              {isSubmitting ? "Menyimpan..." : "Simpan"}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

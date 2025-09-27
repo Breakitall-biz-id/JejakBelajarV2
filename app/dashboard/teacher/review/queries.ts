@@ -12,6 +12,7 @@ import {
   projects,
   submissions,
   templateStageConfigs,
+  templateQuestions,
   userClassAssignments,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
@@ -370,9 +371,10 @@ export async function getProjectDetail(classId: string, projectId: string, teach
 
   const stageIds = stageRows.map(stage => stage.id)
 
-  // Get instruments for each stage
+  // Get instruments for each stage (with questions)
   const instrumentRows = await db
     .select({
+      id: projectStageInstruments.id,
       projectStageId: projectStageInstruments.projectStageId,
       instrumentType: projectStageInstruments.instrumentType,
       description: projectStageInstruments.description,
@@ -381,7 +383,56 @@ export async function getProjectDetail(classId: string, projectId: string, teach
     .from(projectStageInstruments)
     .where(inArray(projectStageInstruments.projectStageId, stageIds))
 
-  // Get students in this class
+  // Map: stageId+instrumentType -> projectStageInstrumentId
+  const instrumentKeyToId = new Map<string, string>()
+  for (const row of instrumentRows) {
+    instrumentKeyToId.set(`${row.projectStageId}__${row.instrumentType}`, row.id)
+  }
+
+  // Get templateStageConfigs for all stage/instrument
+  const templateConfigRows = await db
+    .select({
+      id: templateStageConfigs.id,
+      stageName: templateStageConfigs.stageName,
+      instrumentType: templateStageConfigs.instrumentType,
+    })
+    .from(templateStageConfigs)
+    .where(inArray(templateStageConfigs.stageName, stageRows.map(s => s.name)))
+
+  const configKeyToId = new Map<string, string>()
+  for (const row of templateConfigRows) {
+    configKeyToId.set(`${row.stageName}__${row.instrumentType}`, row.id)
+  }
+
+  const allConfigIds = Array.from(configKeyToId.values())
+
+  let questionRows: Array<{ id: string; configId: string; questionText: string; questionType: string; scoringGuide: string | null; rubricCriteria: string | null }> = []
+  if (allConfigIds.length > 0) {
+    questionRows = await db
+      .select({
+        id: templateQuestions.id,
+        configId: templateQuestions.configId,
+        questionText: templateQuestions.questionText,
+        questionType: templateQuestions.questionType,
+        scoringGuide: templateQuestions.scoringGuide,
+        rubricCriteria: templateQuestions.rubricCriteria,
+      })
+      .from(templateQuestions)
+      .where(inArray(templateQuestions.configId, allConfigIds))
+  }
+
+  const configIdToQuestions = new Map<string, Array<{ id: string; questionText: string; questionType: string; scoringGuide: string | null; rubricCriteria: { [score: string]: string } }>>()
+  for (const q of questionRows) {
+    if (!configIdToQuestions.has(q.configId)) configIdToQuestions.set(q.configId, [])
+    configIdToQuestions.get(q.configId)!.push({
+      id: q.id,
+      questionText: q.questionText,
+      questionType: q.questionType,
+      scoringGuide: q.scoringGuide,
+      rubricCriteria: (() => { try { return q.rubricCriteria ? JSON.parse(q.rubricCriteria) : {}; } catch { return {}; } })(),
+    })
+  }
+
   const studentRows = await db
     .select({
       studentId: user.id,
@@ -465,12 +516,18 @@ export async function getProjectDetail(classId: string, projectId: string, teach
   const stages = stageRows.map(stage => {
     const instruments = instrumentRows
       .filter(instrument => instrument.projectStageId === stage.id)
-      .map(instrument => ({
-        id: `${instrument.instrumentType.toLowerCase()}-${stage.id}`,
-        instrumentType: instrument.instrumentType,
-        isRequired: instrument.isRequired,
-        description: instrument.description,
-      }))
+      .map(instrument => {
+        // Find template config for this stage/instrument
+        const configId = configKeyToId.get(`${stage.name}__${instrument.instrumentType}`)
+        const questions = configId ? configIdToQuestions.get(configId) || [] : []
+        return {
+          id: `${instrument.instrumentType.toLowerCase()}-${stage.id}`,
+          instrumentType: instrument.instrumentType,
+          isRequired: instrument.isRequired,
+          description: instrument.description,
+          questions,
+        }
+      })
 
     const students = studentRows.map(student => {
       const progress = progressRows.find(
@@ -484,6 +541,36 @@ export async function getProjectDetail(classId: string, projectId: string, teach
       const groupMembership = groupRows.find(
         g => g.studentId === student.studentId
       )
+
+      // Special handling for PEER_ASSESSMENT: parse matrix answers
+      const peerAssessmentSubs = submissionsForStudent.filter(sub => sub.instrumentType === "PEER_ASSESSMENT")
+      let peerAssessmentMatrix: number[][] | undefined = undefined
+      if (peerAssessmentSubs.length > 0) {
+        // Assume each submission.content.answers is an array of numbers (per question, per peer)
+        // If student submits matrix, it should be [question][peer] or [peer][question]
+        // We'll try to normalize to [question][peer]
+        // If only one submission, content.answers is matrix; if multiple, merge by question
+        // Try to find the shape
+        const matrices = peerAssessmentSubs.map(sub => {
+          if (sub.content && typeof sub.content === 'object' && 'answers' in sub.content && Array.isArray(sub.content.answers)) {
+            return sub.content.answers as number[][]
+          }
+          return []
+        }).filter(arr => Array.isArray(arr) && arr.length > 0)
+        if (matrices.length > 0) {
+          // If only one matrix, use it; if multiple, merge by question index
+          if (matrices.length === 1) {
+            peerAssessmentMatrix = matrices[0]
+          } else {
+            // Merge: for each question, collect all peer answers
+            const maxQuestions = Math.max(...matrices.map(m => m.length))
+            peerAssessmentMatrix = Array.from({ length: maxQuestions }, (_, qIdx) => {
+              // For each matrix, take row qIdx if exists, flatten
+              return matrices.flatMap(m => m[qIdx] || [])
+            })
+          }
+        }
+      }
 
       return {
         id: student.studentId,
@@ -500,7 +587,8 @@ export async function getProjectDetail(classId: string, projectId: string, teach
           submittedAt: submission.submittedAt?.toISOString() || new Date().toISOString(),
           score: submission.score,
           feedback: submission.feedback,
-        }))
+        })),
+        peerAssessmentMatrix, // <-- add matrix for teacher review
       }
     })
 
@@ -521,7 +609,7 @@ export async function getProjectDetail(classId: string, projectId: string, teach
       order: stage.order,
       unlocksAt: stage.unlocksAt,
       dueAt: stage.dueAt,
-      status: "IN_PROGRESS", // Default status
+      status: "IN_PROGRESS", 
       requiredInstruments: instruments,
       submissionsByInstrument,
       students,
@@ -536,12 +624,12 @@ export async function getProjectDetail(classId: string, projectId: string, teach
     }
     groupMembersMap.get(row.groupId)!.push({
       studentId: row.studentId,
-      name: studentRows.find(s => s.studentId === row.studentId)?.studentName,
-      email: studentRows.find(s => s.studentId === row.studentId)?.studentEmail,
+      name: studentRows.find(s => s.studentId === row.studentId)?.studentName ?? null,
+      email: studentRows.find(s => s.studentId === row.studentId)?.studentEmail ?? null,
     })
   })
 
-  const groups = Array.from(groupMembersMap.entries()).map(([groupId, members]) => ({
+  const groupList = Array.from(groupMembersMap.entries()).map(([groupId, members]) => ({
     id: groupId,
     name: groupRows.find(r => r.groupId === groupId)?.groupName || "Unknown Group",
     members,
@@ -552,8 +640,8 @@ export async function getProjectDetail(classId: string, projectId: string, teach
     title: project.title,
     description: project.description || undefined,
     stages,
-    group: groups.length > 0 ? {
-      members: groups.flatMap(g => g.members)
+    group: groupList.length > 0 ? {
+      members: groupList.flatMap(g => g.members)
     } : undefined,
   }
 }

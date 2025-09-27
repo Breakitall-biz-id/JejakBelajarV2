@@ -145,6 +145,7 @@ export const templateQuestions = pgTable(
     questionText: text("question_text").notNull(),
     questionType: varchar("question_type", { length: 50 }).default("STATEMENT").notNull(), // STATEMENT, ESSAY_PROMPT
     scoringGuide: text("scoring_guide"), // For questionnaires: Always=4, Often=3, Sometimes=2, Never=1
+    rubricCriteria: text("rubric_criteria"), // JSONB field for detailed rubric criteria per score level
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },

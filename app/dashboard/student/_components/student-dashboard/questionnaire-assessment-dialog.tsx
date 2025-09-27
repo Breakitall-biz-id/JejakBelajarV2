@@ -113,7 +113,7 @@ export function QuestionnaireAssessmentDialog({
                 <div className="px-6 pt-6 pb-2 border-b border-muted/60">
 				<DialogHeader className="">
 					<div className="flex justify-between items-center">
-						<Button variant="ghost" disabled={currentStep === 0} onClick={handlePrevious}>
+													<Button variant="ghost" disabled={currentStep === 0} onClick={handlePrevious}>
 							<ArrowLeft/>
 						</Button>
 						<DialogTitle className="text-lg font-medium text-center font-geist-mono">
@@ -157,21 +157,21 @@ export function QuestionnaireAssessmentDialog({
 				</div>
 				{error && <p className="px-6 text-sm text-red-500">{error}</p>}
 				<DialogFooter className="flex justify-between">
-					<Button variant="outline" disabled={currentStep === 0} onClick={handlePrevious}>
-						Previous
-					</Button>
-					{currentStep < totalSteps - 1 ? (
-						<Button onClick={handleNext} disabled={loading || readOnly}>
-							Next Question
-						</Button>
-					) : (
-						<Button
-							onClick={handleSubmit}
-							disabled={loading || !allAnswered || readOnly}
-						>
-							{isSubmitting ? "Menyimpan..." : "Simpan"}
-						</Button>
-					)}
+											<Button variant="outline" disabled={currentStep === 0} onClick={handlePrevious}>
+												Previous
+											</Button>
+											{currentStep < totalSteps - 1 ? (
+												<Button onClick={handleNext} disabled={loading}>
+													Next Question
+												</Button>
+											) : (
+												<Button
+													onClick={handleSubmit}
+													disabled={loading || !allAnswered || readOnly}
+												>
+													{isSubmitting ? "Menyimpan..." : "Simpan"}
+												</Button>
+											)}
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

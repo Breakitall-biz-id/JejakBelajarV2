@@ -21,7 +21,11 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(projectDetail)
-  } catch {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  } catch (err: any) {
+    // Log error for debugging
+    console.error("[API /api/teacher/project-detail]", err)
+    // Return error message in development, generic in production
+    const isDev = process.env.NODE_ENV !== 'production';
+    return NextResponse.json({ error: isDev && err?.message ? err.message : "Internal server error" }, { status: 500 })
   }
 }
