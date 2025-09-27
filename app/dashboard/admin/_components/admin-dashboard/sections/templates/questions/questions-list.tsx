@@ -73,33 +73,15 @@ export function QuestionsList({
     setShowEditDialog(true)
   }
 
-
-  const getInstrumentTypeLabel = (type: string) => {
-    switch (type) {
-      case 'JOURNAL':
-        return 'Journal'
-      case 'SELF_ASSESSMENT':
-        return 'Self Assessment'
-      case 'PEER_ASSESSMENT':
-        return 'Peer Assessment'
-      case 'OBSERVATION':
-        return 'Observation'
-      default:
-        return type
-    }
-  }
-
-  // Journal instruments don't need questions
-  if (instrumentType === 'JOURNAL') {
-    return null
-  }
+  // Label for JOURNAL = Prompt, else Statement
+  const label = instrumentType === 'JOURNAL' ? 'Prompt' : 'Statement';
 
   return (
     <div className="space-y-1">
       {/* Simple Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
-          <h4 className="text-xs font-medium">Statements</h4>
+          <h4 className="text-xs font-medium">{label}s</h4>
           <span className="text-[9px] text-muted-foreground">
             ({questions.length})
           </span>
@@ -109,7 +91,7 @@ export function QuestionsList({
           size="sm"
           variant="outline"
           className="text-[9px] h-5 px-1.5"
-          title="Add new statement"
+          title={`Add new ${label.toLowerCase()}`}
         >
           <Plus className="h-2 w-2" />
         </Button>
@@ -117,7 +99,7 @@ export function QuestionsList({
 
       {questions.length === 0 ? (
         <div className="text-center py-3 border border-dashed border-border rounded text-[10px] text-muted-foreground">
-          No statements yet
+          No {label.toLowerCase()}s yet
         </div>
       ) : (
         <div className="space-y-1 max-h-[40vh] overflow-y-auto">
@@ -163,26 +145,25 @@ export function QuestionsList({
         </div>
       )}
 
-        {showCreateDialog && (
-          <CreateQuestionDialog
-            configId={configId}
-            instrumentType={instrumentType}
-            open={showCreateDialog}
-            onOpenChange={setShowCreateDialog}
-            onSuccess={handleCreateSuccess}
-          />
-        )}
+      {showCreateDialog && (
+        <CreateQuestionDialog
+          configId={configId}
+          instrumentType={instrumentType}
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
+          onSuccess={handleCreateSuccess}
+        />
+      )}
 
-        {showEditDialog && selectedQuestion && (
-          <EditQuestionDialog
-            question={selectedQuestion}
-            instrumentType={instrumentType}
-            open={showEditDialog}
-            onOpenChange={setShowEditDialog}
-            onSuccess={handleEditSuccess}
-          />
-        )}
-
-        </div>
+      {showEditDialog && selectedQuestion && (
+        <EditQuestionDialog
+          question={selectedQuestion}
+          instrumentType={instrumentType}
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          onSuccess={handleEditSuccess}
+        />
+      )}
+    </div>
   )
 }

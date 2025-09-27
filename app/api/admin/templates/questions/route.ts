@@ -9,7 +9,7 @@ const createQuestionSchema = z.object({
   configId: z.string(),
   questionText: z.string(),
   questionType: z.enum(["STATEMENT", "ESSAY_PROMPT"]),
-  scoringGuide: z.string().optional(),
+  rubricCriteria: z.string().optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createQuestionSchema.parse(body)
 
+
     // Create the question
     const [newQuestion] = await db
       .insert(templateQuestions)
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
         configId: validatedData.configId,
         questionText: validatedData.questionText,
         questionType: validatedData.questionType,
-        scoringGuide: validatedData.scoringGuide || null,
+        rubricCriteria: validatedData.rubricCriteria || null,
       })
       .returning()
 

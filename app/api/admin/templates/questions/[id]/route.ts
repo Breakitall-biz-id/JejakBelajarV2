@@ -8,7 +8,7 @@ import { z } from "zod"
 const updateQuestionSchema = z.object({
   questionText: z.string(),
   questionType: z.enum(["STATEMENT", "ESSAY_PROMPT"]),
-  scoringGuide: z.string().optional(),
+  rubricCriteria: z.string().optional(),
 })
 
 export async function PUT(
@@ -26,13 +26,14 @@ export async function PUT(
     const body = await request.json()
     const validatedData = updateQuestionSchema.parse(body)
 
+
     // Update the question
     const [updatedQuestion] = await db
       .update(templateQuestions)
       .set({
         questionText: validatedData.questionText,
         questionType: validatedData.questionType,
-        scoringGuide: validatedData.scoringGuide || null,
+        rubricCriteria: validatedData.rubricCriteria || null,
         updatedAt: new Date(),
       })
       .where(eq(templateQuestions.id, params.id))

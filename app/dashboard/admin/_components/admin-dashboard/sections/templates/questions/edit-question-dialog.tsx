@@ -47,12 +47,20 @@ const getQuestionTypeEnum = (instrumentType: string) => {
   }
 }
 
+
+const rubricCriteriaSchema = z.array(z.object({
+  score: z.union([z.string(), z.number()]),
+  description: z.string(),
+}))
+
 const editQuestionSchema = (instrumentType: string) => z.object({
   questionText: z.string().min(1, "Question text is required"),
   questionType: getQuestionTypeEnum(instrumentType),
   scoringGuide: z.string().optional(),
+  rubricCriteria: instrumentType === 'OBSERVATION' ? rubricCriteriaSchema : z.undefined().optional(),
 })
 
+type RubricCriterion = { score: string | number; description: string }
 type EditQuestionSchema = z.infer<ReturnType<typeof editQuestionSchema>>
 
 type TemplateQuestion = {
@@ -61,6 +69,7 @@ type TemplateQuestion = {
   questionType: string
   scoringGuide: string | null
   createdAt: string
+  rubricCriteria?: string | { score: string | number; description: string }[]
 }
 
 type EditQuestionDialogProps = {
@@ -86,6 +95,7 @@ export function EditQuestionDialog({
       questionText: "",
       questionType: "STATEMENT",
       scoringGuide: "",
+      rubricCriteria: instrumentType === 'OBSERVATION' ? [] : undefined,
     },
   })
 
@@ -106,15 +116,30 @@ export function EditQuestionDialog({
 
   useEffect(() => {
     if (question) {
-      // For Self Assessment, ensure only STATEMENT is allowed
       if (instrumentType === 'SELF_ASSESSMENT') {
         form.reset({
           questionText: question.questionText,
           questionType: "STATEMENT" as const,
           scoringGuide: question.scoringGuide || "",
         })
+      } else if (instrumentType === 'OBSERVATION') {
+        let rubricCriteria: RubricCriterion[] = []
+        try {
+          rubricCriteria = question.rubricCriteria
+            ? typeof question.rubricCriteria === 'string'
+              ? JSON.parse(question.rubricCriteria)
+              : question.rubricCriteria
+            : []
+        } catch {
+          rubricCriteria = []
+        }
+        form.reset({
+          questionText: question.questionText,
+          questionType: question.questionType as "STATEMENT" | "ESSAY_PROMPT",
+          scoringGuide: question.scoringGuide || "",
+          rubricCriteria,
+        } as any)
       } else {
-        // For other instruments, use the actual question type
         const resetData = {
           questionText: question.questionText,
           questionType: question.questionType as "STATEMENT" | "ESSAY_PROMPT",
@@ -128,12 +153,16 @@ export function EditQuestionDialog({
   const onSubmit = async (values: EditQuestionSchema) => {
     setIsSubmitting(true)
     try {
+      const payload = {
+        ...values,
+        rubricCriteria: instrumentType === 'OBSERVATION' ? JSON.stringify(values.rubricCriteria) : undefined,
+      }
       const response = await fetch(`/api/admin/templates/questions/${question.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(payload),
       })
 
       if (!response.ok) {
@@ -149,6 +178,51 @@ export function EditQuestionDialog({
       setIsSubmitting(false)
     }
   }
+// Rubric Criteria Table UI
+function RubricCriteriaField({ value, onChange }: { value: RubricCriterion[]; onChange: (v: RubricCriterion[]) => void }) {
+  const handleChange = (idx: number, key: keyof RubricCriterion, val: string) => {
+    const next = value.map((item, i) => i === idx ? { ...item, [key]: val } : item)
+    onChange(next)
+  }
+  const handleAdd = () => {
+    onChange([...value, { score: '', description: '' }])
+  }
+  const handleRemove = (idx: number) => {
+    onChange(value.filter((_, i) => i !== idx))
+  }
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-2 text-xs font-semibold">
+        <div className="w-16">Skor</div>
+        <div className="flex-1">Deskripsi</div>
+        <div className="w-10"></div>
+      </div>
+      {value.map((item, idx) => (
+        <div key={idx} className="flex gap-2 items-center">
+          <input
+            className="w-16 border rounded px-1 py-0.5 text-xs"
+            type="number"
+            value={item.score}
+            min={1}
+            max={10}
+            onChange={e => handleChange(idx, 'score', e.target.value)}
+          />
+          <input
+            className="flex-1 border rounded px-1 py-0.5 text-xs"
+            type="text"
+            value={item.description}
+            placeholder="Deskripsi kriteria..."
+            onChange={e => handleChange(idx, 'description', e.target.value)}
+          />
+          <button type="button" className="text-xs text-red-500 px-2" onClick={() => handleRemove(idx)} title="Hapus">
+            ×
+          </button>
+        </div>
+      ))}
+      <button type="button" className="text-xs text-blue-600 mt-1" onClick={handleAdd}>+ Tambah Kriteria</button>
+    </div>
+  )
+}
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -260,6 +334,33 @@ export function EditQuestionDialog({
                   </FormItem>
                 )}
               />
+
+              {/* Rubric Criteria for OBSERVATION only */}
+              {instrumentType === 'OBSERVATION' && (
+                <FormField
+                  control={form.control}
+                  name="rubricCriteria"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <FormLabel className="text-[13px] font-semibold leading-none">Rubric Criteria</FormLabel>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span tabIndex={0} className="cursor-pointer"><Info className="w-4 h-4 text-muted-foreground" /></span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs text-xs">
+                            Edit kriteria penilaian untuk setiap skor. Ini akan tampil sebagai tooltip di lembar observasi guru.
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <FormControl>
+                        <RubricCriteriaField value={field.value || []} onChange={field.onChange} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </TooltipProvider>
             <DialogFooter className="pt-2">
               <Button

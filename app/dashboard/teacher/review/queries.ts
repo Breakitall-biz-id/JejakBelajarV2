@@ -609,7 +609,7 @@ export async function getProjectDetail(classId: string, projectId: string, teach
       order: stage.order,
       unlocksAt: stage.unlocksAt,
       dueAt: stage.dueAt,
-      status: "IN_PROGRESS", 
+      status: "IN_PROGRESS", // Default status
       requiredInstruments: instruments,
       submissionsByInstrument,
       students,
