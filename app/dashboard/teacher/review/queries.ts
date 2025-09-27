@@ -158,7 +158,7 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
     .where(
       and(
         inArray(projectStageProgress.projectStageId, stageIds),
-        inArray(projectStageProgress.studentId, studentIds),
+        inArray(projectStageProgress.studentId, userIds),
       ),
     )
 

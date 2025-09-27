@@ -25,6 +25,7 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Eye } from "lucide-react"
 import { JournalAssessmentDialog } from "../../../../student/_components/student-dashboard/journal-assessment-dialog"
+import { TeacherJournalAssessmentDialog } from "../../../_components/teacher-dashboard/teacher-journal-assessment-dialog"
 import { PeerAssessmentDialog } from "../../../../student/_components/student-dashboard/peer-assessment-dialog"
 import { ArrowLeft } from "lucide-react"
 import { QuestionnaireAssessmentDialog } from "../../../../student/_components/student-dashboard/questionnaire-assessment-dialog"
@@ -55,6 +56,7 @@ type InstrumentWithQuestions = {
   isRequired: boolean;
   description?: string | null;
   questions?: { id: string; questionText: string; questionType?: string; scoringGuide?: string | null; rubricCriteria?: unknown }[];
+  rubrics?: { id: string; indicatorText: string; criteria: { [score: string]: string } }[];
 };
 
 type ObservationSubmission = {
@@ -340,12 +342,33 @@ export default function ProjectDetailPage({
                                     >
                                       <span className="text-sm font-medium truncate max-w-[60vw] md:max-w-xs">{student.name || student.id}</span>
                                       <Button
-                                        variant="ghost"
+                                        variant={(() => {
+                                          if (instrument.instrumentType === "JOURNAL") {
+                                            const content = submission.content;
+                                            const hasGrades = typeof content === 'object' && content && 'grades' in content && Array.isArray(content.grades) && content.grades.length > 0;
+                                            return hasGrades ? "default" : "ghost";
+                                          }
+                                          return "ghost";
+                                        })()}
                                         size="icon"
-                                        aria-label={`Lihat detail submission ${student.name || student.id}`}
+                                        aria-label={`${(() => {
+                                          if (instrument.instrumentType === "JOURNAL") {
+                                            const content = submission.content;
+                                            const hasGrades = typeof content === 'object' && content && 'grades' in content && Array.isArray(content.grades) && content.grades.length > 0;
+                                            return hasGrades ? "Edit nilai" : "Lihat detail";
+                                          }
+                                          return "Lihat detail";
+                                        })()} ${student.name || student.id}`}
                                         onClick={() => setDialog({ open: true, student: { ...student, submission }, instrumentType: instrument.instrumentType, instrumentDesc: instrument.description || '', stageId: stage.id })}
                                       >
-                                        <Eye className="w-5 h-5" />
+                                        {(() => {
+                                          if (instrument.instrumentType === "JOURNAL") {
+                                            const content = submission.content;
+                                            const hasGrades = typeof content === 'object' && content && 'grades' in content && Array.isArray(content.grades) && content.grades.length > 0;
+                                            return hasGrades ? <span className="text-xs font-bold">Edit</span> : <Eye className="w-5 h-5" />;
+                                          }
+                                          return <Eye className="w-5 h-5" />;
+                                        })()}
                                       </Button>
                                     </div>
                                   ))
@@ -463,18 +486,17 @@ export default function ProjectDetailPage({
       {/* Dialog untuk lihat detail submission - dipindahkan ke luar loop */}
       {dialog.open && dialog.student && (
         dialog.instrumentType === "JOURNAL" ? (
-          <JournalAssessmentDialog
+          <TeacherJournalAssessmentDialog
             open={dialog.open}
             onOpenChange={open => setDialog(d => ({ ...d, open }))}
-            prompts={(() => {
-              const stageObj = project.stages.find(s => s.id === dialog.stageId)
-              const instrumentObj = stageObj?.requiredInstruments.find(i => i.instrumentType === "JOURNAL") as InstrumentWithQuestions | undefined;
-              return instrumentObj?.questions?.map((q: { questionText: string }) => q.questionText) || [dialog.instrumentDesc || "Tulis refleksi kamu di sini..."];
-            })()}
-            initialValue={(() => {
+            studentName={dialog.student.name || "Unknown Student"}
+            studentAnswers={(() => {
               const content = dialog.student.submission.content;
               if (typeof content === 'object' && content) {
-                if ('text' in content) {
+                if ('student_answers' in content && Array.isArray(content.student_answers)) {
+                  // Handle new format with teacher grades
+                  return content.student_answers.map((answer: unknown) => String(answer || ""));
+                } else if ('text' in content) {
                   // Handle single text answer for backward compatibility
                   return [String(content.text || "")];
                 } else if ('texts' in content && Array.isArray(content.texts)) {
@@ -487,9 +509,55 @@ export default function ProjectDetailPage({
               }
               return [];
             })()}
-            onSubmit={() => {}}
-            loading={false}
-            readOnly={true}
+            prompts={(() => {
+              const stageObj = project.stages.find(s => s.id === dialog.stageId)
+              const instrumentObj = stageObj?.requiredInstruments.find(i => i.instrumentType === "JOURNAL") as InstrumentWithQuestions | undefined;
+              return instrumentObj?.questions?.map((q: { questionText: string }) => q.questionText) || [dialog.instrumentDesc || "Tulis refleksi kamu di sini..."];
+            })()}
+            rubrics={(() => {
+              const stageObj = project.stages.find(s => s.id === dialog.stageId)
+              const instrumentObj = stageObj?.requiredInstruments.find(i => i.instrumentType === "JOURNAL") as InstrumentWithQuestions | undefined;
+              return instrumentObj?.rubrics?.map((r: { id: string; indicatorText: string; criteria: { [score: string]: string } }) => ({
+                id: r.id,
+                indicatorText: r.indicatorText,
+                criteria: r.criteria,
+              })) || [];
+            })()}
+            initialGrades={(() => {
+              const content = dialog.student.submission.content;
+              if (typeof content === 'object' && content && 'grades' in content && Array.isArray(content.grades)) {
+                return content.grades.map((grade: { rubric_id: string; score: number }) => ({
+                  rubricId: grade.rubric_id,
+                  score: String(grade.score),
+                }));
+              }
+              return [];
+            })()}
+            onSubmit={async (grades) => {
+              try {
+                const response = await fetch('/api/teacher/journal-assessment', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    submissionId: dialog.student.submission.id,
+                    grades,
+                  }),
+                });
+
+                if (response.ok) {
+                  // Refresh project data to update scores
+                  await loadProject();
+                  setDialog(d => ({ ...d, open: false }));
+                } else {
+                  console.error('Failed to submit grades');
+                }
+              } catch (error) {
+                console.error('Error submitting grades:', error);
+              }
+            }}
+            onCancel={() => setDialog(d => ({ ...d, open: false }))}
           />
         ) : dialog.instrumentType === "SELF_ASSESSMENT" ? (
           <QuestionnaireAssessmentDialog

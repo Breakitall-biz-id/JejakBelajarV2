@@ -9,6 +9,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import { ChevronDown, ChevronRight } from "lucide-react"
 
 export type JournalRubric = {
   id: string
@@ -23,9 +29,9 @@ export type TeacherJournalAssessmentDialogProps = {
   studentAnswers: string[]
   prompts: string[]
   rubrics: JournalRubric[]
-  initialGrades?: { rubricId: string; score: string; feedback?: string }[]
+  initialGrades?: { rubricId: string; score: string }[]
   loading?: boolean
-  onSubmit: (grades: { rubricId: string; score: string; feedback?: string }[]) => void
+  onSubmit: (grades: { rubricId: string; score: string }[]) => void
   onCancel: () => void
 }
 
@@ -42,9 +48,10 @@ export function TeacherJournalAssessmentDialog({
   onCancel,
 }: TeacherJournalAssessmentDialogProps) {
   const [currentPrompt, setCurrentPrompt] = React.useState(0)
-  const [grades, setGrades] = React.useState<{ rubricId: string; score: string; feedback?: string }[]>(initialGrades || [])
+  const [grades, setGrades] = React.useState<{ rubricId: string; score: string }[]>(initialGrades || [])
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const [showCriteria, setShowCriteria] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     setGrades(initialGrades || [])
@@ -52,35 +59,27 @@ export function TeacherJournalAssessmentDialog({
   }, [initialGrades, open])
 
   const handleScoreChange = (rubricId: string, score: string) => {
+    console.log("🔧 handleScoreChange called:", { rubricId, score })
     setGrades(prev => {
       const existing = prev.find(g => g.rubricId === rubricId)
       if (existing) {
-        return prev.map(g => g.rubricId === rubricId ? { ...g, score } : g)
+        const newGrades = prev.map(g => g.rubricId === rubricId ? { ...g, score } : g)
+        console.log("🔧 Updated grades:", newGrades)
+        return newGrades
       } else {
-        return [...prev, { rubricId, score }]
+        const newGrades = [...prev, { rubricId, score }]
+        console.log("🔧 Added new grade:", newGrades)
+        return newGrades
       }
     })
   }
 
-  const handleFeedbackChange = (rubricId: string, feedback: string) => {
-    setGrades(prev => {
-      const existing = prev.find(g => g.rubricId === rubricId)
-      if (existing) {
-        return prev.map(g => g.rubricId === rubricId ? { ...g, feedback } : g)
-      } else {
-        return [...prev, { rubricId, score: "1", feedback }]
-      }
-    })
-  }
-
+  
   const getScoreForRubric = (rubricId: string) => {
     return grades.find(g => g.rubricId === rubricId)?.score || ""
   }
 
-  const getFeedbackForRubric = (rubricId: string) => {
-    return grades.find(g => g.rubricId === rubricId)?.feedback || ""
-  }
-
+  
   const allGraded = rubrics.length > 0 && rubrics.every(rubric =>
     grades.find(g => g.rubricId === rubric.id)?.score
   )
@@ -103,97 +102,125 @@ export function TeacherJournalAssessmentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-center">
-            Penilaian Jurnal Refleksi - {studentName}
+          <DialogTitle className="text-lg font-bold text-center">
+            Penilaian Jurnal - {studentName}
           </DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="answers" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="answers">Jawaban Siswa</TabsTrigger>
+            <TabsTrigger value="answers">Jawaban</TabsTrigger>
             <TabsTrigger value="assessment">Penilaian</TabsTrigger>
           </TabsList>
 
           <TabsContent value="answers" className="mt-4">
             <div className="space-y-4">
-              <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-4">
-                <div
-                  className="h-full bg-primary transition-all"
-                  style={{ width: `${((currentPrompt + 1) / prompts.length) * 100}%` }}
-                ></div>
+              <div className="flex justify-between items-center mb-4">
+                <div className="text-sm text-muted-foreground">
+                  Pertanyaan {currentPrompt + 1} dari {prompts.length}
+                </div>
+                <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary transition-all"
+                    style={{ width: `${((currentPrompt + 1) / prompts.length) * 100}%` }}
+                  ></div>
+                </div>
               </div>
 
-              <div className="text-lg font-semibold text-foreground text-center mb-4"
+              <div className="text-base font-medium text-center mb-4"
                    dangerouslySetInnerHTML={{ __html: prompts[currentPrompt] }} />
 
               <Card>
-                <CardContent className="pt-6">
+                <CardContent className="pt-4">
                   <Textarea
                     value={studentAnswers[currentPrompt] || ""}
-                    rows={8}
+                    rows={6}
                     readOnly
-                    className="resize-none bg-muted/50"
+                    className="resize-none bg-muted/50 text-sm"
                   />
                 </CardContent>
               </Card>
             </div>
 
-            <DialogFooter className="flex justify-between mt-6">
-              <Button variant="outline" disabled={currentPrompt === 0} onClick={() => setCurrentPrompt(currentPrompt - 1)}>
-                Sebelumnya
+            <DialogFooter className="flex justify-between mt-4">
+              <Button variant="outline" size="sm" disabled={currentPrompt === 0} onClick={() => setCurrentPrompt(currentPrompt - 1)}>
+                ← Sebelumnya
               </Button>
-              <Button onClick={() => setCurrentPrompt(currentPrompt + 1)} disabled={currentPrompt >= prompts.length - 1}>
-                Berikutnya
+              <Button size="sm" onClick={() => setCurrentPrompt(currentPrompt + 1)} disabled={currentPrompt >= prompts.length - 1}>
+                Berikutnya →
               </Button>
             </DialogFooter>
           </TabsContent>
 
           <TabsContent value="assessment" className="mt-4">
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold">Rubrik Penilaian</h3>
-                <p className="text-sm text-muted-foreground">Beri nilai untuk setiap indikator berdasarkan kriteria yang tersedia</p>
+                <h3 className="text-base font-semibold">Rubrik Penilaian</h3>
+                <p className="text-xs text-muted-foreground">Tap untuk lihat kriteria</p>
               </div>
 
               {rubrics.map((rubric, index) => (
-                <Card key={rubric.id}>
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Badge variant="outline">{index + 1}</Badge>
-                      {rubric.indicatorText}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {Object.entries(rubric.criteria).map(([score, description]) => (
-                        <div key={score} className="flex items-start gap-3 p-3 border rounded-lg hover:bg-muted/50">
-                          <RadioGroupItem
-                            value={score}
-                            checked={getScoreForRubric(rubric.id) === score}
-                            onCheckedChange={() => handleScoreChange(rubric.id, score)}
-                            id={`${rubric.id}-${score}`}
-                          />
-                          <div className="flex-1">
-                            <Label htmlFor={`${rubric.id}-${score}`} className="font-medium text-sm">
-                              Skor {score}
-                            </Label>
-                            <p className="text-xs text-muted-foreground mt-1">{description}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                <Card key={rubric.id} className="border-border/50">
+                  <CardContent className="pt-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-2">
+                        <Badge variant="secondary" className="text-xs mt-0.5">
+                          {index + 1}
+                        </Badge>
+                        <p className="text-sm font-medium leading-tight">{rubric.indicatorText}</p>
+                      </div>
 
-                    <div className="mt-4">
-                      <Label className="text-sm font-medium">Feedback (Opsional)</Label>
-                      <Textarea
-                        value={getFeedbackForRubric(rubric.id)}
-                        onChange={(e) => handleFeedbackChange(rubric.id, e.target.value)}
-                        placeholder="Berikan feedback untuk indikator ini..."
-                        rows={2}
-                        className="mt-1"
-                      />
+                      {/* Score Selection */}
+                      <RadioGroup
+                        value={getScoreForRubric(rubric.id)}
+                        onValueChange={(value) => handleScoreChange(rubric.id, value)}
+                        className="flex gap-2"
+                      >
+                        {["4", "3", "2", "1"].map((score) => (
+                          <div key={score} className="flex-1">
+                            <RadioGroupItem
+                              value={score}
+                              id={`${rubric.id}-${score}`}
+                              className="sr-only"
+                            />
+                            <Label
+                              htmlFor={`${rubric.id}-${score}`}
+                              className={`
+                                cursor-pointer text-xs font-medium px-3 py-2 rounded-md border transition-colors w-full text-center
+                                ${getScoreForRubric(rubric.id) === score
+                                  ? 'bg-primary text-primary-foreground border-primary'
+                                  : 'bg-background hover:bg-muted border-border'
+                                }
+                              `}
+                            >
+                              {score}
+                            </Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+
+                      {/* Criteria Collapsible */}
+                      <Collapsible open={showCriteria === rubric.id} onOpenChange={() => setShowCriteria(showCriteria === rubric.id ? null : rubric.id)}>
+                        <CollapsibleTrigger asChild>
+                          <Button variant="ghost" size="sm" className="w-full justify-between p-2 h-auto">
+                            <span className="text-xs">Lihat Kriteria</span>
+                            {showCriteria === rubric.id ? (
+                              <ChevronDown className="w-4 h-4" />
+                            ) : (
+                              <ChevronRight className="w-4 h-4" />
+                            )}
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="space-y-2 mt-2">
+                          {["4", "3", "2", "1"].map((score) => (
+                            <div key={score} className="text-xs p-2 bg-muted/50 rounded">
+                              <span className="font-medium">Skor {score}:</span> {rubric.criteria[score]}
+                            </div>
+                          ))}
+                        </CollapsibleContent>
+                      </Collapsible>
                     </div>
                   </CardContent>
                 </Card>
@@ -201,8 +228,8 @@ export function TeacherJournalAssessmentDialog({
 
               {rubrics.length === 0 && (
                 <Card>
-                  <CardContent className="pt-6 text-center text-muted-foreground">
-                    Tidak ada rubrik yang tersedia untuk instrumen ini
+                  <CardContent className="pt-4 text-center text-muted-foreground text-sm">
+                    Tidak ada rubrik tersedia
                   </CardContent>
                 </Card>
               )}
@@ -212,15 +239,16 @@ export function TeacherJournalAssessmentDialog({
 
         {error && <p className="text-sm text-red-500 mb-4">{error}</p>}
 
-        <DialogFooter className="flex gap-2">
-          <Button variant="outline" onClick={onCancel}>
+        <DialogFooter className="flex gap-2 pt-2">
+          <Button variant="outline" size="sm" onClick={onCancel}>
             Batal
           </Button>
           <Button
+            size="sm"
             onClick={handleSubmit}
             disabled={loading || (rubrics.length > 0 && !allGraded)}
           >
-            {isSubmitting ? "Menyimpan..." : "Simpan Penilaian"}
+            {isSubmitting ? "Menyimpan..." : "Simpan"}
           </Button>
         </DialogFooter>
       </DialogContent>

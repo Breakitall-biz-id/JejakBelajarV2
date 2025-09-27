@@ -16,7 +16,6 @@ export type JournalGradeRequest = {
   grades: Array<{
     rubricId: string
     score: string
-    feedback?: string
   }>
 }
 
@@ -84,23 +83,19 @@ export async function POST(request: Request) {
       }
     }
 
-    // Calculate average score from rubric grades
+    // Calculate average score from rubric grades and round to integer
     const totalScore = grades.reduce((sum, grade) => sum + parseInt(grade.score), 0)
-    const averageScore = totalScore / grades.length
+    const averageScore = Math.round(totalScore / grades.length)
 
     // Prepare the updated content structure
     let existingContent: any = submission.content || {}
 
-    // If content already exists, preserve the student answers
-    const studentAnswers = existingContent.student_answers || []
-
-    // Create the new content structure with both student answers and teacher grades
+    // Create the new content structure - preserve original format and add grades
     const updatedContent = {
-      student_answers: studentAnswers,
+      ...existingContent,
       grades: grades.map(grade => ({
         rubric_id: grade.rubricId,
         score: parseInt(grade.score),
-        feedback: grade.feedback || null,
       }))
     }
 
