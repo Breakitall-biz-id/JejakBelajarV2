@@ -15,6 +15,13 @@
       "when": 1758300273813,
       "tag": "0001_acoustic_scarlet_spider",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1758987453837,
+      "tag": "0003_pretty_the_leader",
+      "breakpoints": true
     }
   ]
 }

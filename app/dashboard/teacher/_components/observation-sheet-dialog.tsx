@@ -52,11 +52,10 @@ export function ObservationSheetDialog({
   const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    setAnswers(
-      initialValue && initialValue.length === statements.length
+    const newAnswers = initialValue && initialValue.length === statements.length
         ? initialValue
-        : statements.map(() => ({}))
-    )
+        : statements.map(() => ({}));
+    setAnswers(newAnswers);
   }, [initialValue, statements.length, open])
 
   const allAnswered =
@@ -69,9 +68,9 @@ export function ObservationSheetDialog({
     if (!readOnly) {
       setAnswers(ans =>
         ans.map((row, sIdx) =>
-          sIdx === currentStatement ? { ...row, [studentId]: value } : row
+          sIdx === currentStatement ? { ...row, [studentId]: value || undefined } : row
         )
-      )
+      );
     }
   }
 
@@ -127,7 +126,12 @@ export function ObservationSheetDialog({
                               <Button variant="ghost" size="icon" className="mb-1 p-1 h-7 w-7">?</Button>
                             </TooltipTrigger>
                             <TooltipContent side="bottom" className="max-w-xs text-xs">
-                              {statement.rubricCriteria[String(score)] || "-"}
+                              {(() => {
+                                const criteria = typeof statement.rubricCriteria === 'string'
+                                  ? (statement.rubricCriteria ? JSON.parse(statement.rubricCriteria) : {})
+                                  : statement.rubricCriteria || {};
+                                return criteria[String(score)] || "-";
+                              })()}
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -143,11 +147,27 @@ export function ObservationSheetDialog({
                     {[4, 3, 2, 1].map(score => (
                       <td key={score} className="text-center">
                         <RadioGroup
-                          value={answers[currentStatement][student.id] ? String(answers[currentStatement][student.id]) : undefined}
-                          onValueChange={val => handleChange(student.id, Number(val))}
+                          value={String(answers[currentStatement]?.[student.id] || "")}
+                          onValueChange={val => {
+                if (val) {
+                  handleChange(student.id, Number(val));
+                } else {
+                  // Remove the value when deselected
+                  setAnswers(ans =>
+                    ans.map((row, sIdx) => {
+                      if (sIdx === currentStatement) {
+                        const newRow = { ...row };
+                        delete newRow[student.id];
+                        return newRow;
+                      }
+                      return row;
+                    })
+                  );
+                }
+              }}
                           disabled={readOnly}
                           className="flex flex-row justify-center"
-                          name={`student-${student.id}`}
+                          name={`student-${student.id}-statement-${currentStatement}`}
                         >
                           <RadioGroupItem
                             value={String(score)}

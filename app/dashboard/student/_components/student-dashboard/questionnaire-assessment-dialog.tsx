@@ -44,6 +44,7 @@ export function QuestionnaireAssessmentDialog({
 
 	React.useEffect(() => {
 		setAnswers(initialValue || Array(statements.length).fill(0))
+		setCurrentStep(0) // Reset currentStep when dialog opens or parameters change
 	}, [initialValue, statements.length, open])
 
 	const allAnswered = answers.every(a => a > 0)

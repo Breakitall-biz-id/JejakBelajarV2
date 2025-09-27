@@ -57,32 +57,29 @@ export function PeerAssessmentDialog({
   }, [members, currentUserId])
 
   // answers[statementIdx][peerIdx]
-  const [answers, setAnswers] = React.useState<number[][]>(
-    initialValue || Array(statements.length).fill(0).map(() => Array(filteredMembers.length).fill(0))
-  )
+  const [answers, setAnswers] = React.useState<(number|null)[][]>(initialValue || Array.from({ length: statements.length }, () => Array(filteredMembers.length).fill(null)))
   const [currentStatement, setCurrentStatement] = React.useState(0)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    setAnswers(
-      initialValue || Array(statements.length).fill(0).map(() => Array(filteredMembers.length).fill(0))
-    )
+    setAnswers(initialValue || Array.from({ length: statements.length }, () =>
+      Array.from({ length: filteredMembers.length }, () => null)
+    ));
+    setCurrentStatement(0) // Reset currentStatement when dialog opens or parameters change
   }, [initialValue, filteredMembers.length, statements.length, open])
 
   const allAnswered =
     answers.length === statements.length &&
-    answers.every(row => row.length === filteredMembers.length && row.every(a => a > 0))
+    answers.every(row => row.length === filteredMembers.length && row.every(a => a != null && a > 0))
 
   const handleChange = (peerIdx: number, value: number) => {
     if (!readOnly) {
-      setAnswers(ans =>
-        ans.map((row, sIdx) =>
-          sIdx === currentStatement
-            ? row.map((a, pIdx) => (pIdx === peerIdx ? value : a))
-            : row
-        )
-      )
+      setAnswers(ans => {
+        const newAnswers = ans.map(row => [...row]);
+        newAnswers[currentStatement][peerIdx] = value;
+        return newAnswers;
+      });
     }
   }
 
@@ -97,7 +94,7 @@ export function PeerAssessmentDialog({
       // Submit one by one for each peer
       for (let i = 0; i < filteredMembers.length; i++) {
         // Kumpulkan semua jawaban untuk peer i (dari semua statement)
-        const memberAnswers = answers.map(row => row[i])
+        const memberAnswers = answers.map(row => row[i]).map(a => a == null ? 0 : a)
         const member = filteredMembers[i]
         const content = { answers: memberAnswers }
         const result = await submitStageInstrument({
@@ -125,7 +122,7 @@ export function PeerAssessmentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg" key="peer-assessment-dialog">
         <DialogHeader>
           <DialogTitle className="text-lg font-medium text-center">
             {title || "Peer Assessment"}
@@ -146,13 +143,13 @@ export function PeerAssessmentDialog({
                 <RadioGroup
                   value={
                     answers[currentStatement] && typeof answers[currentStatement][idx] !== 'undefined'
-                      ? (answers[currentStatement][idx] ? String(answers[currentStatement][idx]) : undefined)
+                      ? (answers[currentStatement][idx] != null ? String(answers[currentStatement][idx]) : undefined)
                       : undefined
                   }
                   onValueChange={val => handleChange(idx, Number(val))}
                   disabled={readOnly}
                   className="flex flex-row gap-4 justify-between"
-                  name={`peer-${idx}`}
+                  name={`peer-${currentStatement}-${idx}`}
                 >
                   {SCALE.map((scale) => (
                     <label

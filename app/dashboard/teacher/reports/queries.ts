@@ -265,7 +265,7 @@ export async function getTeacherReportData(teacher: CurrentUser): Promise<Teache
     ? await db
         .select({
           submissionId: submissions.id,
-          studentId: submissions.studentId,
+          submittedById: submissions.submittedById,
           targetStudentId: submissions.targetStudentId,
           projectId: submissions.projectId,
           projectStageId: submissions.projectStageId,
@@ -311,7 +311,7 @@ export async function getTeacherReportData(teacher: CurrentUser): Promise<Teache
     : []
 
   const userIds = [...new Set([
-    ...peerAssessmentSubmissions.map(s => s.studentId),
+    ...peerAssessmentSubmissions.map(s => s.submittedById),
     ...peerAssessmentSubmissions.map(s => s.targetStudentId).filter((id): id is string => Boolean(id))
   ])]
   const userData = userIds.length > 0
@@ -373,7 +373,7 @@ export async function getTeacherReportData(teacher: CurrentUser): Promise<Teache
       const members = userData
         .filter(u => peerAssessmentSubmissions.some(s =>
           s.projectId === submission.projectId &&
-          (s.studentId === u.id || s.targetStudentId === u.id)
+          (s.submittedById === u.id || s.targetStudentId === u.id)
         ))
         .map(u => ({ id: u.id, name: u.name || "" }))
 
@@ -394,7 +394,7 @@ export async function getTeacherReportData(teacher: CurrentUser): Promise<Teache
     if (submission.answers && typeof submission.answers === 'object' && 'answers' in submission.answers && Array.isArray(submission.answers.answers)) {
       assessment.submissions.push({
         id: submission.submissionId,
-        assessorName: userMap.get(submission.studentId)?.name || "Unknown",
+        assessorName: userMap.get(submission.submittedById)?.name || "Unknown",
         targetStudentName: userMap.get(submission.targetStudentId || "")?.name || "Unknown",
         answers: submission.answers.answers,
         submittedAt: submission.submittedAt.toISOString()

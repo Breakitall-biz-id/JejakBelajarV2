@@ -243,7 +243,7 @@ async function evaluateStageCompletion(
     .innerJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
     .where(
       and(
-        eq(submissions.studentId, studentId),
+        eq(submissions.submittedById, studentId),
         eq(submissions.projectId, projectId),
         eq(submissions.projectStageId, stageId),
         eq(templateStageConfigs.instrumentType, "OBSERVATION"),

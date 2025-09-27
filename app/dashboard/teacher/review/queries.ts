@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray } from "drizzle-orm"
+import { and, asc, coalesce, eq, inArray, or, sql } from "drizzle-orm"
 
 import { db } from "@/db"
 import {
@@ -11,6 +11,7 @@ import {
   projectStages,
   projects,
   submissions,
+  templateJournalRubrics,
   templateStageConfigs,
   templateQuestions,
   userClassAssignments,
@@ -141,7 +142,7 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
       ),
     )
 
-  const studentIds = classStudentRows.map((row) => row.studentId)
+  const userIds = classStudentRows.map((row) => row.studentId)
   const stageIds = stageRows.map((row) => row.id)
 
   const progressRows = await db
@@ -164,20 +165,25 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
   const submissionRows = await db
     .select({
       id: submissions.id,
-      studentId: submissions.studentId,
+      submittedById: submissions.submittedById,
       projectStageId: submissions.projectStageId,
-      instrumentType: templateStageConfigs.instrumentType,
+      instrumentType: sql`COALESCE(${templateStageConfigs.instrumentType}, 'OBSERVATION')`,
       score: submissions.score,
       feedback: submissions.feedback,
       content: submissions.content,
       submittedAt: submissions.submittedAt,
     })
     .from(submissions)
-    .innerJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
+    .leftJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
     .where(
       and(
         inArray(submissions.projectStageId, stageIds),
-        inArray(submissions.studentId, studentIds),
+        or(
+          // Student submissions
+          inArray(submissions.submittedById, userIds),
+          // Teacher submissions (including OBSERVATION instruments)
+          eq(submissions.submittedBy, 'TEACHER')
+        )
       ),
     )
 
@@ -213,7 +219,7 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
         )
 
         const submissionsForStage = submissionRows.filter(
-          (submission) => submission.projectStageId === stage.id && submission.studentId === student.id,
+          (submission) => submission.projectStageId === stage.id && submission.submittedById === student.id,
         )
 
         const groupMembership = groupRows.find(
@@ -287,6 +293,18 @@ export type ProjectDetailData = {
       instrumentType: string
       isRequired: boolean
       description?: string | null
+      questions?: Array<{
+        id: string
+        questionText: string
+        questionType: string
+        scoringGuide: string | null
+        rubricCriteria: { [score: string]: string }
+      }>
+      rubrics?: Array<{
+        id: string
+        indicatorText: string
+        criteria: { [score: string]: string }
+      }>
     }>
     submissionsByInstrument: Record<string, unknown[]>
     students: Array<{
@@ -302,6 +320,11 @@ export type ProjectDetailData = {
         submittedAt: string
         score?: number | null
         feedback?: string | null
+        teacherGrades?: Array<{
+          rubric_id: string
+          score: number
+          feedback?: string | null
+        }>
       }>
     }>
   }>
@@ -433,6 +456,35 @@ export async function getProjectDetail(classId: string, projectId: string, teach
     })
   }
 
+  // Get journal rubrics for JOURNAL instruments
+  let journalRubricRows: Array<{ id: string; configId: string; indicatorText: string; criteria: { [score: string]: string } }> = []
+  if (allConfigIds.length > 0) {
+    const rawRubricRows = await db
+      .select({
+        id: templateJournalRubrics.id,
+        configId: templateJournalRubrics.configId,
+        indicatorText: templateJournalRubrics.indicatorText,
+        criteria: templateJournalRubrics.criteria,
+      })
+      .from(templateJournalRubrics)
+      .where(inArray(templateJournalRubrics.configId, allConfigIds))
+
+    journalRubricRows = rawRubricRows.map(row => ({
+      ...row,
+      criteria: typeof row.criteria === 'string' ? JSON.parse(row.criteria) : row.criteria
+    }))
+  }
+
+  const configIdToRubrics = new Map<string, Array<{ id: string; indicatorText: string; criteria: { [score: string]: string } }>>()
+  for (const r of journalRubricRows) {
+    if (!configIdToRubrics.has(r.configId)) configIdToRubrics.set(r.configId, [])
+    configIdToRubrics.get(r.configId)!.push({
+      id: r.id,
+      indicatorText: r.indicatorText,
+      criteria: r.criteria,
+    })
+  }
+
   const studentRows = await db
     .select({
       studentId: user.id,
@@ -468,26 +520,78 @@ export async function getProjectDetail(classId: string, projectId: string, teach
       )
     )
 
-  // Get submissions
-  const submissionRows = await db
+  // Get student submissions
+  const studentSubmissionRows = await db
     .select({
       id: submissions.id,
-      studentId: submissions.studentId,
+      submittedById: submissions.submittedById,
+      submittedBy: submissions.submittedBy,
       projectStageId: submissions.projectStageId,
       instrumentType: templateStageConfigs.instrumentType,
+      targetStudentId: submissions.targetStudentId,
       score: submissions.score,
       feedback: submissions.feedback,
       content: submissions.content,
       submittedAt: submissions.submittedAt,
     })
     .from(submissions)
-    .innerJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
+    .leftJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
     .where(
       and(
         inArray(submissions.projectStageId, stageIds),
-        inArray(submissions.studentId, studentIds)
+        inArray(submissions.submittedById, studentIds)
       )
     )
+
+  // Get teacher submissions (observations)
+  const teacherSubmissionRows = await db
+    .select({
+      id: submissions.id,
+      submittedById: submissions.submittedById,
+      submittedBy: submissions.submittedBy,
+      projectStageId: submissions.projectStageId,
+      instrumentType: templateStageConfigs.instrumentType,
+      targetStudentId: submissions.targetStudentId,
+      score: submissions.score,
+      feedback: submissions.feedback,
+      content: submissions.content,
+      submittedAt: submissions.submittedAt,
+    })
+    .from(submissions)
+    .leftJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
+    .where(
+      and(
+        inArray(submissions.projectStageId, stageIds),
+        eq(submissions.submittedById, teacher.id),
+        eq(submissions.submittedBy, 'TEACHER')
+      )
+    )
+
+  // Combine all submissions
+  const submissionRows = [...studentSubmissionRows, ...teacherSubmissionRows]
+
+  // Process submission rows to handle NULL instrumentType
+  console.log("🔍 BACKEND DEBUG - Raw submission rows:", submissionRows.length, submissionRows);
+
+  const processedSubmissionRows = submissionRows.map(row => {
+    // Determine instrument type if it's null
+    let instrumentType = row.instrumentType;
+
+    if (!instrumentType) {
+      // For teacher submissions with targetStudentId, assume OBSERVATION
+      if (row.targetStudentId) {
+        instrumentType = "OBSERVATION";
+      }
+      // Add other fallback logic as needed
+    }
+
+    return {
+      ...row,
+      instrumentType: instrumentType || "UNKNOWN"
+    };
+  });
+
+  console.log("🔍 BACKEND DEBUG - Processed submission rows:", processedSubmissionRows.length, processedSubmissionRows);
 
   // Get group data
   let groupRows: Array<{
@@ -520,22 +624,35 @@ export async function getProjectDetail(classId: string, projectId: string, teach
         // Find template config for this stage/instrument
         const configId = configKeyToId.get(`${stage.name}__${instrument.instrumentType}`)
         const questions = configId ? configIdToQuestions.get(configId) || [] : []
+        const rubrics = instrument.instrumentType === "JOURNAL" && configId ? configIdToRubrics.get(configId) || [] : []
         return {
           id: `${instrument.instrumentType.toLowerCase()}-${stage.id}`,
           instrumentType: instrument.instrumentType,
           isRequired: instrument.isRequired,
           description: instrument.description,
           questions,
+          rubrics,
         }
       })
+
+    // Separate teacher submissions from student submissions
+    const teacherSubmissions = processedSubmissionRows.filter(
+      s => s.projectStageId === stage.id && s.submittedById === teacher?.id && s.submittedBy === 'TEACHER'
+    )
+
+    console.log("🔍 BACKEND DEBUG - Teacher submissions for stage:", stage.name, {
+      teacherId: teacher?.id,
+      teacherSubmissions: teacherSubmissions,
+      totalSubmissions: processedSubmissionRows.filter(s => s.projectStageId === stage.id).length
+    })
 
     const students = studentRows.map(student => {
       const progress = progressRows.find(
         p => p.projectStageId === stage.id && p.studentId === student.studentId
       )
 
-      const submissionsForStudent = submissionRows.filter(
-        s => s.projectStageId === stage.id && s.studentId === student.studentId
+      const submissionsForStudent = processedSubmissionRows.filter(
+        s => s.projectStageId === stage.id && s.submittedById === student.studentId
       )
 
       const groupMembership = groupRows.find(
@@ -580,27 +697,68 @@ export async function getProjectDetail(classId: string, projectId: string, teach
         progress: {
           status: progress?.status || "LOCKED"
         },
-        submissions: submissionsForStudent.map(submission => ({
-          id: submission.id,
-          instrumentType: submission.instrumentType,
-          content: submission.content,
-          submittedAt: submission.submittedAt?.toISOString() || new Date().toISOString(),
-          score: submission.score,
-          feedback: submission.feedback,
-        })),
+        submissions: submissionsForStudent.map(submission => {
+          // Handle journal submissions with the new data structure
+          let processedContent = submission.content
+          let teacherGrades = undefined
+
+          if (submission.instrumentType === "JOURNAL" && submission.content && typeof submission.content === 'object') {
+            // Extract student answers and teacher grades from the new structure
+            if ('student_answers' in submission.content) {
+              processedContent = submission.content.student_answers
+            }
+            if ('grades' in submission.content) {
+              teacherGrades = submission.content.grades
+            }
+          }
+
+          return {
+            id: submission.id,
+            instrumentType: submission.instrumentType,
+            content: processedContent,
+            submittedAt: submission.submittedAt?.toISOString() || new Date().toISOString(),
+            score: submission.score,
+            feedback: submission.feedback,
+            teacherGrades,
+          }
+        }),
         peerAssessmentMatrix, // <-- add matrix for teacher review
       }
     })
 
     const submissionsByInstrument = students.reduce((acc, student) => {
       student.submissions.forEach(submission => {
-        if (!acc[submission.instrumentType]) {
-          acc[submission.instrumentType] = []
+        const instrumentType = submission.instrumentType || "UNKNOWN"
+        if (!acc[instrumentType]) {
+          acc[instrumentType] = []
         }
-        acc[submission.instrumentType].push(submission)
+        acc[instrumentType].push(submission)
       })
       return acc
     }, {} as Record<string, unknown[]>)
+
+    // Add teacher submissions to submissionsByInstrument
+    teacherSubmissions.forEach(submission => {
+      const instrumentType = submission.instrumentType || "UNKNOWN"
+      if (!submissionsByInstrument[instrumentType]) {
+        submissionsByInstrument[instrumentType] = []
+      }
+      submissionsByInstrument[instrumentType].push({
+        id: submission.id,
+        instrumentType: submission.instrumentType,
+        targetStudentId: submission.targetStudentId,
+        content: submission.content,
+        submittedAt: submission.submittedAt?.toISOString() || new Date().toISOString(),
+        score: submission.score,
+        feedback: submission.feedback,
+      })
+    })
+
+    console.log("🔍 BACKEND DEBUG - Final submissionsByInstrument for stage:", stage.name, {
+      submissionsByInstrument,
+      instrumentTypes: Object.keys(submissionsByInstrument),
+      observationCount: submissionsByInstrument["OBSERVATION"]?.length || 0
+    })
 
     return {
       id: stage.id,

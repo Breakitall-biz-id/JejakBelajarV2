@@ -269,7 +269,7 @@ export async function getStudentDashboardData(
     .leftJoin(user, eq(user.id, submissions.targetStudentId))
     .where(
       and(
-        eq(submissions.studentId, student.id),
+        eq(submissions.submittedById, student.id),
         inArray(submissions.projectId, projectIds),
       ),
     ))

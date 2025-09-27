@@ -40,7 +40,8 @@ const submissionSchema = z.object({
   instrumentType: studentInstrumentSchema,
   content: z.union([
     z.object({ text: z.string().trim().min(1, "Response is required") }),
-    z.object({ answers: z.array(z.number().min(1).max(4)).min(1) })
+    z.object({ answers: z.array(z.number().min(1).max(4)).min(1) }),
+    z.object({ texts: z.array(z.string().trim().min(1, "Response is required")).min(1) })
   ]),
   targetStudentId: z.string().uuid().optional().nullable(),
 })
@@ -179,7 +180,7 @@ export async function submitStageInstrument(
         .from(submissions)
         .where(
           and(
-            eq(submissions.studentId, student.user.id),
+            eq(submissions.submittedById, student.user.id),
             eq(submissions.projectId, projectId),
             eq(submissions.projectStageId, stageId),
             eq(submissions.templateStageConfigId, templateConfig.id),
@@ -204,6 +205,8 @@ export async function submitStageInstrument(
       } else {
         await tx.insert(submissions).values({
           studentId: student.user.id,
+          submittedBy: 'STUDENT',
+          submittedById: student.user.id,
           projectId,
           projectStageId: stageId,
           templateStageConfigId: templateConfig.id,
@@ -377,7 +380,7 @@ async function evaluateStageCompletion(
     .leftJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
     .where(
       and(
-        eq(submissions.studentId, studentId),
+        eq(submissions.submittedById, studentId),
         eq(submissions.projectId, projectId),
         eq(submissions.projectStageId, stageId),
       ),
@@ -600,7 +603,7 @@ export async function submitQuestionnaire(
         .from(submissions)
         .where(
           and(
-            eq(submissions.studentId, student.user.id),
+            eq(submissions.submittedById, student.user.id),
             eq(submissions.projectId, input.projectId),
             eq(submissions.projectStageId, input.stageId),
             eq(submissions.templateStageConfigId, templateConfig.id),
@@ -624,6 +627,8 @@ export async function submitQuestionnaire(
         // Create new submission
         await tx.insert(submissions).values({
           studentId: student.user.id,
+          submittedBy: 'STUDENT',
+          submittedById: student.user.id,
           projectId: input.projectId,
           projectStageId: input.stageId,
           templateStageConfigId: templateConfig.id,

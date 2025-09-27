@@ -17,7 +17,7 @@ export type ProjectTemplate = {
   }>
 }
 import { z } from "zod"
-import { and, asc, count, eq, inArray } from "drizzle-orm"
+import { and, asc, count, eq, inArray, isNull } from "drizzle-orm"
 
 import { db } from "@/db"
 import {
@@ -1084,7 +1084,7 @@ export async function submitTeacherReport(
         }
       }
 
-      const templateConfig = await tx
+      let templateConfig = await tx
         .select({ id: templateStageConfigs.id })
         .from(templateStageConfigs)
         .innerJoin(projects, eq(templateStageConfigs.templateId, projects.templateId))
@@ -1098,22 +1098,28 @@ export async function submitTeacherReport(
         .limit(1)
         .then((rows) => rows[0])
 
-      if (!templateConfig) {
+      // Special handling for OBSERVATION - create fallback if not in template
+      if (!templateConfig && instrumentType === "OBSERVATION") {
+        // For OBSERVATION, we don't need template config - allow submission without it
+        templateConfig = { id: null }
+      } else if (!templateConfig) {
         throw new ForbiddenError("Instrument configuration not found for this stage.")
       }
+
+      const existingSubmissionQuery = and(
+        eq(submissions.submittedById, teacher.user.id),
+        eq(submissions.projectId, projectId),
+        eq(submissions.projectStageId, stageId),
+        templateConfig.id === null
+          ? isNull(submissions.templateStageConfigId)
+          : eq(submissions.templateStageConfigId, templateConfig.id),
+        ...(targetStudentId ? [eq(submissions.targetStudentId, targetStudentId)] : []),
+      )
 
       const existingSubmission = await tx
         .select({ id: submissions.id })
         .from(submissions)
-        .where(
-          and(
-            eq(submissions.studentId, teacher.user.id),
-            eq(submissions.projectId, projectId),
-            eq(submissions.projectStageId, stageId),
-            eq(submissions.templateStageConfigId, templateConfig.id),
-            ...(targetStudentId ? [eq(submissions.targetStudentId, targetStudentId)] : []),
-          ),
-        )
+        .where(existingSubmissionQuery)
         .limit(1)
         .then((rows) => rows[0])
 
@@ -1129,7 +1135,9 @@ export async function submitTeacherReport(
           .where(eq(submissions.id, existingSubmission.id))
       } else {
         await tx.insert(submissions).values({
-          studentId: teacher.user.id,
+          studentId: null, // Teacher submissions don't have studentId
+          submittedBy: 'TEACHER',
+          submittedById: teacher.user.id,
           projectId,
           projectStageId: stageId,
           templateStageConfigId: templateConfig.id,

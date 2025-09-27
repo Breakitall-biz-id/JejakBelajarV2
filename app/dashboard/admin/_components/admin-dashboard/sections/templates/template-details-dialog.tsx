@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { QuestionsList, TemplateQuestion } from "./questions/questions-list"
+import { JournalRubricsList, JournalRubric } from "./journal-rubrics/journal-rubrics-list"
 import { toast } from "sonner"
 
 interface StageGroup {
@@ -40,12 +41,14 @@ export function TemplateDetailsDialog({
 
 
   const [questionsData, setQuestionsData] = useState<Record<string, TemplateQuestion[]>>({})
+  const [rubricsData, setRubricsData] = useState<Record<string, JournalRubric[]>>({})
 
-  // Fetch all questions for all configs when modal opened
+  // Fetch all questions and rubrics for all configs when modal opened
   useEffect(() => {
     if (!open) return
     const fetchAll = async () => {
-      const entries = await Promise.all(
+      // Fetch questions
+      const questionEntries = await Promise.all(
         template.stageConfigs.map(async (config) => {
           try {
             const response = await fetch(`/api/admin/templates/questions?configId=${config.id}`)
@@ -57,7 +60,22 @@ export function TemplateDetailsDialog({
           return [config.id, []]
         })
       )
-      setQuestionsData(Object.fromEntries(entries))
+      setQuestionsData(Object.fromEntries(questionEntries))
+
+      // Fetch journal rubrics
+      const rubricEntries = await Promise.all(
+        template.stageConfigs.map(async (config) => {
+          try {
+            const response = await fetch(`/api/admin/templates/journal-rubrics?configId=${config.id}`)
+            if (response.ok) {
+              const data = await response.json()
+              return [config.id, data.data]
+            }
+          } catch {}
+          return [config.id, []]
+        })
+      )
+      setRubricsData(Object.fromEntries(rubricEntries))
     }
     fetchAll()
   }, [open, template.stageConfigs])
@@ -74,6 +92,21 @@ export function TemplateDetailsDialog({
       }
     } catch (error) {
       console.error("Failed to load questions:", error)
+    }
+  }, [])
+
+  const loadRubrics = useCallback(async (configId: string) => {
+    try {
+      const response = await fetch(`/api/admin/templates/journal-rubrics?configId=${configId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setRubricsData(prev => ({
+          ...prev,
+          [configId]: data.data
+        }))
+      }
+    } catch (error) {
+      console.error("Failed to load rubrics:", error)
     }
   }, [])
 
@@ -211,6 +244,17 @@ export function TemplateDetailsDialog({
                           questions={questionsData[config.id] || []}
                           onRefresh={() => loadQuestions(config.id)}
                         />
+                        {config.instrumentType === "JOURNAL" && (
+                          <div className="mt-4 pt-4 border-t">
+                            <JournalRubricsList
+                              configId={config.id}
+                              instrumentType={config.instrumentType}
+                              stageName={stage.stageName}
+                              rubrics={rubricsData[config.id] || []}
+                              onRefresh={() => loadRubrics(config.id)}
+                            />
+                          </div>
+                        )}
                       </TabsContent>
                     ))}
                   </Tabs>

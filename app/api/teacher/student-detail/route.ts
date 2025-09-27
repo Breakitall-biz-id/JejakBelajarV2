@@ -110,7 +110,7 @@ export async function GET(request: Request) {
       .innerJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
       .where(
         and(
-          eq(submissions.studentId, studentId),
+          eq(submissions.submittedById, studentId),
           inArray(submissions.projectStageId, stageIds)
         )
       )

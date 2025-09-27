@@ -45,8 +45,8 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
     open: boolean
     stageName?: string
     instrumentId?: string
-    prompt?: string
-    initialValue?: string
+    prompts?: string[]
+    initialValue?: string[]
   }>({ open: false })
   const [journalLoading, setJournalLoading] = React.useState(false)
   const [selfDialog, setSelfDialog] = React.useState<{
@@ -199,7 +199,7 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
                           open: true,
                           stageName: stage.name,
                           instrumentId: ins.id,
-                          prompt: ins.description || "Tulis refleksi kamu di sini...",
+                          prompts: ins.questions?.map((q: { questionText: string }) => q.questionText) || [ins.description || "Tulis refleksi kamu di sini..."],
                           initialValue: (() => {
                             const submission: Submission | undefined = ((stage.submissionsByInstrument[ins.instrumentType] || []) as Submission[])[0]
                             if (
@@ -208,9 +208,10 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
                               "text" in submission.content &&
                               (submission.content as { text?: unknown }).text != null
                             ) {
-                              return String((submission.content as { text?: unknown }).text ?? "")
+                              // Handle single text answer for backward compatibility
+                              return [String((submission.content as { text?: unknown }).text ?? "")]
                             }
-                            return ""
+                            return undefined
                           })()
                         })
                       }
@@ -265,11 +266,38 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
                         />
                       )
                     })}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+        <TabsContent value="group">
+            <div className="flex flex-col gap-4">
+                {project.group?.members.map((member) => (
+                  <Card key={member.studentId} className="p-2">
+                    <CardContent className="">
+                      <div className="text-sm text-foreground">{member.name}</div>
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
+        </TabsContent>
+        <TabsContent value="about">
+          <Card>
+            <CardContent className="p-4">
+              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: project.description || "<i>Tidak ada deskripsi.</i>" }} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+      </div>
+
       {/* Journal Assessment Dialog */}
       <JournalAssessmentDialog
         open={journalDialog.open}
         onOpenChange={open => setJournalDialog(journalDialog => ({ ...journalDialog, open }))}
-        prompt={journalDialog.prompt || "Tulis refleksi kamu di sini..."}
+        prompts={journalDialog.prompts || ["Tulis refleksi kamu di sini..."]}
         initialValue={journalDialog.initialValue}
         loading={journalLoading}
         readOnly={(() => {
@@ -278,14 +306,20 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
           const submission = stage?.submissionsByInstrument[instrument?.instrumentType || ""]?.[0]
           return !!submission
         })()}
-        onSubmit={async value => {
+        onSubmit={async answers => {
           setJournalLoading(true)
           setGlobalLoading(true)
           const stage = groupedStages.find(s => s.name === journalDialog.stageName)
           const instrument = stage?.requiredInstruments.find(i => i.id === journalDialog.instrumentId)
           const stageId = stage?.id || project.stages[0].id
           const instrumentType = (instrument?.instrumentType || "JOURNAL") as "JOURNAL" | "SELF_ASSESSMENT" | "PEER_ASSESSMENT" | "OBSERVATION" | "DAILY_NOTE"
-          const content = { text: value }
+
+          // For backward compatibility, if single answer, submit as single text
+          // If multiple answers, submit as texts array for better data structure
+          const content = answers.length === 1
+            ? { text: answers[0] }
+            : { texts: answers } // Send as structured texts array for multiple questions
+
           const result = await submitStageInstrument({
             projectId: project.id,
             stageId,
@@ -360,32 +394,33 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
           setTimeout(() => setGlobalLoading(false), 600)
         }}
       />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-        <TabsContent value="group">
-            <div className="flex flex-col gap-4">
-                {project.group?.members.map((member) => (
-                  <Card key={member.studentId} className="p-2">
-                    <CardContent className="">
-                      <div className="text-sm text-foreground">{member.name}</div>
-                    </CardContent>
-                  </Card>
-                ))}
-            </div>
-        </TabsContent>
-        <TabsContent value="about">
-          <Card>
-            <CardContent className="p-4">
-              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: project.description || "<i>Tidak ada deskripsi.</i>" }} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+
+      {/* Self Assessment Dialog */}
+      <QuestionnaireAssessmentDialog
+        open={selfDialog.open}
+        onOpenChange={open => setSelfDialog(selfDialog => ({ ...selfDialog, open }))}
+        title="Self Assessment"
+        statements={selfDialog.statements || []}
+        initialValue={selfDialog.initialValue}
+        projectId={project.id}
+        stageId={(() => {
+          const stage = groupedStages.find(s => s.name === selfDialog.stageName)
+          return stage?.id || project.stages[0].id
+        })() as string}
+        instrumentType="SELF_ASSESSMENT"
+        readOnly={(() => {
+          const stage = groupedStages.find(s => s.name === selfDialog.stageName)
+          const instrument = stage?.requiredInstruments.find(i => i.id === selfDialog.instrumentId)
+          const submission = stage?.submissionsByInstrument[instrument?.instrumentType || ""]?.[0]
+          return !!submission
+        })()}
+        onSubmitSuccess={async () => {
+          setGlobalLoading(true)
+          await new Promise(res => setTimeout(res, 300))
+          router.refresh()
+          setTimeout(() => setGlobalLoading(false), 600)
+        }}
+      />
     </>
   )
 }

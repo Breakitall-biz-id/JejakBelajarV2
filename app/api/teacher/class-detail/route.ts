@@ -113,7 +113,7 @@ export async function GET(request: Request) {
     // Get submissions
     const submissionRows = await db
       .select({
-        studentId: submissions.studentId,
+        submittedById: submissions.submittedById,
         projectStageId: submissions.projectStageId,
         score: submissions.score,
         submittedAt: submissions.submittedAt,
@@ -124,7 +124,7 @@ export async function GET(request: Request) {
       .where(
         and(
           inArray(submissions.projectStageId, stageIds),
-          inArray(submissions.studentId, studentIds)
+          inArray(submissions.submittedById, studentIds)
         )
       )
 

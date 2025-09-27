@@ -105,6 +105,37 @@ export const projectStages = pgTable("project_stages", {
 		}).onDelete("cascade"),
 ]);
 
+export const projects = pgTable("projects", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	title: varchar({ length: 255 }).notNull(),
+	description: text(),
+	theme: varchar({ length: 255 }),
+	classId: uuid("class_id").notNull(),
+	teacherId: uuid("teacher_id"),
+	status: projectStatus().default('DRAFT').notNull(),
+	publishedAt: timestamp("published_at", { withTimezone: true, mode: 'string' }),
+	archivedAt: timestamp("archived_at", { withTimezone: true, mode: 'string' }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	templateId: uuid("template_id"),
+}, (table) => [
+	foreignKey({
+			columns: [table.classId],
+			foreignColumns: [classes.id],
+			name: "projects_class_id_classes_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.teacherId],
+			foreignColumns: [users.id],
+			name: "projects_teacher_id_users_id_fk"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.templateId],
+			foreignColumns: [projectTemplates.id],
+			name: "projects_template_id_project_templates_id_fk"
+		}).onDelete("restrict"),
+]);
+
 export const users = pgTable("users", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	name: text().notNull(),
@@ -132,56 +163,13 @@ export const groups = pgTable("groups", {
 		}).onDelete("cascade"),
 ]);
 
-export const projects = pgTable("projects", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	title: varchar({ length: 255 }).notNull(),
-	description: text(),
-	theme: varchar({ length: 255 }),
-	classId: uuid("class_id").notNull(),
-	teacherId: uuid("teacher_id"),
-	status: projectStatus().default('DRAFT').notNull(),
-	publishedAt: timestamp("published_at", { withTimezone: true, mode: 'string' }),
-	archivedAt: timestamp("archived_at", { withTimezone: true, mode: 'string' }),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	foreignKey({
-			columns: [table.classId],
-			foreignColumns: [classes.id],
-			name: "projects_class_id_classes_id_fk"
-		}).onDelete("cascade"),
-	foreignKey({
-			columns: [table.teacherId],
-			foreignColumns: [users.id],
-			name: "projects_teacher_id_users_id_fk"
-		}).onDelete("set null"),
-]);
-
-export const projectStageInstruments = pgTable("project_stage_instruments", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	projectStageId: uuid("project_stage_id").notNull(),
-	instrumentType: instrumentType("instrument_type").notNull(),
-	isRequired: boolean("is_required").default(true).notNull(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	uniqueIndex("project_stage_instruments_type_idx").using("btree", table.projectStageId.asc().nullsLast().op("uuid_ops"), table.instrumentType.asc().nullsLast().op("uuid_ops")),
-	foreignKey({
-			columns: [table.projectStageId],
-			foreignColumns: [projectStages.id],
-			name: "project_stage_instruments_project_stage_id_project_stages_id_fk"
-		}).onDelete("cascade"),
-]);
-
 export const submissions = pgTable("submissions", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
-	studentId: uuid("student_id").notNull(),
+	studentId: uuid("student_id"),
 	projectId: uuid("project_id").notNull(),
 	projectStageId: uuid("project_stage_id"),
-	projectStageName: varchar("project_stage_name", { length: 255 }).notNull(),
-	instrumentType: instrumentType("instrument_type").notNull(),
 	targetStudentId: uuid("target_student_id"),
-	content: jsonb(),
+	content: jsonb().notNull(),
 	score: integer(),
 	feedback: text(),
 	submittedAt: timestamp("submitted_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
@@ -189,6 +177,9 @@ export const submissions = pgTable("submissions", {
 	assessedAt: timestamp("assessed_at", { withTimezone: true, mode: 'string' }),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	templateStageConfigId: uuid("template_stage_config_id"),
+	submittedBy: varchar("submitted_by", { length: 50 }).default('STUDENT').notNull(),
+	submittedById: uuid("submitted_by_id").notNull(),
 }, (table) => [
 	foreignKey({
 			columns: [table.studentId],
@@ -215,6 +206,33 @@ export const submissions = pgTable("submissions", {
 			foreignColumns: [users.id],
 			name: "submissions_assessed_by_users_id_fk"
 		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.submittedById],
+			foreignColumns: [users.id],
+			name: "submissions_submitted_by_id_users_id_fk"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.templateStageConfigId],
+			foreignColumns: [templateStageConfigs.id],
+			name: "submissions_template_stage_config_id_template_stage_configs_id_"
+		}).onDelete("set null"),
+]);
+
+export const projectStageInstruments = pgTable("project_stage_instruments", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	projectStageId: uuid("project_stage_id").notNull(),
+	instrumentType: instrumentType("instrument_type").notNull(),
+	isRequired: boolean("is_required").default(true).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	description: text(),
+}, (table) => [
+	uniqueIndex("project_stage_instruments_type_idx").using("btree", table.projectStageId.asc().nullsLast().op("uuid_ops"), table.instrumentType.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.projectStageId],
+			foreignColumns: [projectStages.id],
+			name: "project_stage_instruments_project_stage_id_project_stages_id_fk"
+		}).onDelete("cascade"),
 ]);
 
 export const accounts = pgTable("accounts", {
@@ -236,6 +254,59 @@ export const accounts = pgTable("accounts", {
 			columns: [table.userId],
 			foreignColumns: [users.id],
 			name: "accounts_user_id_users_id_fk"
+		}).onDelete("cascade"),
+]);
+
+export const projectTemplates = pgTable("project_templates", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	templateName: varchar("template_name", { length: 255 }).notNull(),
+	description: text(),
+	createdById: uuid("created_by_id"),
+	isActive: boolean("is_active").default(true).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.createdById],
+			foreignColumns: [users.id],
+			name: "project_templates_created_by_id_users_id_fk"
+		}).onDelete("set null"),
+	unique("project_templates_template_name_unique").on(table.templateName),
+]);
+
+export const templateStageConfigs = pgTable("template_stage_configs", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	templateId: uuid("template_id").notNull(),
+	stageName: varchar("stage_name", { length: 255 }).notNull(),
+	instrumentType: instrumentType("instrument_type").notNull(),
+	displayOrder: integer("display_order").notNull(),
+	description: text(),
+	estimatedDuration: varchar("estimated_duration", { length: 50 }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	uniqueIndex("template_stage_configs_template_order_idx").using("btree", table.templateId.asc().nullsLast().op("int4_ops"), table.displayOrder.asc().nullsLast().op("int4_ops")),
+	foreignKey({
+			columns: [table.templateId],
+			foreignColumns: [projectTemplates.id],
+			name: "template_stage_configs_template_id_project_templates_id_fk"
+		}).onDelete("cascade"),
+]);
+
+export const templateQuestions = pgTable("template_questions", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	configId: uuid("config_id").notNull(),
+	questionText: text("question_text").notNull(),
+	questionType: varchar("question_type", { length: 50 }).default('STATEMENT').notNull(),
+	scoringGuide: text("scoring_guide"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	rubricCriteria: text("rubric_criteria"),
+}, (table) => [
+	foreignKey({
+			columns: [table.configId],
+			foreignColumns: [templateStageConfigs.id],
+			name: "template_questions_config_id_template_stage_configs_id_fk"
 		}).onDelete("cascade"),
 ]);
 

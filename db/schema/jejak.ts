@@ -151,6 +151,21 @@ export const templateQuestions = pgTable(
   },
 );
 
+// Dedicated table for journal rubrics with multi-indicator assessment
+export const templateJournalRubrics = pgTable(
+  "template_journal_rubrics",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    configId: uuid("config_id")
+      .notNull()
+      .references(() => templateStageConfigs.id, { onDelete: "cascade" }),
+    indicatorText: text("indicator_text").notNull(), // e.g., "Mengajukan pertanyaan terbuka..."
+    criteria: jsonb("criteria").notNull(), // e.g., {"4": "Description for score 4", "3": "...", "2": "...", "1": "..."}
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+);
+
 // Updated Projects table - now links to template
 export const projects = pgTable("projects", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -268,14 +283,15 @@ export const projectStageProgress = pgTable(
 // Updated Submissions table - now works with template questions
 export const submissions = pgTable("submissions", {
   id: uuid("id").defaultRandom().primaryKey(),
-  studentId: uuid("student_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
+
+  submittedBy: varchar("submitted_by", { length: 50 }).notNull().default('STUDENT'), // STUDENT, TEACHER, ADMIN
+  submittedById: uuid("submitted_by_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+
+
   projectId: uuid("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
 
-  // Link to template stage config instead of custom project stage
   templateStageConfigId: uuid("template_stage_config_id")
     .references(() => templateStageConfigs.id, { onDelete: "set null" }),
 
@@ -288,13 +304,9 @@ export const submissions = pgTable("submissions", {
     onDelete: "cascade",
   }),
 
-  // Content structure based on PRD-V2:
-  // For questionnaires: {"template_question_id": score}
-  // For journals: {"text": "...", "html": "..."}
   content: jsonb("content").notNull(),
 
-  // Grading and feedback
-  score: integer("score"), // Auto-calculated for questionnaires, manual for journals
+  score: integer("score"), 
   feedback: text("feedback"),
   submittedAt: timestamp("submitted_at", { withTimezone: true }).defaultNow().notNull(),
   assessedBy: uuid("assessed_by").references(() => user.id, { onDelete: "set null" }),
