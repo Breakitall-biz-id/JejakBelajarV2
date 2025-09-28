@@ -50,6 +50,10 @@ export async function POST(request: Request) {
     const submission = submissionData[0]
 
     // Get project stage to verify class access
+    if (!submission.projectStageId) {
+      return NextResponse.json({ error: "Project stage ID is required" }, { status: 400 })
+    }
+
     const projectStageData = await db
       .select({
         id: projectStages.id,

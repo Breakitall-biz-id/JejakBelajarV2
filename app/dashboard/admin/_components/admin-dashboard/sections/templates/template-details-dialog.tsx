@@ -13,7 +13,38 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { QuestionsList, TemplateQuestion } from "./questions/questions-list"
 import { JournalRubricsList, JournalRubric } from "./journal-rubrics/journal-rubrics-list"
+import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
+
+// Journal Rubrics Skeleton Component
+function JournalRubricsSkeleton() {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-7 w-20" />
+      </div>
+      <div className="space-y-2">
+        {[1, 2].map((i) => (
+          <div key={i} className="border rounded-lg p-3 bg-card">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-3 w-3/4" />
+              <div className="space-y-1">
+                {[1, 2, 3, 4].map((j) => (
+                  <div key={j} className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-8 rounded" />
+                    <Skeleton className="h-3 flex-1" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 interface StageGroup {
   stageName: string
@@ -42,11 +73,24 @@ export function TemplateDetailsDialog({
 
   const [questionsData, setQuestionsData] = useState<Record<string, TemplateQuestion[]>>({})
   const [rubricsData, setRubricsData] = useState<Record<string, JournalRubric[]>>({})
+  const [loading, setLoading] = useState<Record<string, boolean>>({})
+  const [initialLoad, setInitialLoad] = useState(true)
 
   // Fetch all questions and rubrics for all configs when modal opened
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      setInitialLoad(true)
+      return
+    }
+    setInitialLoad(true)
     const fetchAll = async () => {
+      // Set loading states for all configs
+      const loadingStates: Record<string, boolean> = {}
+      template.stageConfigs.forEach(config => {
+        loadingStates[config.id] = true
+      })
+      setLoading(loadingStates)
+
       // Fetch questions
       const questionEntries = await Promise.all(
         template.stageConfigs.map(async (config) => {
@@ -76,11 +120,16 @@ export function TemplateDetailsDialog({
         })
       )
       setRubricsData(Object.fromEntries(rubricEntries))
+
+      // Clear loading states
+      setLoading({})
+      setInitialLoad(false)
     }
     fetchAll()
   }, [open, template.stageConfigs])
 
   const loadQuestions = useCallback(async (configId: string) => {
+    setLoading(prev => ({ ...prev, [configId]: true }))
     try {
       const response = await fetch(`/api/admin/templates/questions?configId=${configId}`)
       if (response.ok) {
@@ -92,10 +141,13 @@ export function TemplateDetailsDialog({
       }
     } catch (error) {
       console.error("Failed to load questions:", error)
+    } finally {
+      setLoading(prev => ({ ...prev, [configId]: false }))
     }
   }, [])
 
   const loadRubrics = useCallback(async (configId: string) => {
+    setLoading(prev => ({ ...prev, [configId]: true }))
     try {
       const response = await fetch(`/api/admin/templates/journal-rubrics?configId=${configId}`)
       if (response.ok) {
@@ -107,6 +159,8 @@ export function TemplateDetailsDialog({
       }
     } catch (error) {
       console.error("Failed to load rubrics:", error)
+    } finally {
+      setLoading(prev => ({ ...prev, [configId]: false }))
     }
   }, [])
 
@@ -246,13 +300,17 @@ export function TemplateDetailsDialog({
                         />
                         {config.instrumentType === "JOURNAL" && (
                           <div className="mt-4 pt-4 border-t">
-                            <JournalRubricsList
-                              configId={config.id}
-                              instrumentType={config.instrumentType}
-                              stageName={stage.stageName}
-                              rubrics={rubricsData[config.id] || []}
-                              onRefresh={() => loadRubrics(config.id)}
-                            />
+                            {loading[config.id] || initialLoad ? (
+                              <JournalRubricsSkeleton />
+                            ) : (
+                              <JournalRubricsList
+                                configId={config.id}
+                                instrumentType={config.instrumentType}
+                                stageName={stage.stageName}
+                                rubrics={rubricsData[config.id] || []}
+                                onRefresh={() => loadRubrics(config.id)}
+                              />
+                            )}
                           </div>
                         )}
                       </TabsContent>

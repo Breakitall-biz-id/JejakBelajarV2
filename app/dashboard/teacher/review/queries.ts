@@ -1,4 +1,4 @@
-import { and, asc, coalesce, eq, inArray, or, sql } from "drizzle-orm"
+import { and, asc, eq, inArray, or, sql } from "drizzle-orm"
 
 import { db } from "@/db"
 import {

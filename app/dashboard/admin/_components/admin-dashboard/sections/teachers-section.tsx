@@ -1,6 +1,6 @@
 "use client";
 
-
+import { useRouter } from "next/navigation";
 import { TeachersTable } from "./teachers-table";
 import { CreateTeacherDialog } from "./teachers-dialogs/create-teacher-dialog";
 import { EditTeacherDialog } from "./teachers-dialogs/edit-teacher-dialog";
@@ -13,6 +13,7 @@ export interface TeachersSectionProps {
 }
 
 export function TeachersSection({ teachers: initialTeachers }: TeachersSectionProps) {
+  const router = useRouter();
   const [teachers, setTeachers] = React.useState<Teacher[]>(initialTeachers);
   const [editTeacher, setEditTeacher] = React.useState<Teacher | null>(null);
 
@@ -79,7 +80,11 @@ export function TeachersSection({ teachers: initialTeachers }: TeachersSectionPr
             }}
             open={!!editTeacher}
             onOpenChange={(open) => !open && setEditTeacher(null)}
-            onSuccess={(values) => handleEditSave(values)}
+            onSuccess={() => {
+              // Refresh the page after successful edit
+              router.refresh();
+              setEditTeacher(null);
+            }}
           />
         )}
       </CardContent>

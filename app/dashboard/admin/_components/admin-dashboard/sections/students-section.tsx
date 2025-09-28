@@ -58,7 +58,11 @@ export function StudentsSection({ students: initialStudents }: StudentsSectionPr
             }}
             open={!!editStudent}
             onOpenChange={(open) => !open && setEditStudent(null)}
-            onSuccess={(values) => handleEditSave(values)}
+            onSuccess={() => {
+              // Refresh the page after successful edit
+              router.refresh();
+              setEditStudent(null);
+            }}
           />
         )}
       </CardContent>

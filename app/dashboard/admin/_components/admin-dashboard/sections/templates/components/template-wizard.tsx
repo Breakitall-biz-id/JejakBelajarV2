@@ -112,7 +112,12 @@ export function TemplateWizard({
           {currentStep === 2 && (
             <StageConfigurator
               key={rerenderTrigger}
-              stageFields={stageFields}
+              stageFields={stageFields.map(field => ({
+                id: field.id,
+                stageName: field.stageName,
+                description: field.description || "", // Ensure description is always a string
+                estimatedDuration: field.estimatedDuration || "", // Ensure estimatedDuration is always a string
+              }))}
               onRemoveStage={removeStage}
               onMoveStage={swapStage}
               onInstrumentChange={handleInstrumentChange}

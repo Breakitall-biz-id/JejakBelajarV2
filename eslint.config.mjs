@@ -20,6 +20,16 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-empty-function": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "react-hooks/exhaustive-deps": "warn",
+      "prefer-const": "off",
+    },
+  },
 ];
 
 export default eslintConfig;

@@ -45,7 +45,7 @@ export function EditJournalRubricDialog({
   useEffect(() => {
     if (rubric && open) {
       setIndicatorText(rubric.indicatorText)
-      setCriteria(rubric.criteria)
+      setCriteria(rubric.criteria as {"4": string; "3": string; "2": string; "1": string})
     }
   }, [rubric, open])
 

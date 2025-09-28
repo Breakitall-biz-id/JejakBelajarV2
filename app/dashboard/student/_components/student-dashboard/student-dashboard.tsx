@@ -38,7 +38,6 @@ export function StudentDashboard({ student, data }: StudentDashboardProps) {
           <ProjectCard
             key={project.id}
             project={project}
-            student={student}
             router={router}
           />
         ))}

@@ -16,6 +16,7 @@ import { toast } from "sonner"
 
 import type { CurrentUser } from "@/lib/auth/session"
 import { submitQuestionnaire } from "../../actions"
+import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime"
 
 type QuestionnaireQuestion = {
   id: string
@@ -77,7 +78,7 @@ export function Questionnaire({
         projectId,
         stageId,
         instrumentType,
-        content: values.answers,
+        answers: values.answers,
         targetStudentId: targetStudent?.id,
       })
 

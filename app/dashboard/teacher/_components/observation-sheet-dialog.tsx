@@ -68,7 +68,7 @@ export function ObservationSheetDialog({
     if (!readOnly) {
       setAnswers(ans =>
         ans.map((row, sIdx) =>
-          sIdx === currentStatement ? { ...row, [studentId]: value || undefined } : row
+          sIdx === currentStatement ? { ...row, [studentId]: value } : row
         )
       );
     }

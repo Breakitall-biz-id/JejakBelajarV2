@@ -14,6 +14,7 @@ import {
   projectTemplates,
   templateStageConfigs,
   templateQuestions,
+  templateJournalRubrics,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
 import {
@@ -137,6 +138,94 @@ const handleError = (error: unknown, fallback: string): ActionResult => {
 
   if (error instanceof ForbiddenError) {
     return { success: false, error: "Only school administrators can perform this action." }
+  }
+
+  // Handle Better Auth errors
+  if (error && typeof error === 'object' && 'message' in error) {
+    const errorMessage = (error as any).message
+
+    // Better Auth specific error messages
+    if (errorMessage.includes('Invalid password')) {
+      return {
+        success: false,
+        error: "Password yang dimasukkan tidak valid. Pastikan password memenuhi syarat keamanan."
+      }
+    }
+
+    if (errorMessage.includes('Email already exists')) {
+      return {
+        success: false,
+        error: "Email ini sudah terdaftar di sistem. Silakan gunakan email yang berbeda."
+      }
+    }
+
+    if (errorMessage.includes('Invalid email')) {
+      return {
+        success: false,
+        error: "Format email tidak valid. Silakan periksa kembali alamat email Anda."
+      }
+    }
+
+    if (errorMessage.includes('Password too short')) {
+      return {
+        success: false,
+        error: "Password terlalu pendek. Gunakan minimal 8 karakter."
+      }
+    }
+  }
+
+  // Handle Postgres duplicate key error
+  if (error && typeof error === 'object' && 'code' in error) {
+    const postgresError = error as any
+    if (postgresError.code === '23505') {
+      // Extract constraint name and table name from error
+      const constraintName = postgresError.constraint_name || 'unknown constraint'
+      const tableName = postgresError.table_name || 'table'
+
+      // Provide user-friendly messages based on constraint
+      if (constraintName.includes('academic_terms_year_semester')) {
+        return {
+          success: false,
+          error: "Tahun ajaran dengan periode ini sudah ada. Silakan gunakan tahun ajaran atau semester yang berbeda."
+        }
+      }
+
+      if (constraintName.includes('classes_name_term')) {
+        return {
+          success: false,
+          error: "Nama kelas ini sudah ada untuk tahun ajaran yang dipilih. Silakan gunakan nama yang berbeda."
+        }
+      }
+
+      if (constraintName.includes('users_email_unique')) {
+        return {
+          success: false,
+          error: "Email ini sudah terdaftar. Silakan gunakan email yang berbeda."
+        }
+      }
+
+      // Generic duplicate key message
+      return {
+        success: false,
+        error: `Data yang Anda masukkan sudah ada di sistem. Silakan periksa kembali data Anda.`
+      }
+    }
+
+    // Handle foreign key constraint errors
+    if (postgresError.code === '23503') {
+      return {
+        success: false,
+        error: "Data terkait tidak ditemukan. Silakan periksa referensi data Anda."
+      }
+    }
+
+    // Handle not null constraint errors
+    if (postgresError.code === '23502') {
+      return {
+        success: false,
+        error: "Ada data yang wajib diisi. Silakan periksa kembali formulir Anda."
+      }
+    }
   }
 
   console.error(fallback, error)
@@ -475,10 +564,17 @@ export async function createAccount(
       },
     })
 
-    const createdUser = response?.data?.user ?? response?.user
+    const createdUser = response?.user
 
     if (!createdUser?.id) {
-      throw new Error(response?.error?.message ?? "Account creation failed")
+      // Handle Better Auth specific errors
+      if (response && typeof response === 'object' && 'error' in response) {
+        const authError = response as any
+        if (authError.error?.message) {
+          throw new Error(authError.error.message)
+        }
+      }
+      throw new Error("Pembuatan akun gagal. Periksa kembali data yang dimasukkan.")
     }
 
     await db
@@ -721,7 +817,7 @@ export async function createTemplate(
     })
 
     revalidatePath(DASHBOARD_ADMIN_PATH)
-    return result
+    return result as ActionResult
 
   } catch (error) {
     return handleError(error, "Failed to create template.")
@@ -761,7 +857,7 @@ export async function updateTemplate(
 
       // Update stage configurations if provided
       if (parsed.data.stageConfigs && parsed.data.stageConfigs.length > 0) {
-        // Get existing configs with their questions to preserve them
+        // Get existing configs with their questions and journal rubrics to preserve them
         const existingConfigs = await tx
           .select({
             id: templateStageConfigs.id,
@@ -771,17 +867,29 @@ export async function updateTemplate(
               questionType: templateQuestions.questionType,
               scoringGuide: templateQuestions.scoringGuide,
             },
+            journalRubrics: {
+              id: templateJournalRubrics.id,
+              indicatorText: templateJournalRubrics.indicatorText,
+              criteria: templateJournalRubrics.criteria,
+            },
           })
           .from(templateStageConfigs)
           .leftJoin(
             templateQuestions,
             eq(templateQuestions.configId, templateStageConfigs.id)
           )
+          .leftJoin(
+            templateJournalRubrics,
+            eq(templateJournalRubrics.configId, templateStageConfigs.id)
+          )
           .where(eq(templateStageConfigs.templateId, parsed.data.templateId))
 
-        // Store existing questions by config ID to preserve them
+        // Store existing questions and journal rubrics by config ID to preserve them
         const questionsToPreserve: Record<string, typeof templateQuestions.$inferInsert[]> = {}
+        const journalRubricsToPreserve: Record<string, typeof templateJournalRubrics.$inferInsert[]> = {}
+
         existingConfigs.forEach(row => {
+          // Preserve questions
           if (row.questions) {
             if (!questionsToPreserve[row.id]) {
               questionsToPreserve[row.id] = []
@@ -791,6 +899,18 @@ export async function updateTemplate(
               questionText: row.questions.questionText,
               questionType: row.questions.questionType,
               scoringGuide: row.questions.scoringGuide,
+            })
+          }
+
+          // Preserve journal rubrics
+          if (row.journalRubrics) {
+            if (!journalRubricsToPreserve[row.id]) {
+              journalRubricsToPreserve[row.id] = []
+            }
+            journalRubricsToPreserve[row.id].push({
+              configId: row.id, // Will be updated to new config ID later
+              indicatorText: row.journalRubrics.indicatorText,
+              criteria: row.journalRubrics.criteria,
             })
           }
         })
@@ -815,19 +935,31 @@ export async function updateTemplate(
           .values(newConfigs)
           .returning({ id: templateStageConfigs.id, stageName: templateStageConfigs.stageName })
 
-        // Recreate questions for preserved configs
+        // Recreate questions and journal rubrics for preserved configs
         for (let i = 0; i < parsed.data.stageConfigs.length; i++) {
           const oldConfigId = parsed.data.stageConfigs[i].id
           const newConfigId = insertedConfigs[i]?.id
 
-          if (oldConfigId && newConfigId && questionsToPreserve[oldConfigId]) {
+          if (oldConfigId && newConfigId) {
             // Recreate questions for this config
-            await tx.insert(templateQuestions).values(
-              questionsToPreserve[oldConfigId].map(q => ({
-                ...q,
-                configId: newConfigId,
-              }))
-            )
+            if (questionsToPreserve[oldConfigId]) {
+              await tx.insert(templateQuestions).values(
+                questionsToPreserve[oldConfigId].map(q => ({
+                  ...q,
+                  configId: newConfigId,
+                }))
+              )
+            }
+
+            // Recreate journal rubrics for this config
+            if (journalRubricsToPreserve[oldConfigId]) {
+              await tx.insert(templateJournalRubrics).values(
+                journalRubricsToPreserve[oldConfigId].map(r => ({
+                  ...r,
+                  configId: newConfigId,
+                }))
+              )
+            }
           }
         }
       }

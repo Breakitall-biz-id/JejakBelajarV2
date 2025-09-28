@@ -15,6 +15,7 @@ export const formSchema = z.object({
   semester: z.enum(["ODD", "EVEN"]),
   startsAt: z.string().optional(),
   endsAt: z.string().optional(),
+  setActive: z.boolean().optional(),
 })
 
 export type TermFormValues = z.infer<typeof formSchema>
@@ -77,6 +78,22 @@ export function TermFormFields({ form }: { form: ReturnType<typeof useForm<TermF
             <FormLabel className="text-xs font-medium text-muted-foreground">Selesai</FormLabel>
             <FormControl>
               <DatePicker value={field.value ?? null} onChange={field.onChange} placeholder="Pilih tanggal selesai" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="setActive"
+        render={({ field }) => (
+          <FormItem className="space-y-1">
+            <FormLabel className="text-xs font-medium text-muted-foreground">Set sebagai Aktif</FormLabel>
+            <FormControl>
+              <Switch
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

@@ -31,6 +31,19 @@ import {
   instrumentDescription,
 } from "./helpers"
 
+type FormSchema =
+  | z.ZodObject<{
+      response: z.ZodString
+      targetStudentId: z.ZodString
+    }>
+  | z.ZodObject<{
+      response: z.ZodString
+      targetStudentId: z.ZodOptional<z.ZodString>
+    }>
+  | z.ZodObject<{
+      response: z.ZodString
+    }>
+
 type InstrumentSubmissionCardProps = {
   stage: StudentDashboardData["projects"][number]["stages"][number]
   instrumentType: string
@@ -76,7 +89,7 @@ export function InstrumentSubmissionCard({
     }
   }, [stage.id, isQuestionnaireType])
 
-  const formSchema = useMemo(() => {
+  const formSchema = useMemo((): FormSchema => {
     if (instrumentType === "PEER_ASSESSMENT") {
       if (!hasPeers) {
         return z.object({
@@ -166,7 +179,7 @@ export function InstrumentSubmissionCard({
   // For questionnaire-based instruments, use the modern questionnaire interface
   if (isQuestionnaireType && templateQuestions.length > 0) {
     const targetStudent = instrumentType === "PEER_ASSESSMENT" && peers.length > 0
-      ? peers[0]
+      ? { id: peers[0].studentId, name: peers[0].name }
       : undefined
 
     return (

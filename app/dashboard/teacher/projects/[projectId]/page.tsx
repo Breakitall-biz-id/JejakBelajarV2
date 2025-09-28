@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, use } from "react"
 import Link from "next/link"
 import { ArrowLeft, Calendar, CheckCircle, Clock, Users, BookOpen, FileText, MessageSquare, Eye, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -42,11 +42,13 @@ type Project = {
 export default function ProjectDetailPage({
   params
 }: {
-  params: { projectId: string }
+  params: Promise<{ projectId: string }>
 }) {
+  const { projectId } = use(params)
+
   // Mock data - in real app, this would come from API
   const project: Project = {
-    id: params.projectId,
+    id: projectId,
     title: "P5 Project: Environmental Awareness",
     description: "Students will explore environmental issues and create solutions for local community problems.",
     theme: "Environmental Sustainability",

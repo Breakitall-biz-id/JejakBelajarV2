@@ -22,6 +22,7 @@ type DialogState = {
   stageId?: string;
 };
 import * as React from "react"
+import { use } from "react"
 import { Button } from "@/components/ui/button"
 import { Eye } from "lucide-react"
 import { JournalAssessmentDialog } from "../../../../student/_components/student-dashboard/journal-assessment-dialog"
@@ -126,8 +127,9 @@ function convertRubricCriteria(rubricCriteria?: unknown): { [score: string]: str
 export default function ProjectDetailPage({
   params
 }: {
-  params: { classId: string; projectId: string }
+  params: Promise<{ classId: string; projectId: string }>
 }) {
+  const { classId, projectId } = use(params)
   // Dialog state for all instruments
   const [dialog, setDialog] = React.useState<DialogState>({ open: false, student: null, instrumentType: null });
   const [observationDialog, setObservationDialog] = React.useState<{
@@ -146,7 +148,7 @@ export default function ProjectDetailPage({
   const loadProject = React.useCallback(async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/teacher/project-detail?classId=${params.classId}&projectId=${params.projectId}`)
+      const response = await fetch(`/api/teacher/project-detail?classId=${classId}&projectId=${projectId}`)
       if (response.ok) {
         const data = await response.json()
         console.log("🔍 DEBUG - Raw project data:", data);
@@ -170,11 +172,11 @@ export default function ProjectDetailPage({
     } finally {
       setLoading(false)
     }
-  }, [params.classId, params.projectId])
+  }, [classId, projectId])
 
   React.useEffect(() => {
     loadProject()
-  }, [params.classId, params.projectId, loadProject])
+  }, [classId, projectId, loadProject])
 
   // Group stages by name and combine data
   const groupedStages = React.useMemo(() => {

@@ -4,7 +4,7 @@ import { ProjectDetail } from "../../_components/student-dashboard/project-detai
 import { notFound } from "next/navigation"
 import { getCurrentUser } from "@/lib/auth/session"
 
-export default async function ProjectDetailPage(props: { params: { projectId: string } }) {
+export default async function ProjectDetailPage(props: { params: Promise<{ projectId: string }> }) {
   const { params } = props
   const { projectId } = await params
   const user = await getCurrentUser()

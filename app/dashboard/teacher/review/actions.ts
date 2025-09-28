@@ -57,7 +57,7 @@ export async function gradeSubmission(
       const submission = await tx
         .select({
           id: submissions.id,
-          studentId: submissions.studentId,
+          targetStudentId: submissions.targetStudentId,
           projectId: submissions.projectId,
           projectStageId: submissions.projectStageId,
         })
@@ -82,7 +82,7 @@ export async function gradeSubmission(
         .where(eq(submissions.id, submission.id))
 
       if (parsed.data.score !== null) {
-        await evaluateStageCompletion(tx, submission.studentId, submission.projectId, submission.projectStageId)
+        await evaluateStageCompletion(tx, submission.targetStudentId, submission.projectId, submission.projectStageId)
       }
     })
 

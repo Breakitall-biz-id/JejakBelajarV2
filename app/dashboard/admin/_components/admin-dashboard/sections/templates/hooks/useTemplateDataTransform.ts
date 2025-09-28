@@ -10,14 +10,14 @@ export function transformTemplateToFormData(template: ProjectTemplate): Template
     if (!acc[config.stageName]) {
       acc[config.stageName] = {
         stageName: config.stageName,
-        description: config.description,
-        estimatedDuration: config.estimatedDuration,
+        description: config.description || undefined,
+        estimatedDuration: config.estimatedDuration || undefined,
         instruments: [],
       }
     }
     acc[config.stageName].instruments.push({
-      instrumentType: config.instrumentType,
-      description: config.description,
+      instrumentType: config.instrumentType as "JOURNAL" | "SELF_ASSESSMENT" | "PEER_ASSESSMENT" | "OBSERVATION",
+      description: config.description || undefined,
       configId: config.id, // ✅ Preserve the configId for existing instruments
     })
     return acc

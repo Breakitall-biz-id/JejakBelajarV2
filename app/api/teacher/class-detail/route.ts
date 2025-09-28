@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { requireTeacherUser } from "@/lib/auth/session"
-import { and, eq, inArray } from "drizzle-orm"
+import { and, eq, inArray, or } from "drizzle-orm"
 import { db } from "@/db"
 import {
   classes,
@@ -114,6 +114,7 @@ export async function GET(request: Request) {
     const submissionRows = await db
       .select({
         submittedById: submissions.submittedById,
+        targetStudentId: submissions.targetStudentId,
         projectStageId: submissions.projectStageId,
         score: submissions.score,
         submittedAt: submissions.submittedAt,
@@ -124,7 +125,10 @@ export async function GET(request: Request) {
       .where(
         and(
           inArray(submissions.projectStageId, stageIds),
-          inArray(submissions.submittedById, studentIds)
+          or(
+            inArray(submissions.submittedById, studentIds),
+            inArray(submissions.targetStudentId, studentIds)
+          )
         )
       )
 
@@ -147,7 +151,9 @@ export async function GET(request: Request) {
     // Transform data
     const students = studentRows.map(student => {
       const groupMembership = groupData.find(g => g.studentId === student.studentId)
-      const studentSubmissions = submissionRows.filter(s => s.studentId === student.studentId)
+      const studentSubmissions = submissionRows.filter(s =>
+        s.submittedById === student.studentId || s.targetStudentId === student.studentId
+      )
       const studentProgress = progressRows.filter(p => p.studentId === student.studentId)
 
       const projectGrades = projectRows.map(project => {

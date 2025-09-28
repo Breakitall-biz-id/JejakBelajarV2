@@ -6,10 +6,11 @@ import { eq } from "drizzle-orm"
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await requireAdminUser()
+    const params = await context.params
 
     const body = await request.json()
     const { indicatorText, criteria } = body
@@ -42,17 +43,18 @@ export async function PUT(
       data: updatedRubric
     })
   } catch (error) {
-    console.error(`[API /api/admin/templates/journal-rubrics/${params.id} PUT]`, error)
+    console.error(`[API /api/admin/templates/journal-rubrics PUT]`, error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await requireAdminUser()
+    const params = await context.params
 
     const [deletedRubric] = await db
       .delete(templateJournalRubrics)
@@ -68,7 +70,7 @@ export async function DELETE(
       data: deletedRubric
     })
   } catch (error) {
-    console.error(`[API /api/admin/templates/journal-rubrics/${params.id} DELETE]`, error)
+    console.error(`[API /api/admin/templates/journal-rubrics DELETE]`, error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

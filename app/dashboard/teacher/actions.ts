@@ -150,7 +150,80 @@ const handleError = (error: unknown, fallback: string): ActionResult => {
     return { success: false, error: "You are not allowed to perform this action." }
   }
 
-  // Error logging removed for production
+  // Handle Better Auth errors
+  if (error && typeof error === 'object' && 'message' in error) {
+    const errorMessage = (error as any).message
+
+    // Better Auth specific error messages
+    if (errorMessage.includes('Invalid password')) {
+      return {
+        success: false,
+        error: "Password yang dimasukkan tidak valid. Pastikan password memenuhi syarat keamanan."
+      }
+    }
+
+    if (errorMessage.includes('Email already exists')) {
+      return {
+        success: false,
+        error: "Email ini sudah terdaftar di sistem. Silakan gunakan email yang berbeda."
+      }
+    }
+
+    if (errorMessage.includes('Invalid email')) {
+      return {
+        success: false,
+        error: "Format email tidak valid. Silakan periksa kembali alamat email Anda."
+      }
+    }
+  }
+
+  // Handle Postgres duplicate key error
+  if (error && typeof error === 'object' && 'code' in error) {
+    const postgresError = error as any
+    if (postgresError.code === '23505') {
+      // Extract constraint name and table name from error
+      const constraintName = postgresError.constraint_name || 'unknown constraint'
+
+      // Provide user-friendly messages based on constraint
+      if (constraintName.includes('projects_title_class')) {
+        return {
+          success: false,
+          error: "Judul project ini sudah ada untuk kelas yang dipilih. Silakan gunakan judul yang berbeda."
+        }
+      }
+
+      if (constraintName.includes('groups_name_project')) {
+        return {
+          success: false,
+          error: "Nama kelompok ini sudah ada untuk project ini. Silakan gunakan nama yang berbeda."
+        }
+      }
+
+      // Generic duplicate key message
+      return {
+        success: false,
+        error: "Data yang Anda masukkan sudah ada di sistem. Silakan periksa kembali data Anda."
+      }
+    }
+
+    // Handle foreign key constraint errors
+    if (postgresError.code === '23503') {
+      return {
+        success: false,
+        error: "Data terkait tidak ditemukan. Silakan periksa referensi data Anda."
+      }
+    }
+
+    // Handle not null constraint errors
+    if (postgresError.code === '23502') {
+      return {
+        success: false,
+        error: "Ada data yang wajib diisi. Silakan periksa kembali formulir Anda."
+      }
+    }
+  }
+
+  console.error(fallback, error)
   return { success: false, error: fallback }
 }
 
@@ -317,7 +390,7 @@ export async function createProject(
 
     return { success: true, data: { projectId: result.id } }
   } catch (error) {
-    return handleError(error, "Unable to create project.")
+    return handleError(error, "Unable to create project.") as ActionResult<{ projectId: string }>
   }
 }
 
@@ -465,7 +538,7 @@ export async function createProjectStage(
 
     return { success: true, data: { stageId: created.id } }
   } catch (error) {
-    return handleError(error, "Unable to create project stage.")
+    return handleError(error, "Unable to create project stage.") as ActionResult<{ stageId: string }>
   }
 }
 
@@ -722,7 +795,7 @@ export async function createGroup(
 
     return { success: true, data: { groupId: created.id } }
   } catch (error) {
-    return handleError(error, "Unable to create group.")
+    return handleError(error, "Unable to create group.") as ActionResult<{ groupId: string }>
   }
 }
 
@@ -1101,7 +1174,7 @@ export async function submitTeacherReport(
       // Special handling for OBSERVATION - create fallback if not in template
       if (!templateConfig && instrumentType === "OBSERVATION") {
         // For OBSERVATION, we don't need template config - allow submission without it
-        templateConfig = { id: null }
+        templateConfig = { id: "observation-fallback" }
       } else if (!templateConfig) {
         throw new ForbiddenError("Instrument configuration not found for this stage.")
       }
@@ -1135,7 +1208,6 @@ export async function submitTeacherReport(
           .where(eq(submissions.id, existingSubmission.id))
       } else {
         await tx.insert(submissions).values({
-          studentId: null, // Teacher submissions don't have studentId
           submittedBy: 'TEACHER',
           submittedById: teacher.user.id,
           projectId,

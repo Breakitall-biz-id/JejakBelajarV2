@@ -23,4 +23,5 @@ export const auth = betterAuth({
             generateId: () => randomUUID(),
         },
     },
+    secret: process.env.BETTER_AUTH_SECRET || "fallback-secret-for-development",
 });

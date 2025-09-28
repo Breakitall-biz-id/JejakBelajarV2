@@ -26,13 +26,21 @@ type ActionResult<T = void> =
   | { success: true; data?: T }
   | { success: false; error: string; fieldErrors?: Record<string, string[]> }
 
-const studentInstrumentSchema = z.enum([
+export const studentInstrumentSchema = z.enum([
   "JOURNAL",
   "SELF_ASSESSMENT",
   "PEER_ASSESSMENT",
   "DAILY_NOTE",
   "OBSERVATION",
 ] as const)
+
+export const questionnaireSchema = z.object({
+  projectId: z.string().uuid(),
+  stageId: z.string().uuid(),
+  instrumentType: studentInstrumentSchema,
+  targetStudentId: z.string().uuid().optional().nullable(),
+  answers: z.record(z.string(), z.number().min(1).max(4)),
+})
 
 const submissionSchema = z.object({
   projectId: z.string().uuid(),
@@ -89,7 +97,7 @@ export async function submitStageInstrument(
         .from(projects)
         .where(eq(projects.id, projectId))
         .limit(1)
-        .then((rows) => rows[0])
+        .then((rows: any[]) => rows[0])
 
       if (!projectRecord || projectRecord.status !== "PUBLISHED") {
         throw new ForbiddenError("Project not available.")
@@ -105,7 +113,7 @@ export async function submitStageInstrument(
           ),
         )
         .limit(1)
-        .then((rows) => rows[0])
+        .then((rows: any[]) => rows[0])
 
       if (!classAssignment) {
         throw new ForbiddenError("You are not assigned to this project.")
@@ -126,7 +134,7 @@ export async function submitStageInstrument(
           ),
         )
         .limit(1)
-        .then((rows) => rows[0])
+        .then((rows: any[]) => rows[0])
 
       if (!stageRecord) {
         throw new ForbiddenError("Stage not found.")
@@ -169,7 +177,7 @@ export async function submitStageInstrument(
           ),
         )
         .limit(1)
-        .then((rows) => rows[0])
+        .then((rows: any[]) => rows[0])
 
       if (!templateConfig) {
         throw new ForbiddenError("Instrument configuration not found for this stage.")
@@ -190,7 +198,7 @@ export async function submitStageInstrument(
           ),
         )
         .limit(1)
-        .then((rows) => rows[0])
+        .then((rows: any[]) => rows[0])
 
       if (existingSubmission) {
         await tx
@@ -204,7 +212,6 @@ export async function submitStageInstrument(
           .where(eq(submissions.id, existingSubmission.id))
       } else {
         await tx.insert(submissions).values({
-          studentId: student.user.id,
           submittedBy: 'STUDENT',
           submittedById: student.user.id,
           projectId,
@@ -252,7 +259,7 @@ async function ensureStageProgress(
       ),
     )
     .limit(1)
-    .then((rows) => rows[0])
+    .then((rows: any[]) => rows[0])
 
   if (existing) {
     return existing
@@ -292,7 +299,7 @@ async function validatePeerTarget(
       ),
     )
     .limit(1)
-    .then((rows) => rows[0])
+    .then((rows: any[]) => rows[0])
 
   if (!studentGroup) {
     throw new ForbiddenError("You are not assigned to a group for this project.")
@@ -308,7 +315,7 @@ async function validatePeerTarget(
       ),
     )
     .limit(1)
-    .then((rows) => rows[0])
+    .then((rows: any[]) => rows[0])
 
   if (!peer) {
     throw new ForbiddenError("Peer not found in your group.")
@@ -330,7 +337,7 @@ async function evaluateStageCompletion(
     .from(projectStages)
     .where(eq(projectStages.id, stageId))
     .limit(1)
-    .then((rows) => rows[0])
+    .then((rows: any[]) => rows[0])
 
   if (!stage) {
     return
@@ -346,7 +353,7 @@ async function evaluateStageCompletion(
       ),
     )
     .limit(1)
-    .then((rows) => rows[0])
+    .then((rows: any[]) => rows[0])
 
   if (!progress) {
     return
@@ -362,8 +369,8 @@ async function evaluateStageCompletion(
     .where(eq(projectStageInstruments.projectStageId, stageId))
 
   const requiredStudentInstruments = stageInstruments
-    .filter((instrument) => instrument.isRequired && studentInstrumentTypes.has(instrument.instrumentType))
-    .map((instrument) => instrument.instrumentType)
+    .filter((instrument: any) => instrument.isRequired && studentInstrumentTypes.has(instrument.instrumentType))
+    .map((instrument: any) => instrument.instrumentType)
 
   if (requiredStudentInstruments.length === 0) {
     await markStageCompleted(tx, progress.id)
@@ -387,15 +394,15 @@ async function evaluateStageCompletion(
     )
 
   // Check if all required instruments have been submitted
-  const submittedInstruments = new Set(studentSubmissions.map(s => s.instrumentType))
+  const submittedInstruments = new Set(studentSubmissions.map((s: any) => s.instrumentType))
 
   // For peer assessment, verify there's at least one submission with a target
   const hasPeerAssessment = requiredStudentInstruments.includes("PEER_ASSESSMENT")
   const hasValidPeerSubmission = hasPeerAssessment
-    ? studentSubmissions.some(s => s.instrumentType === "PEER_ASSESSMENT" && s.targetStudentId)
+    ? studentSubmissions.some((s: any) => s.instrumentType === "PEER_ASSESSMENT" && s.targetStudentId)
     : true
 
-  const hasFulfilledAll = requiredStudentInstruments.every(instrument =>
+  const hasFulfilledAll = requiredStudentInstruments.every((instrument: any) =>
     submittedInstruments.has(instrument)
   ) && hasValidPeerSubmission
 
@@ -441,7 +448,7 @@ async function unlockNextStage(
     )
     .orderBy(asc(projectStages.order))
     .limit(1)
-    .then((rows) => rows[0])
+    .then((rows: any[]) => rows[0])
 
   if (!nextStage) {
     return
@@ -457,7 +464,7 @@ async function unlockNextStage(
       ),
     )
     .limit(1)
-    .then((rows) => rows[0])
+    .then((rows: any[]) => rows[0])
 
   if (!nextProgress) {
     await tx.insert(projectStageProgress).values({
@@ -543,7 +550,7 @@ export async function submitQuestionnaire(
           ),
         )
         .limit(1)
-        .then((rows) => rows[0])
+        .then((rows: any[]) => rows[0])
 
       if (!classAssignment) {
         throw new ForbiddenError("You are not assigned to this project.")
@@ -563,7 +570,7 @@ export async function submitQuestionnaire(
           ),
         )
         .limit(1)
-        .then((rows) => rows[0])
+        .then((rows: any[]) => rows[0])
 
       if (!stageRecord) {
         throw new ForbiddenError("Stage not found.")
@@ -587,15 +594,15 @@ export async function submitQuestionnaire(
           ),
         )
         .limit(1)
-        .then((rows) => rows[0])
+        .then((rows: any[]) => rows[0])
 
       if (!templateConfig) {
         throw new ForbiddenError("Instrument configuration not found for this stage.")
       }
 
       // Calculate total score from questionnaire responses
-      const totalScore = Object.values(input.content).reduce((sum, score) => sum + score, 0)
-      const averageScore = totalScore / Object.keys(input.content).length
+      const totalScore = Object.values(input.answers).reduce((sum: number, score: number) => sum + score, 0)
+      const averageScore = totalScore / Object.keys(input.answers).length
 
       // Check if submission already exists
       const existingSubmission = await tx
@@ -611,14 +618,14 @@ export async function submitQuestionnaire(
           ),
         )
         .limit(1)
-        .then((rows) => rows[0])
+        .then((rows: any[]) => rows[0])
 
       if (existingSubmission) {
         // Update existing submission
         await tx
           .update(submissions)
           .set({
-            content: input.content,
+            content: input.answers,
             score: Math.round(averageScore),
             submittedAt: new Date(),
           })
@@ -626,13 +633,12 @@ export async function submitQuestionnaire(
       } else {
         // Create new submission
         await tx.insert(submissions).values({
-          studentId: student.user.id,
           submittedBy: 'STUDENT',
           submittedById: student.user.id,
           projectId: input.projectId,
           projectStageId: input.stageId,
           templateStageConfigId: templateConfig.id,
-          content: input.content,
+          content: input.answers,
           score: Math.round(averageScore),
           targetStudentId: input.targetStudentId,
         })
@@ -641,7 +647,7 @@ export async function submitQuestionnaire(
       return { success: true, data: undefined }
     })
 
-    return result
+    return result as ActionResult
   } catch (error) {
     return handleError(error, "Failed to submit questionnaire")
   }

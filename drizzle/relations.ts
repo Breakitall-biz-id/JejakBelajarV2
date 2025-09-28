@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { users, sessions, academicTerms, classes, projectStages, projectStageProgress, projects, projectTemplates, groups, submissions, templateStageConfigs, projectStageInstruments, accounts, templateQuestions, templateJournalRubrics, groupMembers, userClassAssignments } from "./schema";
+import { users, sessions, academicTerms, classes, projectStages, projectStageProgress, projects, projectTemplates, groups, submissions, templateStageConfigs, projectStageInstruments, accounts, templateQuestions, groupMembers, userClassAssignments } from "./schema";
 
 export const sessionsRelations = relations(sessions, ({one}) => ({
 	user: one(users, {
@@ -12,9 +12,6 @@ export const usersRelations = relations(users, ({many}) => ({
 	sessions: many(sessions),
 	projectStageProgresses: many(projectStageProgress),
 	projects: many(projects),
-	submissions_studentId: many(submissions, {
-		relationName: "submissions_studentId_users_id"
-	}),
 	submissions_targetStudentId: many(submissions, {
 		relationName: "submissions_targetStudentId_users_id"
 	}),
@@ -100,11 +97,6 @@ export const groupsRelations = relations(groups, ({one, many}) => ({
 }));
 
 export const submissionsRelations = relations(submissions, ({one}) => ({
-	user_studentId: one(users, {
-		fields: [submissions.studentId],
-		references: [users.id],
-		relationName: "submissions_studentId_users_id"
-	}),
 	project: one(projects, {
 		fields: [submissions.projectId],
 		references: [projects.id]
@@ -141,7 +133,6 @@ export const templateStageConfigsRelations = relations(templateStageConfigs, ({o
 		references: [projectTemplates.id]
 	}),
 	templateQuestions: many(templateQuestions),
-	templateJournalRubrics: many(templateJournalRubrics),
 }));
 
 export const projectStageInstrumentsRelations = relations(projectStageInstruments, ({one}) => ({
@@ -161,13 +152,6 @@ export const accountsRelations = relations(accounts, ({one}) => ({
 export const templateQuestionsRelations = relations(templateQuestions, ({one}) => ({
 	templateStageConfig: one(templateStageConfigs, {
 		fields: [templateQuestions.configId],
-		references: [templateStageConfigs.id]
-	}),
-}));
-
-export const templateJournalRubricsRelations = relations(templateJournalRubrics, ({one}) => ({
-	templateStageConfig: one(templateStageConfigs, {
-		fields: [templateJournalRubrics.configId],
 		references: [templateStageConfigs.id]
 	}),
 }));

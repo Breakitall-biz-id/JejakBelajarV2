@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, use } from "react"
 import * as React from "react"
 import { ArrowLeft, Search, Download } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -44,13 +44,14 @@ type StudentDetailData = {
 }
 
 type StudentDetailPageProps = {
-  params: {
+  params: Promise<{
     classId: string
     studentId: string
-  }
+  }>
 }
 
 export default function StudentDetailPage({ params }: StudentDetailPageProps) {
+  const { classId, studentId } = use(params)
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [studentData, setStudentData] = useState<StudentDetailData | null>(null)
@@ -58,7 +59,7 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
   React.useEffect(() => {
     async function loadStudentData() {
       try {
-        const response = await fetch(`/api/teacher/student-detail?classId=${params.classId}&studentId=${params.studentId}`)
+        const response = await fetch(`/api/teacher/student-detail?classId=${classId}&studentId=${studentId}`)
         if (response.ok) {
           const data = await response.json()
           setStudentData(data)
@@ -69,7 +70,7 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
     }
 
     loadStudentData()
-  }, [params.classId, params.studentId])
+  }, [classId, studentId])
 
   function GradeBadge({ grade }: { grade: number }) {
     if (grade >= 3.5) return (
@@ -108,7 +109,7 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
             <div className="text-muted-foreground mb-4">
               The requested student could not be found.
             </div>
-            <Button onClick={() => router.push(`/dashboard/teacher/reports/${params.classId}`)}>
+            <Button onClick={() => router.push(`/dashboard/teacher/reports/${classId}`)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Class
             </Button>
@@ -124,7 +125,7 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
       <div className="mb-6">
         <Button
           variant="ghost"
-          onClick={() => router.push(`/dashboard/teacher/reports/${params.classId}`)}
+          onClick={() => router.push(`/dashboard/teacher/reports/${classId}`)}
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
