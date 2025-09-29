@@ -547,15 +547,15 @@ export default function ProjectDetailPage({
             studentAnswers={(() => {
               const content = dialog.student.submission.content;
               if (typeof content === 'object' && content) {
-                if ('student_answers' in content && Array.isArray(content.student_answers)) {
-                  // Handle new format with teacher grades
-                  return content.student_answers.map((answer: unknown) => String(answer || ""));
+                if ('texts' in content && Array.isArray(content.texts)) {
+                  // Handle multiple texts array format
+                  return content.texts.map((text: unknown) => String(text || ""));
                 } else if ('text' in content) {
                   // Handle single text answer for backward compatibility
                   return [String(content.text || "")];
-                } else if ('texts' in content && Array.isArray(content.texts)) {
-                  // Handle multiple texts array (new format)
-                  return content.texts.map((text: unknown) => String(text || ""));
+                } else if ('student_answers' in content && Array.isArray(content.student_answers)) {
+                  // Handle teacher graded format
+                  return content.student_answers.map((answer: unknown) => String(answer || ""));
                 } else if ('answers' in content && Array.isArray(content.answers)) {
                   // Handle multiple answers array (old format - for backward compatibility)
                   return content.answers.map((answer: unknown) => String(answer || ""));

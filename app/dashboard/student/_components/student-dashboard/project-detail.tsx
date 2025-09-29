@@ -4,7 +4,7 @@ import { InstrumentChecklistItem } from "./instrument-checklist-item"
 import { JournalAssessmentDialog } from "./journal-assessment-dialog"
 import { QuestionnaireAssessmentDialog } from "./questionnaire-assessment-dialog"
 import { PeerAssessmentDialog } from "./peer-assessment-dialog"
-import { submitStageInstrument, getJournalSubmissionStatus, submitJournalQuestion } from "../../actions"
+import { submitStageInstrument } from "../../actions"
 import { toast } from "sonner"
 import type { StudentDashboardData } from "../../queries"
 import { Card, CardContent } from "@/components/ui/card"
@@ -50,13 +50,7 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
     stageId?: string
   }>({ open: false })
   const [journalLoading, setJournalLoading] = React.useState(false)
-  const [journalSubmissionStatus, setJournalSubmissionStatus] = React.useState<Array<{
-    questionIndex: number
-    isSubmitted: boolean
-    submittedAt?: string
-    answer?: string
-  }>>([])
-  const [selfDialog, setSelfDialog] = React.useState<{
+    const [selfDialog, setSelfDialog] = React.useState<{
     open: boolean
     stageName?: string
     instrumentId?: string
@@ -203,19 +197,6 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
 
                       if (ins.instrumentType === "JOURNAL" && actionLabel && !submission) {
                         onAction = async () => {
-                          // Fetch journal submission status
-                          try {
-                            const statusResult = await getJournalSubmissionStatus(
-                              project.id,
-                              stage.id
-                            )
-                            if (statusResult.success) {
-                              setJournalSubmissionStatus(statusResult.data?.questions || [])
-                            }
-                          } catch (error) {
-                            console.error("Failed to fetch journal submission status:", error)
-                          }
-
                           setJournalDialog({
                             open: true,
                             stageName: stage.name,
@@ -323,51 +304,6 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
         prompts={journalDialog.prompts || ["Tulis refleksi kamu di sini..."]}
         initialValue={journalDialog.initialValue}
         loading={journalLoading}
-        projectId={journalDialog.stageId ? project.id : undefined}
-        stageId={journalDialog.stageId}
-        submissionStatus={journalSubmissionStatus}
-        onIndividualSubmit={async (questionIndex, answer) => {
-          setJournalLoading(true)
-          setGlobalLoading(true)
-
-          const result = await submitJournalQuestion({
-            projectId: project.id,
-            stageId: journalDialog.stageId!,
-            questionIndex,
-            questionText: journalDialog.prompts![questionIndex],
-            answer
-          })
-
-          setJournalLoading(false)
-          if (result.success) {
-            toast.success(`Jawaban ${questionIndex + 1} berhasil disimpan!`)
-            // Update submission status
-            const statusResult = await getJournalSubmissionStatus(
-              project.id,
-              journalDialog.stageId!
-            )
-            if (statusResult.success) {
-              setJournalSubmissionStatus(statusResult.data?.questions || [])
-            }
-            await new Promise(res => setTimeout(res, 300))
-            router.refresh()
-            setTimeout(() => setGlobalLoading(false), 600)
-          } else {
-            setGlobalLoading(false)
-            toast.error(result.error || `Gagal menyimpan jawaban ${questionIndex + 1}.`)
-          }
-        }}
-        onRefreshStatus={async () => {
-          if (journalDialog.stageId) {
-            const statusResult = await getJournalSubmissionStatus(
-              project.id,
-              journalDialog.stageId
-            )
-            if (statusResult.success) {
-              setJournalSubmissionStatus(statusResult.data?.questions || [])
-            }
-          }
-        }}
         readOnly={(() => {
           const stage = groupedStages.find(s => s.name === journalDialog.stageName)
           const instrument = stage?.requiredInstruments.find(i => i.id === journalDialog.instrumentId)

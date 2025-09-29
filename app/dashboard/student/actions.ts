@@ -60,7 +60,7 @@ type ActionResult<T = void> =
   | { success: true; data?: T }
   | { success: false; error: string; fieldErrors?: Record<string, string[]> }
 
-export const studentInstrumentSchema = z.enum([
+const studentInstrumentSchema = z.enum([
   "JOURNAL",
   "SELF_ASSESSMENT",
   "PEER_ASSESSMENT",
@@ -68,7 +68,7 @@ export const studentInstrumentSchema = z.enum([
   "OBSERVATION",
 ] as const)
 
-export const questionnaireSchema = z.object({
+const questionnaireSchema = z.object({
   projectId: z.string().uuid(),
   stageId: z.string().uuid(),
   instrumentType: studentInstrumentSchema,
@@ -88,14 +88,6 @@ const submissionSchema = z.object({
   targetStudentId: z.string().uuid().optional().nullable(),
 })
 
-// Schema for individual journal question submission
-const journalQuestionSchema = z.object({
-  projectId: z.string().uuid(),
-  stageId: z.string().uuid(),
-  questionIndex: z.number().min(0),
-  questionText: z.string().trim().min(1, "Question text is required"),
-  answer: z.string().trim().min(1, "Response is required"),
-})
 
 const studentInstrumentTypes = new Set([
   "JOURNAL",
@@ -271,326 +263,6 @@ export async function submitStageInstrument(
     return { success: true }
   } catch (error) {
     return handleError(error, "Unable to save your response.")
-  }
-}
-
-// New function for individual journal question submission
-// Get journal submission status for a student
-export async function getJournalSubmissionStatus(
-  projectId: string,
-  stageId: string,
-): Promise<ActionResult<{
-  questions: Array<{
-    id: string
-    questionText: string
-    questionIndex: number
-    isSubmitted: boolean
-    submittedAt?: string
-    answer?: string
-  }>
-  allSubmitted: boolean
-}>> {
-  try {
-    const student = await requireStudentUser()
-
-    const result = await db.transaction(async (tx) => {
-      // Validate project access
-      const projectRecord = await tx
-        .select({
-          id: projects.id,
-          classId: projects.classId,
-        })
-        .from(projects)
-        .where(eq(projects.id, projectId))
-        .limit(1)
-        .then((rows: any[]) => rows[0])
-
-      if (!projectRecord) {
-        throw new ForbiddenError("Project not found.")
-      }
-
-      await validateStudentProjectAccess(tx, student.user.id, projectRecord.classId, projectId)
-
-      // Get journal template configuration
-      const templateConfig = await tx
-        .select({ id: templateStageConfigs.id })
-        .from(templateStageConfigs)
-        .innerJoin(projects, eq(templateStageConfigs.templateId, projects.templateId))
-        .innerJoin(projectStages, eq(projects.id, projectStages.projectId))
-        .where(
-          and(
-            eq(projectStages.id, stageId),
-            eq(templateStageConfigs.instrumentType, "JOURNAL"),
-          ),
-        )
-        .limit(1)
-        .then((rows: any[]) => rows[0])
-
-      if (!templateConfig) {
-        throw new ForbiddenError("Journal configuration not found for this stage.")
-      }
-
-      // Get all questions for this journal
-      const journalQuestions = await tx
-        .select({
-          id: templateQuestions.id,
-          questionText: templateQuestions.questionText,
-        })
-        .from(templateQuestions)
-        .where(eq(templateQuestions.configId, templateConfig.id))
-        .orderBy(asc(templateQuestions.id))
-
-      // Get existing submissions for this student
-      const existingSubmissions = await tx
-        .select({
-          content: submissions.content,
-          submittedAt: submissions.submittedAt,
-        })
-        .from(submissions)
-        .where(
-          and(
-            eq(submissions.submittedById, student.user.id),
-            eq(submissions.projectId, projectId),
-            eq(submissions.projectStageId, stageId),
-            eq(submissions.templateStageConfigId, templateConfig.id),
-          ),
-        )
-
-      // Create a map of submitted questions by index
-      const submittedMap = new Map()
-      existingSubmissions.forEach(sub => {
-        const content = sub.content as any
-        if (content?.questionIndex !== undefined) {
-          submittedMap.set(content.questionIndex, {
-            answer: content.text,
-            submittedAt: sub.submittedAt,
-          })
-        }
-      })
-
-      // Combine questions with their submission status
-      const questionsWithStatus = journalQuestions.map((question, index) => ({
-        id: question.id,
-        questionText: question.questionText,
-        questionIndex: index,
-        isSubmitted: submittedMap.has(index),
-        submittedAt: submittedMap.get(index)?.submittedAt,
-        answer: submittedMap.get(index)?.answer,
-      }))
-
-      const allSubmitted = questionsWithStatus.every(q => q.isSubmitted)
-
-      return {
-        questions: questionsWithStatus,
-        allSubmitted,
-      }
-    })
-
-    return { success: true, data: result }
-  } catch (error) {
-    return handleError(error, "Unable to fetch journal submission status.") as ActionResult<{
-      questions: Array<{
-        id: string
-        questionText: string
-        questionIndex: number
-        isSubmitted: boolean
-        submittedAt?: string
-        answer?: string
-      }>
-      allSubmitted: boolean
-    }>
-  }
-}
-
-export async function submitJournalQuestion(
-  values: z.input<typeof journalQuestionSchema>,
-): Promise<ActionResult> {
-  const parsed = journalQuestionSchema.safeParse(values)
-  if (!parsed.success) {
-    return {
-      success: false,
-      error: "Please review your response.",
-      fieldErrors: parsed.error.flatten().fieldErrors,
-    }
-  }
-
-  const { projectId, stageId, questionIndex, questionText, answer } = parsed.data
-
-  try {
-    const student = await requireStudentUser()
-
-    await db.transaction(async (tx) => {
-      // Get project and stage records for validation
-      const projectRecord = await tx
-        .select({
-          id: projects.id,
-          classId: projects.classId,
-          templateId: projects.templateId,
-        })
-        .from(projects)
-        .where(eq(projects.id, projectId))
-        .limit(1)
-        .then((rows: any[]) => rows[0])
-
-      if (!projectRecord) {
-        throw new ForbiddenError("Project not found.")
-      }
-
-      const stageRecord = await tx
-        .select({
-          id: projectStages.id,
-          projectTemplateId: projects.templateId,
-        })
-        .from(projectStages)
-        .innerJoin(projects, eq(projectStages.projectId, projects.id))
-        .where(eq(projectStages.id, stageId))
-        .limit(1)
-        .then((rows: any[]) => rows[0])
-
-      if (!stageRecord) {
-        throw new ForbiddenError("Stage not found.")
-      }
-
-      // Validate student has access to this project
-      await validateStudentProjectAccess(tx, student.user.id, projectRecord.classId, projectId)
-
-      // Check if journal instrument is required for this stage
-      const stageInstruments = await tx
-        .select({
-          instrumentType: projectStageInstruments.instrumentType,
-        })
-        .from(projectStageInstruments)
-        .where(eq(projectStageInstruments.projectStageId, stageId))
-
-      const instrumentTypesForStage = new Set(stageInstruments.map((instrument) => instrument.instrumentType))
-
-      if (!instrumentTypesForStage.has("JOURNAL")) {
-        throw new ForbiddenError("Journal instrument is not required for the selected stage.")
-      }
-
-      const progress = await ensureStageProgress(tx, student.user.id, stageRecord)
-
-      if (progress.status === "LOCKED") {
-        throw new ForbiddenError("This stage is locked. Complete previous stages first.")
-      }
-
-      // Get the journal template configuration
-      const templateConfig = await tx
-        .select({
-          id: templateStageConfigs.id,
-          stageName: templateStageConfigs.stageName,
-        })
-        .from(templateStageConfigs)
-        .innerJoin(projects, eq(templateStageConfigs.templateId, projects.templateId))
-        .innerJoin(projectStages, eq(projects.id, projectStages.projectId))
-        .where(
-          and(
-            eq(projectStages.id, stageId),
-            eq(templateStageConfigs.instrumentType, "JOURNAL"),
-          ),
-        )
-        .limit(1)
-        .then((rows: any[]) => rows[0])
-
-      if (!templateConfig) {
-        throw new ForbiddenError("Journal configuration not found for this stage.")
-      }
-
-      // Get all questions for this journal to determine total count
-      const journalQuestions = await tx
-        .select({
-          id: templateQuestions.id,
-          questionText: templateQuestions.questionText,
-        })
-        .from(templateQuestions)
-        .where(eq(templateQuestions.configId, templateConfig.id))
-        .orderBy(asc(templateQuestions.id))
-
-      if (questionIndex >= journalQuestions.length) {
-        throw new ForbiddenError("Invalid question index.")
-      }
-
-      // Check if submission already exists for this specific question
-      const existingSubmission = await tx
-        .select({ id: submissions.id })
-        .from(submissions)
-        .where(
-          and(
-            eq(submissions.submittedById, student.user.id),
-            eq(submissions.projectId, projectId),
-            eq(submissions.projectStageId, stageId),
-            eq(submissions.templateStageConfigId, templateConfig.id),
-            // Use question metadata to identify individual question submissions
-            eq(submissions.content, sql`${JSON.stringify({
-              questionIndex,
-              questionText,
-              text: answer
-            })}::jsonb`)
-          ),
-        )
-        .limit(1)
-        .then((rows: any[]) => rows[0])
-
-      if (existingSubmission) {
-        // Update existing submission
-        await tx
-          .update(submissions)
-          .set({
-            content: {
-              questionIndex,
-              questionText,
-              text: answer,
-              submittedAt: new Date(),
-            },
-            submittedAt: new Date(),
-            updatedAt: new Date(),
-          })
-          .where(eq(submissions.id, existingSubmission.id))
-      } else {
-        // Create new submission for this specific question
-        await tx.insert(submissions).values({
-          submittedBy: 'STUDENT',
-          submittedById: student.user.id,
-          projectId,
-          projectStageId: stageId,
-          templateStageConfigId: templateConfig.id,
-          content: {
-            questionIndex,
-            questionText,
-            text: answer,
-          },
-        })
-      }
-
-      // Check if all questions are now submitted to evaluate stage completion
-      const allSubmissions = await tx
-        .select({ content: submissions.content })
-        .from(submissions)
-        .where(
-          and(
-            eq(submissions.submittedById, student.user.id),
-            eq(submissions.projectId, projectId),
-            eq(submissions.projectStageId, stageId),
-            eq(submissions.templateStageConfigId, templateConfig.id),
-          ),
-        )
-
-      const submittedQuestions = new Set(
-        allSubmissions.map(sub => {
-          const content = sub.content as any
-          return content?.questionIndex
-        }).filter(Boolean)
-      )
-
-      // If all questions are submitted, mark journal instrument as complete
-      if (submittedQuestions.size === journalQuestions.length) {
-        await evaluateStageCompletion(tx, student.user.id, projectId, stageRecord.id)
-      }
-    })
-
-    return { success: true }
-  } catch (error) {
-    return handleError(error, "Unable to save your journal response.")
   }
 }
 
@@ -803,8 +475,36 @@ async function checkCompleteJournalSubmission(
   projectId: string,
   stageId: string,
 ): Promise<boolean> {
-  // Get all journal submissions for this student and stage
-  const journalSubmissions = await tx
+  // Get the journal template configuration for this stage
+  const templateConfig = await tx
+    .select({ id: templateStageConfigs.id })
+    .from(templateStageConfigs)
+    .innerJoin(projects, eq(templateStageConfigs.templateId, projects.templateId))
+    .innerJoin(projectStages, eq(projects.id, projectStages.projectId))
+    .where(
+      and(
+        eq(projectStages.id, stageId),
+        eq(templateStageConfigs.instrumentType, "JOURNAL"),
+      ),
+    )
+    .limit(1)
+    .then((rows: any[]) => rows[0])
+
+  if (!templateConfig) {
+    // No journal configuration for this stage, consider it complete
+    return true
+  }
+
+  // Get the total number of journal questions for this stage
+  const journalQuestions = await tx
+    .select({
+      questionText: templateQuestions.questionText,
+    })
+    .from(templateQuestions)
+    .where(eq(templateQuestions.configId, templateConfig.id))
+
+  // Get the journal submission for this student and stage
+  const journalSubmission = await tx
     .select({
       content: submissions.content,
     })
@@ -814,38 +514,23 @@ async function checkCompleteJournalSubmission(
         eq(submissions.submittedById, studentId),
         eq(submissions.projectId, projectId),
         eq(submissions.projectStageId, stageId),
-        eq(submissions.instrumentType, "JOURNAL"),
+        eq(submissions.templateStageConfigId, templateConfig.id),
       ),
     )
+    .limit(1)
+    .then((rows: any[]) => rows[0])
 
-  // Get the total number of journal questions for this stage
-  const journalQuestions = await tx
-    .select({
-      questionText: templateQuestions.questionText,
-    })
-    .from(templateQuestions)
-    .innerJoin(
-      templateStageConfigs,
-      eq(templateQuestions.configId, templateStageConfigs.id)
-    )
-    .where(
-      and(
-        eq(templateStageConfigs.projectStageId, stageId),
-        eq(templateStageConfigs.instrumentType, "JOURNAL"),
-      ),
-    )
+  if (!journalSubmission) {
+    // No submission found
+    return false
+  }
 
-  // Extract submitted question indices from individual submissions
-  const submittedQuestionIndices = new Set<number>()
-  journalSubmissions.forEach((submission: any) => {
-    const content = submission.content as any || {}
-    if (content.question_index !== undefined) {
-      submittedQuestionIndices.add(content.question_index)
-    }
-  })
+  // Extract answers from the texts array
+  const content = journalSubmission.content as any || {}
+  const texts = content.texts || []
 
-  // Check if all questions have been submitted
-  return submittedQuestionIndices.size === journalQuestions.length
+  // Check if all questions have been answered
+  return texts.length === journalQuestions.length && texts.every((text: string) => text.trim().length > 0)
 }
 
 async function unlockNextStage(

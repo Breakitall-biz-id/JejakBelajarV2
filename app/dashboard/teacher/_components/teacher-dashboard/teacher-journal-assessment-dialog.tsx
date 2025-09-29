@@ -59,17 +59,12 @@ export function TeacherJournalAssessmentDialog({
   }, [initialGrades, open])
 
   const handleScoreChange = (rubricId: string, score: string) => {
-    console.log("🔧 handleScoreChange called:", { rubricId, score })
     setGrades(prev => {
       const existing = prev.find(g => g.rubricId === rubricId)
       if (existing) {
-        const newGrades = prev.map(g => g.rubricId === rubricId ? { ...g, score } : g)
-        console.log("🔧 Updated grades:", newGrades)
-        return newGrades
+        return prev.map(g => g.rubricId === rubricId ? { ...g, score } : g)
       } else {
-        const newGrades = [...prev, { rubricId, score }]
-        console.log("🔧 Added new grade:", newGrades)
-        return newGrades
+        return [...prev, { rubricId, score }]
       }
     })
   }
