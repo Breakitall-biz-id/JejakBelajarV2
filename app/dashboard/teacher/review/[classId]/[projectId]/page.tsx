@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button"
 import { Eye } from "lucide-react"
 import { JournalAssessmentDialog } from "../../../../student/_components/student-dashboard/journal-assessment-dialog"
 import { TeacherJournalAssessmentDialog } from "../../../_components/teacher-dashboard/teacher-journal-assessment-dialog"
+import { TeacherJournalIndividualAssessmentDialog } from "../../../_components/teacher-dashboard/teacher-journal-individual-assessment-dialog"
 import { PeerAssessmentDialog } from "../../../../student/_components/student-dashboard/peer-assessment-dialog"
 import { ArrowLeft } from "lucide-react"
 import { QuestionnaireAssessmentDialog } from "../../../../student/_components/student-dashboard/questionnaire-assessment-dialog"
@@ -144,6 +145,27 @@ export default function ProjectDetailPage({
   const [tab, setTab] = React.useState("tentang")
   const [project, setProject] = React.useState<ProjectDetailData | null>(null)
   const [loading, setLoading] = React.useState(true)
+  const [journalSubmissions, setJournalSubmissions] = React.useState<Array<{
+    id: string
+    questionIndex: number
+    questionText: string
+    answer: string
+    submittedAt: string
+    score?: number
+    feedback?: string
+    grades?: Array<{
+      rubric_id: string
+      score: number
+    }>
+  }>>([])
+  const [individualJournalDialog, setIndividualJournalDialog] = React.useState<{
+    open: boolean
+    student: {
+      id: string
+      name: string | null
+    } | null
+    stageId?: string
+  }>({ open: false, student: null })
 
   const loadProject = React.useCallback(async () => {
     try {
@@ -361,7 +383,37 @@ export default function ProjectDetailPage({
                                           }
                                           return "Lihat detail";
                                         })()} ${student.name || student.id}`}
-                                        onClick={() => setDialog({ open: true, student: { ...student, submission }, instrumentType: instrument.instrumentType, instrumentDesc: instrument.description || '', stageId: stage.id })}
+                                        onClick={async () => {
+                                          // Check if this is an individual submission format
+                                          const content = submission.content;
+                                          const hasIndividualSubmissions = typeof content === 'object' && content && 'question_index' in content;
+
+                                          if (hasIndividualSubmissions) {
+                                            // Use new individual submission dialog
+                                            try {
+                                              const response = await fetch(`/api/teacher/journal-submissions/${classId}/${projectId}/${student.id}/${stage.id}`)
+                                              if (response.ok) {
+                                                const data = await response.json()
+                                                setJournalSubmissions(data.data || [])
+                                                setIndividualJournalDialog({
+                                                  open: true,
+                                                  student: { id: student.id, name: student.name },
+                                                  stageId: stage.id
+                                                })
+                                              } else {
+                                                // Fallback to old dialog
+                                                setDialog({ open: true, student: { ...student, submission }, instrumentType: instrument.instrumentType, instrumentDesc: instrument.description || '', stageId: stage.id })
+                                              }
+                                            } catch (error) {
+                                              console.error("Failed to fetch journal submissions:", error)
+                                              // Fallback to old dialog
+                                              setDialog({ open: true, student: { ...student, submission }, instrumentType: instrument.instrumentType, instrumentDesc: instrument.description || '', stageId: stage.id })
+                                            }
+                                          } else {
+                                            // Use old dialog for backward compatibility
+                                            setDialog({ open: true, student: { ...student, submission }, instrumentType: instrument.instrumentType, instrumentDesc: instrument.description || '', stageId: stage.id })
+                                          }
+                                        }}
                                       >
                                         {(() => {
                                           if (instrument.instrumentType === "JOURNAL") {
@@ -663,6 +715,63 @@ export default function ProjectDetailPage({
               console.error("Error submitting observation:", error);
             }
           }}
+        />
+      )}
+
+      {/* Individual Journal Assessment Dialog */}
+      {individualJournalDialog.open && individualJournalDialog.student && individualJournalDialog.stageId && (
+        <TeacherJournalIndividualAssessmentDialog
+          open={individualJournalDialog.open}
+          onOpenChange={open => setIndividualJournalDialog(d => ({ ...d, open }))}
+          studentName={individualJournalDialog.student.name || "Unknown Student"}
+          submissions={journalSubmissions}
+          prompts={(() => {
+            const stageObj = project.stages.find(s => s.id === individualJournalDialog.stageId)
+            const instrumentObj = stageObj?.requiredInstruments.find(i => i.instrumentType === "JOURNAL") as InstrumentWithQuestions | undefined;
+            return instrumentObj?.questions?.map((q: { questionText: string }) => q.questionText) || [""];
+          })()}
+          rubrics={(() => {
+            const stageObj = project.stages.find(s => s.id === individualJournalDialog.stageId)
+            const instrumentObj = stageObj?.requiredInstruments.find(i => i.instrumentType === "JOURNAL") as InstrumentWithQuestions | undefined;
+            return instrumentObj?.rubrics?.map((r: { id: string; indicatorText: string; criteria: { [score: string]: string } }) => ({
+              id: r.id,
+              indicatorText: r.indicatorText,
+              criteria: r.criteria,
+            })) || [];
+          })()}
+          onQuestionGrade={async (submissionId, grades) => {
+            try {
+              const response = await fetch('/api/teacher/journal-question-assessment', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  submissionId,
+                  grades,
+                }),
+              });
+
+              if (!response.ok) {
+                throw new Error('Failed to submit grades');
+              }
+            } catch (error) {
+              console.error('Error submitting grades:', error);
+              throw error;
+            }
+          }}
+          onRefresh={async () => {
+            try {
+              const response = await fetch(`/api/teacher/journal-submissions/${classId}/${projectId}/${individualJournalDialog.student.id}/${individualJournalDialog.stageId}`)
+              if (response.ok) {
+                const data = await response.json()
+                setJournalSubmissions(data.data || [])
+              }
+            } catch (error) {
+              console.error("Failed to refresh journal submissions:", error)
+            }
+          }}
+          onCancel={() => setIndividualJournalDialog(d => ({ ...d, open: false }))}
         />
       )}
     </div>
