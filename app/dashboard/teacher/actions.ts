@@ -338,7 +338,7 @@ export async function createProject(
         .orderBy(asc(templateStageConfigs.displayOrder))
 
 
-      // Group configs by stageName and instrumentType to preserve descriptions
+      // Group configs by stageName and support multiple instruments of same type
       const stageMap = new Map()
       for (const config of stageConfigs) {
         const key = `${config.stageName}`
@@ -348,10 +348,13 @@ export async function createProject(
             description: config.description,
             displayOrder: config.displayOrder,
             estimatedDuration: config.estimatedDuration,
-            instruments: new Map(),
+            instruments: [], // Array to support multiple instruments of same type
           })
         }
-        stageMap.get(key).instruments.set(config.instrumentType, config.description)
+        stageMap.get(key).instruments.push({
+          instrumentType: config.instrumentType,
+          description: config.description,
+        })
       }
 
       // Insert project stages (one per unique stageName)
@@ -373,12 +376,12 @@ export async function createProject(
       // Insert instruments for each stage with their descriptions
       for (const [stageName, stageObj] of stageMap.entries()) {
         const stageId = stageNameToId.get(stageName)
-        for (const [instrumentType, description] of stageObj.instruments.entries()) {
+        for (const instrument of stageObj.instruments) {
           await tx.insert(projectStageInstruments).values({
             projectStageId: stageId,
-            instrumentType,
+            instrumentType: instrument.instrumentType,
             isRequired: true,
-            description,
+            description: instrument.description,
           })
         }
       }

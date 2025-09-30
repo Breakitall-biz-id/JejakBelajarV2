@@ -4,6 +4,7 @@ import { z } from "zod"
 import { and, asc, eq, gt, sql } from "drizzle-orm"
 
 import { db } from "@/db"
+import { getCurrentUser } from "@/lib/auth/session"
 import {
   groupMembers,
   groups,
@@ -80,6 +81,7 @@ const submissionSchema = z.object({
   projectId: z.string().uuid(),
   stageId: z.string().uuid(),
   instrumentType: studentInstrumentSchema,
+  templateStageConfigId: z.string().uuid().optional().nullable(),
   content: z.union([
     z.object({ text: z.string().trim().min(1, "Response is required") }),
     z.object({ answers: z.array(z.number().min(1).max(4)).min(1) }),
@@ -96,6 +98,142 @@ const studentInstrumentTypes = new Set([
   "DAILY_NOTE",
 ])
 
+export async function debugStageProgress(
+  projectId: string,
+  stageId: string,
+): Promise<any> {
+  try {
+    const user = await getCurrentUser()
+
+    if (!user) {
+      return { error: 'User not found' }
+    }
+
+    const result = await db.transaction(async (tx) => {
+      // Get stage info
+      const stage = await tx
+        .select({
+          id: projectStages.id,
+          order: projectStages.order,
+          projectId: projectStages.projectId,
+        })
+        .from(projectStages)
+        .where(eq(projectStages.id, stageId))
+        .limit(1)
+        .then((rows: any[]) => rows[0])
+
+      if (!stage) {
+        return { error: 'Stage not found' }
+      }
+
+      // Get progress
+      const progress = await tx
+        .select()
+        .from(projectStageProgress)
+        .where(
+          and(
+            eq(projectStageProgress.projectStageId, stageId),
+            eq(projectStageProgress.studentId, user.id),
+          ),
+        )
+        .limit(1)
+        .then((rows: any[]) => rows[0])
+
+      // Get stage instruments
+      const stageInstruments = await tx
+        .select({
+          instrumentType: projectStageInstruments.instrumentType,
+          isRequired: projectStageInstruments.isRequired,
+          description: projectStageInstruments.description,
+        })
+        .from(projectStageInstruments)
+        .where(eq(projectStageInstruments.projectStageId, stageId))
+
+      const requiredStudentInstruments = stageInstruments
+        .filter((instrument: any) => instrument.isRequired && studentInstrumentTypes.has(instrument.instrumentType))
+        .map((instrument: any) => instrument.instrumentType)
+
+      // Get submissions
+      const submissionsQuery = await tx
+        .select({
+          id: submissions.id,
+          instrumentType: templateStageConfigs.instrumentType,
+          targetStudentId: submissions.targetStudentId,
+          templateStageConfigId: submissions.templateStageConfigId,
+          content: submissions.content,
+        })
+        .from(submissions)
+        .leftJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
+        .where(
+          and(
+            eq(submissions.submittedById, user.id),
+            eq(submissions.projectId, projectId),
+            eq(submissions.projectStageId, stageId),
+          ),
+        )
+
+      // Determine submitted instruments
+      const submittedInstruments = new Set()
+      for (const submission of submissionsQuery) {
+        if (submission.instrumentType) {
+          submittedInstruments.add(submission.instrumentType)
+        } else if (submission.templateStageConfigId === null) {
+          const stageInstrument = await tx
+            .select({ instrumentType: projectStageInstruments.instrumentType })
+            .from(projectStageInstruments)
+            .where(eq(projectStageInstruments.projectStageId, stageId))
+            .limit(1)
+            .then((rows: any[]) => rows[0])
+
+          if (stageInstrument) {
+            submittedInstruments.add(stageInstrument.instrumentType)
+          }
+        }
+      }
+
+      // Check peer assessment
+      const hasPeerAssessment = requiredStudentInstruments.includes("PEER_ASSESSMENT")
+      const hasValidPeerSubmission = hasPeerAssessment
+        ? submissionsQuery.some((s: any) => s.instrumentType === "PEER_ASSESSMENT" && s.targetStudentId)
+        : true
+
+      // Check journal completion
+      const hasJournalAssessment = requiredStudentInstruments.includes("JOURNAL")
+      let hasCompleteJournalSubmission = true
+      if (hasJournalAssessment) {
+        console.log('Calling checkCompleteJournalSubmission...')
+        hasCompleteJournalSubmission = await checkCompleteJournalSubmission(tx, user.id, projectId, stageId)
+        console.log('checkCompleteJournalSubmission returned:', hasCompleteJournalSubmission)
+      }
+
+      return {
+        stage,
+        progress,
+        stageInstruments,
+        requiredStudentInstruments,
+        submissions: submissionsQuery,
+        submittedInstruments: Array.from(submittedInstruments),
+        hasPeerAssessment,
+        hasValidPeerSubmission,
+        hasJournalAssessment,
+        hasCompleteJournalSubmission,
+        allInstrumentsSubmitted: requiredStudentInstruments.every((instrument: any) =>
+          submittedInstruments.has(instrument)
+        ),
+        hasFulfilledAll: requiredStudentInstruments.every((instrument: any) =>
+          submittedInstruments.has(instrument)
+        ) && hasValidPeerSubmission && hasCompleteJournalSubmission,
+        missingInstruments: requiredStudentInstruments.filter(inst => !submittedInstruments.has(inst))
+      }
+    })
+
+    return result
+  } catch (error) {
+    console.error('Debug error:', error)
+    return { error: 'Debug failed' }
+  }
+}
+
 export async function submitStageInstrument(
   values: z.input<typeof submissionSchema>,
 ): Promise<ActionResult> {
@@ -109,7 +247,7 @@ export async function submitStageInstrument(
     }
   }
 
-  const { projectId, stageId, instrumentType, content, targetStudentId } = parsed.data
+  const { projectId, stageId, instrumentType, templateStageConfigId, content, targetStudentId } = parsed.data
 
 
   if (instrumentType === "PEER_ASSESSMENT" && !targetStudentId) {
@@ -200,19 +338,31 @@ export async function submitStageInstrument(
         await validatePeerTarget(tx, student.user.id, projectId, targetStudentId)
       }
 
-      const templateConfig = await tx
-        .select({ id: templateStageConfigs.id })
-        .from(templateStageConfigs)
-        .innerJoin(projects, eq(templateStageConfigs.templateId, projects.templateId))
-        .innerJoin(projectStages, eq(projects.id, projectStages.projectId))
-        .where(
-          and(
-            eq(projectStages.id, stageId),
-            eq(templateStageConfigs.instrumentType, instrumentType),
-          ),
-        )
-        .limit(1)
-        .then((rows: any[]) => rows[0])
+      let templateConfig
+      if (templateStageConfigId) {
+        // If templateStageConfigId is provided, use it directly
+        templateConfig = await tx
+          .select({ id: templateStageConfigs.id })
+          .from(templateStageConfigs)
+          .where(eq(templateStageConfigs.id, templateStageConfigId))
+          .limit(1)
+          .then((rows: any[]) => rows[0])
+      } else {
+        // Fallback to old logic for backward compatibility
+        templateConfig = await tx
+          .select({ id: templateStageConfigs.id })
+          .from(templateStageConfigs)
+          .innerJoin(projects, eq(templateStageConfigs.templateId, projects.templateId))
+          .innerJoin(projectStages, eq(projects.id, projectStages.projectId))
+          .where(
+            and(
+              eq(projectStages.id, stageId),
+              eq(templateStageConfigs.instrumentType, instrumentType),
+            ),
+          )
+          .limit(1)
+          .then((rows: any[]) => rows[0])
+      }
 
       if (!templateConfig) {
         throw new ForbiddenError("Instrument configuration not found for this stage.")
@@ -407,16 +557,23 @@ async function evaluateStageCompletion(
     .filter((instrument: any) => instrument.isRequired && studentInstrumentTypes.has(instrument.instrumentType))
     .map((instrument: any) => instrument.instrumentType)
 
+  console.log('Stage instruments:', stageInstruments)
+  console.log('Required student instruments:', requiredStudentInstruments)
+
   if (requiredStudentInstruments.length === 0) {
+    console.log(`Stage ${stageId} has no required student instruments, marking as completed`)
     await markStageCompleted(tx, progress.id)
     await unlockNextStage(tx, studentId, projectId, stage.order)
     return
   }
 
-  const studentSubmissions = await tx
+  // Get all submissions for this stage
+  const submissionsQuery = await tx
     .select({
+      id: submissions.id,
       instrumentType: templateStageConfigs.instrumentType,
       targetStudentId: submissions.targetStudentId,
+      templateStageConfigId: submissions.templateStageConfigId,
     })
     .from(submissions)
     .leftJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
@@ -428,13 +585,33 @@ async function evaluateStageCompletion(
       ),
     )
 
-  // Check if all required instruments have been submitted
-  const submittedInstruments = new Set(studentSubmissions.map((s: any) => s.instrumentType))
+  // For each submission, determine the instrument type
+  const submittedInstruments = new Set()
+  for (const submission of submissionsQuery) {
+    if (submission.instrumentType) {
+      // For instruments with templateStageConfigId (JOURNAL, SELF_ASSESSMENT, etc.)
+      submittedInstruments.add(submission.instrumentType)
+    } else if (submission.templateStageConfigId === null) {
+      // For instruments without templateStageConfigId, we need to determine the type
+      // This is likely OBSERVATION or other direct instrument types
+      // Get the instrument type from projectStageInstruments
+      const stageInstrument = await tx
+        .select({ instrumentType: projectStageInstruments.instrumentType })
+        .from(projectStageInstruments)
+        .where(eq(projectStageInstruments.projectStageId, stageId))
+        .limit(1)
+        .then((rows: any[]) => rows[0])
+
+      if (stageInstrument) {
+        submittedInstruments.add(stageInstrument.instrumentType)
+      }
+    }
+  }
 
   // For peer assessment, verify there's at least one submission with a target
   const hasPeerAssessment = requiredStudentInstruments.includes("PEER_ASSESSMENT")
   const hasValidPeerSubmission = hasPeerAssessment
-    ? studentSubmissions.some((s: any) => s.instrumentType === "PEER_ASSESSMENT" && s.targetStudentId)
+    ? submissionsQuery.some((s: any) => s.instrumentType === "PEER_ASSESSMENT" && s.targetStudentId)
     : true
 
   // For journal assessment, verify all questions have been submitted (individual submissions)
@@ -443,11 +620,20 @@ async function evaluateStageCompletion(
     ? await checkCompleteJournalSubmission(tx, studentId, projectId, stageId)
     : true
 
+  // Debug logging
+  console.log('Required instruments:', requiredStudentInstruments)
+  console.log('Submitted instruments:', Array.from(submittedInstruments))
+  console.log('Has valid peer submission:', hasValidPeerSubmission)
+  console.log('Has complete journal submission:', hasCompleteJournalSubmission)
+
   const hasFulfilledAll = requiredStudentInstruments.every((instrument: any) =>
     submittedInstruments.has(instrument)
   ) && hasValidPeerSubmission && hasCompleteJournalSubmission
 
+  console.log('Has fulfilled all:', hasFulfilledAll)
+
   if (!hasFulfilledAll) {
+    console.log('Stage not completed - missing requirements')
     return
   }
 
@@ -475,62 +661,54 @@ async function checkCompleteJournalSubmission(
   projectId: string,
   stageId: string,
 ): Promise<boolean> {
-  // Get the journal template configuration for this stage
-  const templateConfig = await tx
-    .select({ id: templateStageConfigs.id })
-    .from(templateStageConfigs)
-    .innerJoin(projects, eq(templateStageConfigs.templateId, projects.templateId))
-    .innerJoin(projectStages, eq(projects.id, projectStages.projectId))
+  console.log('=== DEBUG checkCompleteJournalSubmission ===')
+  console.log('Student ID:', studentId)
+  console.log('Project ID:', projectId)
+  console.log('Stage ID:', stageId)
+  // Get all required journal instruments for this stage
+  const requiredJournalInstruments = await tx
+    .select({ id: projectStageInstruments.id })
+    .from(projectStageInstruments)
     .where(
       and(
-        eq(projectStages.id, stageId),
-        eq(templateStageConfigs.instrumentType, "JOURNAL"),
+        eq(projectStageInstruments.projectStageId, stageId),
+        eq(projectStageInstruments.instrumentType, "JOURNAL"),
+        eq(projectStageInstruments.isRequired, true),
       ),
     )
-    .limit(1)
-    .then((rows: any[]) => rows[0])
 
-  if (!templateConfig) {
-    // No journal configuration for this stage, consider it complete
+  console.log('Required journal instruments found:', requiredJournalInstruments.length)
+  console.log('Required journal instruments:', requiredJournalInstruments)
+
+  if (requiredJournalInstruments.length === 0) {
+    // No journal instruments required for this stage, consider it complete
+    console.log('No journal instruments required, returning true')
     return true
   }
 
-  // Get the total number of journal questions for this stage
-  const journalQuestions = await tx
-    .select({
-      questionText: templateQuestions.questionText,
-    })
-    .from(templateQuestions)
-    .where(eq(templateQuestions.configId, templateConfig.id))
-
-  // Get the journal submission for this student and stage
-  const journalSubmission = await tx
-    .select({
-      content: submissions.content,
-    })
+  // Get all journal submissions for this stage
+  const journalSubmissions = await tx
+    .select({ templateStageConfigId: submissions.templateStageConfigId })
     .from(submissions)
+    .leftJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
     .where(
       and(
         eq(submissions.submittedById, studentId),
         eq(submissions.projectId, projectId),
         eq(submissions.projectStageId, stageId),
-        eq(submissions.templateStageConfigId, templateConfig.id),
+        eq(templateStageConfigs.instrumentType, "JOURNAL"),
       ),
     )
-    .limit(1)
-    .then((rows: any[]) => rows[0])
 
-  if (!journalSubmission) {
-    // No submission found
-    return false
-  }
+  console.log('Journal submissions found:', journalSubmissions.length)
+  console.log('Journal submissions:', journalSubmissions)
 
-  // Extract answers from the texts array
-  const content = journalSubmission.content as any || {}
-  const texts = content.texts || []
+  // Simple check: if we have at least the same number of submissions as required instruments
+  const hasCompleteJournalSubmission = journalSubmissions.length >= requiredJournalInstruments.length
 
-  // Check if all questions have been answered
-  return texts.length === journalQuestions.length && texts.every((text: string) => text.trim().length > 0)
+  console.log('Has complete journal submission:', hasCompleteJournalSubmission)
+
+  return hasCompleteJournalSubmission
 }
 
 async function unlockNextStage(
@@ -586,13 +764,15 @@ async function unlockNextStage(
       .update(projectStageProgress)
       .set({ status: "IN_PROGRESS", unlockedAt: new Date(), updatedAt: new Date() })
       .where(eq(projectStageProgress.id, nextProgress.id))
+
+    // After unlocking, check if this stage should be auto-completed (e.g., only has OBSERVATION instruments)
+    await evaluateStageCompletion(tx, studentId, projectId, nextStage.id)
   }
 }
 
 const questionnaireInstrumentSchema = z.enum([
   "SELF_ASSESSMENT",
   "PEER_ASSESSMENT",
-  "OBSERVATION",
 ] as const)
 
 

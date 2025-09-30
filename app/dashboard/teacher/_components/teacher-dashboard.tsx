@@ -875,14 +875,7 @@ function ProjectCard({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h5 className="text-sm font-medium text-foreground">Groups ({project.groups.length})</h5>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-6 text-xs"
-                onClick={() => router.push(`/dashboard/teacher/projects/${project.id}`)}
-              >
-                Manage Groups
-              </Button>
+               <CreateGroupDialog projectId={project.id} router={router} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {project.groups.map((group) => (

@@ -165,7 +165,6 @@ export const groups = pgTable("groups", {
 
 export const submissions = pgTable("submissions", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
-	studentId: uuid("student_id"),
 	projectId: uuid("project_id").notNull(),
 	projectStageId: uuid("project_stage_id"),
 	targetStudentId: uuid("target_student_id"),
@@ -181,11 +180,6 @@ export const submissions = pgTable("submissions", {
 	submittedBy: varchar("submitted_by", { length: 50 }).default('STUDENT').notNull(),
 	submittedById: uuid("submitted_by_id").notNull(),
 }, (table) => [
-	foreignKey({
-			columns: [table.studentId],
-			foreignColumns: [users.id],
-			name: "submissions_student_id_users_id_fk"
-		}).onDelete("cascade"),
 	foreignKey({
 			columns: [table.projectId],
 			foreignColumns: [projects.id],
@@ -307,6 +301,21 @@ export const templateQuestions = pgTable("template_questions", {
 			columns: [table.configId],
 			foreignColumns: [templateStageConfigs.id],
 			name: "template_questions_config_id_template_stage_configs_id_fk"
+		}).onDelete("cascade"),
+]);
+
+export const templateJournalRubrics = pgTable("template_journal_rubrics", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	configId: uuid("config_id").notNull(),
+	indicatorText: text("indicator_text").notNull(),
+	criteria: jsonb().notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.configId],
+			foreignColumns: [templateStageConfigs.id],
+			name: "template_journal_rubrics_config_id_template_stage_configs_id_fk"
 		}).onDelete("cascade"),
 ]);
 

@@ -4,7 +4,7 @@ import { InstrumentChecklistItem } from "./instrument-checklist-item"
 import { JournalAssessmentDialog } from "./journal-assessment-dialog"
 import { QuestionnaireAssessmentDialog } from "./questionnaire-assessment-dialog"
 import { PeerAssessmentDialog } from "./peer-assessment-dialog"
-import { submitStageInstrument } from "../../actions"
+import { submitStageInstrument, debugStageProgress } from "../../actions"
 import { toast } from "sonner"
 import type { StudentDashboardData } from "../../queries"
 import { Card, CardContent } from "@/components/ui/card"
@@ -22,6 +22,7 @@ type InstrumentWithStatements = {
   isRequired: boolean;
   statements?: string[];
   description?: string | null;
+  templateStageConfigId?: string | null;
   questions?: Array<{
     id: string;
     questionText: string;
@@ -45,6 +46,7 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
     open: boolean
     stageName?: string
     instrumentId?: string
+    templateStageConfigId?: string | null
     prompts?: string[]
     initialValue?: string[]
     stageId?: string
@@ -65,6 +67,17 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
     initialValue?: number[][]
   }>({ open: false })
   const [globalLoading, setGlobalLoading] = React.useState(false)
+
+  const handleDebugStage = async (stageId: string) => {
+    try {
+      const result = await debugStageProgress(project.id, stageId)
+      console.log('DEBUG RESULT:', result)
+      alert(`Debug info logged to console. Check browser dev tools.`)
+    } catch (error) {
+      console.error('Debug failed:', error)
+      alert('Debug failed')
+    }
+  }
 
   const groupedStages = React.useMemo(() => {
     type Instrument = InstrumentWithStatements;
@@ -166,10 +179,20 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
                     {stage.status === "LOCKED" && (
                       <span className="ml-2 text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground border border-muted">Locked</span>
                     )}
+                    <button
+                      onClick={() => handleDebugStage(stage.id)}
+                      className="ml-2 text-xs px-2 py-0.5 rounded bg-red-500 text-white hover:bg-red-600"
+                    >
+                      Debug
+                    </button>
                   </div>
                   <div className="flex flex-col gap-1 mt-2 ml-8">
                     {stage.requiredInstruments.map((ins) => {
-                      const submission: Submission | undefined = ((stage.submissionsByInstrument[ins.instrumentType] || []) as Submission[])[0]
+                      // For journals, use unique key with templateStageConfigId to differentiate multiple journals
+                      const submissionKey = ins.instrumentType === 'JOURNAL' && ins.templateStageConfigId
+                        ? `${ins.instrumentType}_${ins.templateStageConfigId}`
+                        : ins.instrumentType
+                      const submission: Submission | undefined = ((stage.submissionsByInstrument[submissionKey] || []) as Submission[])[0]
                       let status: "done" | "pending" | "waiting" = "pending"
                       let actionLabel: string | undefined = undefined
                       let onAction: (() => void) | undefined = undefined
@@ -201,9 +224,14 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
                             open: true,
                             stageName: stage.name,
                             instrumentId: ins.id,
+                            templateStageConfigId: ins.templateStageConfigId,
                             prompts: ins.questions?.map((q: { questionText: string }) => q.questionText) || [ins.description || "Tulis refleksi kamu di sini..."],
                             initialValue: (() => {
-                              const submission: Submission | undefined = ((stage.submissionsByInstrument[ins.instrumentType] || []) as Submission[])[0]
+                              // For journals, use unique key with templateStageConfigId to differentiate multiple journals
+                      const submissionKey = ins.instrumentType === 'JOURNAL' && ins.templateStageConfigId
+                        ? `${ins.instrumentType}_${ins.templateStageConfigId}`
+                        : ins.instrumentType
+                      const submission: Submission | undefined = ((stage.submissionsByInstrument[submissionKey] || []) as Submission[])[0]
                               if (
                                 submission?.content &&
                                 typeof submission.content === "object" &&
@@ -226,7 +254,11 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
                           instrumentId: ins.id,
                           statements: ins.questions?.map((q: { questionText: string }) => q.questionText) || [], // Pass questions as statements
                           initialValue: (() => {
-                            const submission: Submission | undefined = ((stage.submissionsByInstrument[ins.instrumentType] || []) as Submission[])[0]
+                            // For journals, use unique key with templateStageConfigId to differentiate multiple journals
+                      const submissionKey = ins.instrumentType === 'JOURNAL' && ins.templateStageConfigId
+                        ? `${ins.instrumentType}_${ins.templateStageConfigId}`
+                        : ins.instrumentType
+                      const submission: Submission | undefined = ((stage.submissionsByInstrument[submissionKey] || []) as Submission[])[0]
                             if (
                               submission?.content &&
                               typeof submission.content === "object" &&
@@ -245,7 +277,11 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
                           instrumentId: ins.id,
                           statements: ins.questions?.map((q: { questionText: string }) => q.questionText) || ["Teman saya menunjukkan sikap menghargai saat mendengarkan pendapat teman kelompok."],
                           initialValue: (() => {
-                            const submission: Submission | undefined = ((stage.submissionsByInstrument[ins.instrumentType] || []) as Submission[])[0]
+                            // For journals, use unique key with templateStageConfigId to differentiate multiple journals
+                      const submissionKey = ins.instrumentType === 'JOURNAL' && ins.templateStageConfigId
+                        ? `${ins.instrumentType}_${ins.templateStageConfigId}`
+                        : ins.instrumentType
+                      const submission: Submission | undefined = ((stage.submissionsByInstrument[submissionKey] || []) as Submission[])[0]
                             if (
                               submission?.content &&
                               typeof submission.content === "object" &&
@@ -307,7 +343,11 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
         readOnly={(() => {
           const stage = groupedStages.find(s => s.name === journalDialog.stageName)
           const instrument = stage?.requiredInstruments.find(i => i.id === journalDialog.instrumentId)
-          const submission = stage?.submissionsByInstrument[instrument?.instrumentType || ""]?.[0]
+          // For journals, use unique key with templateStageConfigId
+          const submissionKey = instrument?.instrumentType === 'JOURNAL' && instrument?.templateStageConfigId
+            ? `${instrument.instrumentType}_${instrument.templateStageConfigId}`
+            : instrument?.instrumentType || ""
+          const submission = stage?.submissionsByInstrument[submissionKey]?.[0]
           return !!submission
         })()}
         onSubmit={async answers => {
@@ -328,6 +368,7 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
             projectId: project.id,
             stageId,
             instrumentType,
+            templateStageConfigId: instrument?.templateStageConfigId,
             content,
           })
           setJournalLoading(false)
@@ -360,7 +401,11 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
         readOnly={(() => {
           const stage = groupedStages.find(s => s.name === selfDialog.stageName)
           const instrument = stage?.requiredInstruments.find(i => i.id === selfDialog.instrumentId)
-          const submission = stage?.submissionsByInstrument[instrument?.instrumentType || ""]?.[0]
+          // For journals, use unique key with templateStageConfigId (though not needed for self assessment)
+          const submissionKey = instrument?.instrumentType === 'JOURNAL' && instrument?.templateStageConfigId
+            ? `${instrument.instrumentType}_${instrument.templateStageConfigId}`
+            : instrument?.instrumentType || ""
+          const submission = stage?.submissionsByInstrument[submissionKey]?.[0]
           return !!submission
         })()}
         onSubmitSuccess={async () => {
@@ -388,7 +433,11 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
         readOnly={(() => {
           const stage = groupedStages.find(s => s.name === peerDialog.stageName)
           const instrument = stage?.requiredInstruments.find(i => i.id === peerDialog.instrumentId)
-          const submission = stage?.submissionsByInstrument[instrument?.instrumentType || ""]?.[0]
+          // For journals, use unique key with templateStageConfigId (though not needed for peer assessment)
+          const submissionKey = instrument?.instrumentType === 'JOURNAL' && instrument?.templateStageConfigId
+            ? `${instrument.instrumentType}_${instrument.templateStageConfigId}`
+            : instrument?.instrumentType || ""
+          const submission = stage?.submissionsByInstrument[submissionKey]?.[0]
           return !!submission
         })()}
         onSubmitSuccess={async () => {
@@ -415,7 +464,11 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
         readOnly={(() => {
           const stage = groupedStages.find(s => s.name === selfDialog.stageName)
           const instrument = stage?.requiredInstruments.find(i => i.id === selfDialog.instrumentId)
-          const submission = stage?.submissionsByInstrument[instrument?.instrumentType || ""]?.[0]
+          // For journals, use unique key with templateStageConfigId (though not needed for self assessment)
+          const submissionKey = instrument?.instrumentType === 'JOURNAL' && instrument?.templateStageConfigId
+            ? `${instrument.instrumentType}_${instrument.templateStageConfigId}`
+            : instrument?.instrumentType || ""
+          const submission = stage?.submissionsByInstrument[submissionKey]?.[0]
           return !!submission
         })()}
         onSubmitSuccess={async () => {

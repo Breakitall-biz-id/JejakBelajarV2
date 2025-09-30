@@ -333,11 +333,16 @@ export default function ProjectDetailPage({
                         }
                         submissions = submittedStudents;
                       } else {
-                        submissions = stage.students
-                          .flatMap(student => {
-                            const subs = student.submissions?.filter(sub => sub.instrumentType === instrument.instrumentType) || [];
-                            return subs.map(submission => ({ student, submission }));
-                          });
+                        // For other instruments (like JOURNAL), group submissions by student to avoid duplicates
+                        const studentSubmissions = new Map();
+                        stage.students.forEach(student => {
+                          const subs = student.submissions?.filter(sub => sub.instrumentType === instrument.instrumentType) || [];
+                          if (subs.length > 0) {
+                            // For journal, use the first submission or combine them appropriately
+                            studentSubmissions.set(student.id, { student, submission: subs[0] });
+                          }
+                        });
+                        submissions = Array.from(studentSubmissions.values());
                       }
                       return (
                         <div key={instrument.id} className="rounded-lg border p-3 flex flex-col gap-2 bg-muted/40">

@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { users, sessions, academicTerms, classes, projectStages, projectStageProgress, projects, projectTemplates, groups, submissions, templateStageConfigs, projectStageInstruments, accounts, templateQuestions, groupMembers, userClassAssignments } from "./schema";
+import { users, sessions, academicTerms, classes, projectStages, projectStageProgress, projects, projectTemplates, groups, submissions, templateStageConfigs, projectStageInstruments, accounts, templateQuestions, templateJournalRubrics, groupMembers, userClassAssignments } from "./schema";
 
 export const sessionsRelations = relations(sessions, ({one}) => ({
 	user: one(users, {
@@ -133,6 +133,7 @@ export const templateStageConfigsRelations = relations(templateStageConfigs, ({o
 		references: [projectTemplates.id]
 	}),
 	templateQuestions: many(templateQuestions),
+	templateJournalRubrics: many(templateJournalRubrics),
 }));
 
 export const projectStageInstrumentsRelations = relations(projectStageInstruments, ({one}) => ({
@@ -152,6 +153,13 @@ export const accountsRelations = relations(accounts, ({one}) => ({
 export const templateQuestionsRelations = relations(templateQuestions, ({one}) => ({
 	templateStageConfig: one(templateStageConfigs, {
 		fields: [templateQuestions.configId],
+		references: [templateStageConfigs.id]
+	}),
+}));
+
+export const templateJournalRubricsRelations = relations(templateJournalRubrics, ({one}) => ({
+	templateStageConfig: one(templateStageConfigs, {
+		fields: [templateJournalRubrics.configId],
 		references: [templateStageConfigs.id]
 	}),
 }));

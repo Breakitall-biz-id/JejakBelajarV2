@@ -36,6 +36,7 @@ type StudentSubmissionRow = {
   stageId: string | null
   projectId: string
   instrumentType: string
+  templateStageConfigId: string | null
   content: unknown
   submittedAt: Date
   targetStudentId: string | null
@@ -82,6 +83,7 @@ export type StudentDashboardData = {
         instrumentType: string
         isRequired: boolean
         description: string | null
+        templateStageConfigId: string | null
         questions?: Array<{
           id: string
           questionText: string
@@ -92,6 +94,7 @@ export type StudentDashboardData = {
       submissions: Array<{
         id: string
         instrumentType: string
+        templateStageConfigId: string | null
         content: unknown
         submittedAt: string
         targetStudentId: string | null
@@ -100,6 +103,7 @@ export type StudentDashboardData = {
       submissionsByInstrument: Record<string, Array<{
         id: string
         instrumentType: string
+        templateStageConfigId: string | null
         content: unknown
         submittedAt: string
         targetStudentId: string | null
@@ -259,6 +263,7 @@ export async function getStudentDashboardData(
       stageId: submissions.projectStageId,
       projectId: submissions.projectId,
       instrumentType: templateStageConfigs.instrumentType,
+      templateStageConfigId: submissions.templateStageConfigId,
       content: submissions.content,
       submittedAt: submissions.submittedAt,
       targetStudentId: submissions.targetStudentId,
@@ -428,22 +433,36 @@ export async function getStudentDashboardData(
           return null
         }
 
-        // Fetch templateStageConfig for this stage/instrument
+        // Get template stage configs for this project to properly map instruments
+        const projectTemplateConfigs = await db
+          .select({
+            id: templateStageConfigs.id,
+            stageName: templateStageConfigs.stageName,
+            instrumentType: templateStageConfigs.instrumentType,
+            description: templateStageConfigs.description,
+          })
+          .from(templateStageConfigs)
+          .innerJoin(projects, eq(templateStageConfigs.templateId, projects.templateId))
+          .where(
+            and(
+              eq(projects.id, project.id),
+              eq(templateStageConfigs.stageName, stage.name),
+            )
+          )
+
+        // Create instruments data by mapping project stage instruments with template configs
         const instruments = (instrumentsByStage[stage.id]?.length
           ? await Promise.all(
-              instrumentsByStage[stage.id].map(async (instrument) => {
-                // Find the templateStageConfig for this stage/instrument
-                const templateConfig = await db
-                  .select({ id: templateStageConfigs.id })
-                  .from(templateStageConfigs)
-                  .where(
-                    and(
-                      eq(templateStageConfigs.stageName, stage.name),
-                      eq(templateStageConfigs.instrumentType, instrument.instrumentType),
-                    )
-                  )
-                  .limit(1)
-                const configId = templateConfig[0]?.id
+              instrumentsByStage[stage.id].map(async (instrument, index) => {
+                // For multiple instruments of the same type, use index to create unique mapping
+                const matchingConfigs = projectTemplateConfigs.filter(config =>
+                  config.instrumentType === instrument.instrumentType
+                )
+
+                // Use the config at the same index, or fallback to the first one
+                const templateConfig = matchingConfigs[index] || matchingConfigs[0]
+                const configId = templateConfig?.id
+
                 // Fetch questions for this configId
                 let questions: Array<{
                   id: string
@@ -468,12 +487,13 @@ export async function getStudentDashboardData(
                   isRequired: instrument.isRequired,
                   description: instrument.description,
                   questions,
+                  templateStageConfigId: configId || null,
                 }
               })
             )
           : [])
 
-        // Group submissions by instrument type for multiple assessments per stage
+        // Group submissions by instrument type and template config for multiple journals in same stage
         const submissionsByInstrument: Record<string, Array<{
           id: string
           instrumentType: string
@@ -481,21 +501,30 @@ export async function getStudentDashboardData(
           submittedAt: string
           targetStudentId: string | null
           targetStudentName: string | null
+          templateStageConfigId: string | null
         }>> = {}
         const stageSubmissions = submissionsByStage[stage.id] ?? []
 
         for (const submission of stageSubmissions) {
           const instrType = submission.instrumentType ?? ''
-          if (!submissionsByInstrument[instrType]) {
-            submissionsByInstrument[instrType] = []
+
+          // For journals, create a unique key using templateStageConfigId to differentiate multiple journals
+          // For other instruments, just use the instrument type
+          const key = instrType === 'JOURNAL' && submission.templateStageConfigId
+            ? `${instrType}_${submission.templateStageConfigId}`
+            : instrType
+
+          if (!submissionsByInstrument[key]) {
+            submissionsByInstrument[key] = []
           }
-          submissionsByInstrument[instrType].push({
+          submissionsByInstrument[key].push({
             id: submission.id,
             instrumentType: instrType,
             content: submission.content,
             submittedAt: typeof submission.submittedAt === 'string' ? submission.submittedAt : submission.submittedAt?.toISOString() ?? '',
             targetStudentId: submission.targetStudentId,
             targetStudentName: submission.targetStudentName,
+            templateStageConfigId: submission.templateStageConfigId,
           })
         }
 
