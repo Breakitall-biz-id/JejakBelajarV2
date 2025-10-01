@@ -29,6 +29,13 @@
       "when": 1759165054988,
       "tag": "0004_glossy_lily_hollister",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1759328601767,
+      "tag": "0005_goofy_bloodstrike",
+      "breakpoints": true
     }
   ]
 }

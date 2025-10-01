@@ -1,5 +1,6 @@
 import {
   boolean,
+  index,
   integer,
   jsonb,
   pgEnum,
@@ -254,6 +255,28 @@ export const groupMembers = pgTable(
       columns: [table.groupId, table.studentId],
       name: "group_members_pkey",
     }),
+  }),
+);
+
+export const groupComments = pgTable(
+  "group_comments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    groupId: uuid("group_id")
+      .notNull()
+      .references(() => groups.id, { onDelete: "cascade" }),
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    targetMemberId: uuid("target_member_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    comment: text("comment").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    groupMemberIdx: index("group_comments_idx").on(table.groupId, table.targetMemberId),
   }),
 );
 

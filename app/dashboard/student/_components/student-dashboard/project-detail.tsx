@@ -4,12 +4,14 @@ import { InstrumentChecklistItem } from "./instrument-checklist-item"
 import { JournalAssessmentDialog } from "./journal-assessment-dialog"
 import { QuestionnaireAssessmentDialog } from "./questionnaire-assessment-dialog"
 import { PeerAssessmentDialog } from "./peer-assessment-dialog"
-import { submitStageInstrument, debugStageProgress } from "../../actions"
+import { submitStageInstrument, debugStageProgress, updateGroupMemberComment } from "../../actions"
 import { toast } from "sonner"
 import type { StudentDashboardData } from "../../queries"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { ProjectProgressBar } from "./project-progress-bar"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import * as React from "react"
 import { OverlaySpinner } from "@/components/ui/overlay-spinner"
 import { useRouter } from "next/navigation"
@@ -67,11 +69,28 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
     initialValue?: number[][]
   }>({ open: false })
   const [globalLoading, setGlobalLoading] = React.useState(false)
+  const [editingComment, setEditingComment] = React.useState<{
+    memberId: string
+    comment: string
+  } | null>(null)
+
+  // Local state for optimistic updates
+  const [localComments, setLocalComments] = React.useState<Record<string, string>>({})
+
+  // Initialize local comments from project data
+  React.useEffect(() => {
+    const comments: Record<string, string> = {}
+    project.group?.members.forEach((member) => {
+      if (member.comment) {
+        comments[member.studentId] = member.comment
+      }
+    })
+    setLocalComments(comments)
+  }, [project.group?.members])
 
   const handleDebugStage = async (stageId: string) => {
     try {
       const result = await debugStageProgress(project.id, stageId)
-      console.log('DEBUG RESULT:', result)
       alert(`Debug info logged to console. Check browser dev tools.`)
     } catch (error) {
       console.error('Debug failed:', error)
@@ -313,15 +332,138 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
           </div>
         </TabsContent>
         <TabsContent value="group">
-            <div className="flex flex-col gap-4">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Anggota Kelompok</h3>
+                <div className="text-sm text-muted-foreground">
+                  {project.group?.members.length || 0} anggota
+                </div>
+              </div>
+
+              <div className="space-y-4">
                 {project.group?.members.map((member) => (
-                  <Card key={member.studentId} className="p-2">
-                    <CardContent className="">
-                      <div className="text-sm text-foreground">{member.name}</div>
-                    </CardContent>
+                  <Card key={member.studentId} className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                          <span className="text-sm font-medium text-primary">
+                            {member.name?.charAt(0).toUpperCase() || member.email.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <div className="font-medium">{member.name || 'Tanpa Nama'}</div>
+                          <div className="text-sm text-muted-foreground">{member.email}</div>
+                        </div>
+                      </div>
+
+                      <div className="w-80 bg-muted/30 rounded-lg border border-border/50">
+                        <div className="p-3 border-b border-border/50">
+                          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Komentar</div>
+                        </div>
+                        <div className="p-3">
+                          {editingComment?.memberId === member.studentId ? (
+                            <div className="space-y-3">
+                              <Textarea
+                                value={editingComment.comment}
+                                onChange={(e) => setEditingComment({
+                                  ...editingComment,
+                                  comment: e.target.value
+                                })}
+                                placeholder="Tulis komentar tentang kontribusi atau ide..."
+                                rows={3}
+                                className="resize-none text-sm border-border/50 focus:border-primary"
+                              />
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setEditingComment(null)}
+                                  className="text-xs h-7 px-3"
+                                >
+                                  Batal
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={async () => {
+                                    setGlobalLoading(true)
+                                    const result = await updateGroupMemberComment({
+                                      projectId: project.id,
+                                      targetMemberId: member.studentId,
+                                      comment: editingComment.comment.trim() || undefined,
+                                    })
+                                    if (result.success) {
+                                      // Optimistic update - update local state immediately
+                                      const newComment = editingComment.comment.trim() || undefined
+                                      if (newComment) {
+                                        setLocalComments(prev => ({
+                                          ...prev,
+                                          [member.studentId]: newComment
+                                        }))
+                                      } else {
+                                        setLocalComments(prev => {
+                                          const newState = { ...prev }
+                                          delete newState[member.studentId]
+                                          return newState
+                                        })
+                                      }
+
+                                      toast.success("Komentar berhasil disimpan!")
+                                      // Clear editing state
+                                      setEditingComment(null)
+
+                                      // Refresh data to sync with server
+                                      await router.refresh()
+                                      setGlobalLoading(false)
+                                    } else {
+                                      setGlobalLoading(false)
+                                      toast.error(result.error || "Gagal menyimpan komentar.")
+                                    }
+                                  }}
+                                  className="text-xs h-7 px-3"
+                                >
+                                  Simpan
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <div className="text-sm text-muted-foreground min-h-[2.5rem] flex items-center">
+                                {localComments[member.studentId] || member.comment ? (
+                                  <span className="line-clamp-2">{localComments[member.studentId] || member.comment}</span>
+                                ) : (
+                                  <span className="italic text-muted-foreground/60">Belum ada komentar</span>
+                                )}
+                              </div>
+                              <div className="flex justify-end">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setEditingComment({
+                                    memberId: member.studentId,
+                                    comment: localComments[member.studentId] || member.comment || ''
+                                  })}
+                                  className="text-xs h-7 px-3 hover:bg-primary/10 hover:text-primary"
+                                >
+                                  {localComments[member.studentId] || member.comment ? 'Edit' : 'Tambah'}
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </Card>
                 ))}
-            </div>
+              </div>
+
+              {!project.group?.members || project.group.members.length === 0 && (
+                <div className="text-center py-8">
+                  <div className="text-muted-foreground">Belum ada anggota kelompok</div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
         <TabsContent value="about">
           <Card>
