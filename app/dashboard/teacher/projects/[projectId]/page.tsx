@@ -222,8 +222,8 @@ export default function ProjectDetailPage({
         <CardContent>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>{overallProgress}% Complete</span>
-              <span>{project.stages.filter(s => s.status === "COMPLETED").length} of {project.stages.length} stages completed</span>
+              <span>{overallProgress}% Selesai</span>
+              <span>{project.stages.filter(s => s.status === "COMPLETED").length} dari {project.stages.length} tahapan selesai</span>
             </div>
             <Progress value={overallProgress} className="h-2" />
           </div>
@@ -321,7 +321,7 @@ export default function ProjectDetailPage({
                       <Progress value={group.progress} className="h-2" />
                     </div>
                     <Button variant="outline" size="sm" className="w-full">
-                      View Details
+                      Lihat Detail
                     </Button>
                   </div>
                 </CardContent>

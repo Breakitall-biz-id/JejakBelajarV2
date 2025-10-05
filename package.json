@@ -12,6 +12,7 @@
     "db:pull": "drizzle-kit pull",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx scripts/seed-dimensions.ts",
     "db:up": "docker compose up postgres -d",
     "db:down": "docker compose down postgres",
     "db:dev": "docker compose --profile dev up postgres-dev -d",

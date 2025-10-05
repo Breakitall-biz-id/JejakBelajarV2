@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server"
 import { requireTeacherUser } from "@/lib/auth/session"
-import { and, eq } from "drizzle-orm"
+import { and, eq, inArray } from "drizzle-orm"
 import { db } from "@/db"
 import {
   submissions,
+  templateStageConfigs,
+  templateQuestions,
+  templateJournalRubrics,
+  dimensions,
 } from "@/db/schema/jejak"
 import { sql } from "drizzle-orm"
 
@@ -27,6 +31,7 @@ export async function GET(
         submittedAt: submissions.submittedAt,
         score: submissions.score,
         feedback: submissions.feedback,
+        templateStageConfigId: submissions.templateStageConfigId,
       })
       .from(submissions)
       .where(
@@ -38,6 +43,30 @@ export async function GET(
       )
       .orderBy(submissions.submittedAt)
 
+    // Get template config for dimension information
+    const configIds = [...new Set(journalSubmissions.map(s => s.templateStageConfigId).filter(Boolean))]
+    const questionDimensions = configIds.length > 0
+      ? await db
+          .select({
+            configId: templateQuestions.configId,
+            questionIndex: sql<number>`ROW_NUMBER() OVER (PARTITION BY ${templateQuestions.configId} ORDER BY ${templateQuestions.createdAt})`.as('question_index'),
+            dimensionId: templateQuestions.dimensionId,
+            dimensionName: dimensions.name,
+          })
+          .from(templateQuestions)
+          .leftJoin(dimensions, eq(templateQuestions.dimensionId, dimensions.id))
+          .where(sql`${templateQuestions.configId} IN (${sql.raw(configIds.map(id => `'${id}'`).join(', '))})`)
+      : []
+
+    // Create dimension lookup map
+    const dimensionMap = new Map<string, { dimensionId: string; dimensionName: string }>()
+    questionDimensions.forEach(qd => {
+      dimensionMap.set(`${qd.configId}_${qd.questionIndex}`, {
+        dimensionId: qd.dimensionId || 'default',
+        dimensionName: qd.dimensionName || 'Umum'
+      })
+    })
+
     // Transform the data to match the expected format
     const transformedSubmissions = journalSubmissions
       .map(submission => {
@@ -46,6 +75,13 @@ export async function GET(
         // Only include submissions that have journal question structure
         if (content.question_index === undefined || !content.question_text) {
           return null
+        }
+
+        // Get dimension information
+        const dimensionKey = `${submission.templateStageConfigId}_${content.question_index}`
+        const dimensionInfo = dimensionMap.get(dimensionKey) || {
+          dimensionId: 'default',
+          dimensionName: 'Umum'
         }
 
         return {
@@ -57,6 +93,7 @@ export async function GET(
           score: submission.score,
           feedback: submission.feedback,
           grades: content.grades || [],
+          dimension: dimensionInfo,
         }
       })
       .filter((submission): submission is NonNullable<typeof submission> => submission !== null)

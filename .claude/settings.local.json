@@ -6,7 +6,10 @@
       "Bash(npx next:*)",
       "Bash(node:*)",
       "Bash(task-manager:*)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "mcp__neon__describe_project",
+      "mcp__neon__describe_branch",
+      "mcp__neon__run_sql"
     ],
     "deny": [],
     "ask": []

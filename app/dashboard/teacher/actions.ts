@@ -54,7 +54,7 @@ const instrumentTypeSchema = z.enum(instrumentTypeEnum.enumValues)
 
 const projectBaseSchema = z.object({
   classId: z.string().uuid(),
-  title: z.string().trim().min(1, "Project title is required").max(255),
+  title: z.string().trim().min(1, "Judul proyek wajib diisi").max(255),
   description: z
     .string()
     .trim()
@@ -68,7 +68,7 @@ const projectBaseSchema = z.object({
 })
 
 const createProjectSchema = projectBaseSchema.extend({
-  templateId: z.string().uuid("Please select a project template"),
+  templateId: z.string().uuid("Silakan pilih template proyek"),
 })
 
 const updateProjectSchema = projectBaseSchema.extend({
@@ -87,7 +87,7 @@ const projectStageSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, "Stage name is required")
+    .min(1, "Nama tahapan wajib diisi")
     .max(255),
   description: z
     .string()
@@ -114,7 +114,7 @@ const deleteStageSchema = z.object({ stageId: z.string().uuid() })
 
 const reorderStagesSchema = z.object({
   projectId: z.string().uuid(),
-  stageOrder: z.array(z.string().uuid()).min(1, "At least one stage id is required"),
+  stageOrder: z.array(z.string().uuid()).min(1, "Setidaknya satu ID tahapan diperlukan"),
 })
 
 const stageInstrumentSchema = z.object({
@@ -126,7 +126,7 @@ const stageInstrumentSchema = z.object({
 
 const groupBaseSchema = z.object({
   projectId: z.string().uuid(),
-  name: z.string().trim().min(1, "Group name is required").max(255),
+  name: z.string().trim().min(1, "Nama kelompok wajib diisi").max(255),
 })
 
 const updateGroupSchema = groupBaseSchema.extend({

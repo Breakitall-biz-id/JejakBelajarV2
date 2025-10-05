@@ -103,6 +103,8 @@ export async function POST(request: Request) {
       }))
     }
 
+    console.log(`averageScore: ${averageScore}`, updatedContent)
+
     // Update the submission with grades and average score
     const [updatedSubmission] = await db
       .update(submissions)

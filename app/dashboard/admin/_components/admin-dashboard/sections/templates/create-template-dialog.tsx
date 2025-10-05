@@ -45,14 +45,14 @@ export function CreateTemplateDialog({
 
       const result = await createTemplate(transformedData)
       if (!result.success) {
-        toast.error(result.error || "Failed to create template")
+        toast.error(result.error || "Gagal membuat template")
         return
       }
 
-      toast.success("Template created successfully!")
+      toast.success("Template berhasil dibuat!")
       onSuccess()
     } catch (err) {
-      toast.error("Failed to create template")
+      toast.error("Gagal membuat template")
       console.error(err)
     } finally {
       setIsSubmitting(false)
@@ -80,7 +80,7 @@ export function CreateTemplateDialog({
             <TemplateWizard
               onSubmit={onSubmit}
               onCancel={handleCancel}
-              submitButtonText="Create Template"
+              submitButtonText="Buat Template"
               isSubmitting={isSubmitting}
             />
           </div>

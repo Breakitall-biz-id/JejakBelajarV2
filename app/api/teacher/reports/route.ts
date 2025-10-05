@@ -30,6 +30,16 @@ export async function GET(request: Request) {
 }
 
 function buildSummaryCsv(data: Awaited<ReturnType<typeof getTeacherReportData>>): string {
+  // Get all unique dimension names for headers
+  const allDimensions = new Set<string>()
+  data.classes.forEach(item => {
+    item.dimensionScores.forEach(dim => {
+      allDimensions.add(dim.dimensionName)
+    })
+  })
+
+  const dimensionHeaders = Array.from(allDimensions).sort()
+
   const rows: CsvRow[] = [
     [
       "Class",
@@ -38,9 +48,10 @@ function buildSummaryCsv(data: Awaited<ReturnType<typeof getTeacherReportData>>)
       "Stages",
       "Completed assignments",
       "Completion rate (%)",
-      "Observation avg",
-      "Reflection avg",
-      "Daily note avg",
+      "Overall Average",
+      "Overall Qualitative",
+      ...dimensionHeaders.map(dim => `${dim} Avg`),
+      ...dimensionHeaders.map(dim => `${dim} Qualitative`),
       "Last submission",
     ],
   ]
@@ -48,6 +59,18 @@ function buildSummaryCsv(data: Awaited<ReturnType<typeof getTeacherReportData>>)
   data.classes
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach((item) => {
+      const dimensionMap = new Map(item.dimensionScores.map(dim => [dim.dimensionName, dim]))
+
+      const dimensionAverages = dimensionHeaders.map(dim => {
+        const dimScore = dimensionMap.get(dim)
+        return formatCsvNumber(dimScore?.averageScore ?? null)
+      })
+
+      const dimensionQualitative = dimensionHeaders.map(dim => {
+        const dimScore = dimensionMap.get(dim)
+        return dimScore?.qualitativeScore ?? ""
+      })
+
       rows.push([
         item.name,
         item.totalStudents,
@@ -55,9 +78,10 @@ function buildSummaryCsv(data: Awaited<ReturnType<typeof getTeacherReportData>>)
         item.totalStages,
         item.completedAssignments,
         item.completionRate,
-        formatCsvNumber(item.averageScores.observation),
-        formatCsvNumber(item.averageScores.journal),
-        formatCsvNumber(item.averageScores.dailyNote),
+        formatCsvNumber(item.overallAverageScore),
+        item.overallQualitativeScore,
+        ...dimensionAverages,
+        ...dimensionQualitative,
         item.lastSubmissionAt ?? "",
       ])
     })

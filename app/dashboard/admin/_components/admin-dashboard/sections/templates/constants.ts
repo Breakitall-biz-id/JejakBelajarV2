@@ -1,15 +1,15 @@
 export const instrumentTypes = [
-  { value: "JOURNAL", label: "Reflection Journal", description: "Text-based reflection entries" },
-  { value: "SELF_ASSESSMENT", label: "Self-Assessment", description: "Student self-evaluation questionnaire" },
-  { value: "PEER_ASSESSMENT", label: "Peer Assessment", description: "Peer-to-peer evaluation form" },
-  { value: "OBSERVATION", label: "Observation", description: "Teacher observation rubric" },
+  { value: "JOURNAL", label: "Jurnal Refleksi", description: "Catatan refleksi berbasis teks" },
+  { value: "SELF_ASSESSMENT", label: "Penilaian Diri", description: "Kuisioner evaluasi diri siswa" },
+  { value: "PEER_ASSESSMENT", label: "Penilaian Teman", description: "Form evaluasi antar siswa" },
+  { value: "OBSERVATION", label: "Observasi", description: "Rubrik observasi guru" },
 ] as const
 
 export const pjblStages = [
-  "Start with the essential question",
-  "Design a plan for the project",
-  "Create a schedule and timeline",
-  "Conduct research and gather information",
-  "Develop the project solution",
-  "Present the project and reflect"
+  "Mulai dengan pertanyaan pokok",
+  "Buat rencana proyek",
+  "Buat jadwal dan waktu",
+  "Lakukan penelitian dan kumpulkan informasi",
+  "Kembangkan solusi proyek",
+  "Presentasikan proyek dan refleksi"
 ] as const

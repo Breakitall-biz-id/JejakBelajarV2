@@ -200,21 +200,12 @@ export default function ProjectDetailPage({
     loadProject()
   }, [classId, projectId, loadProject])
 
-  // Group stages by name and combine data
+  // Use stages as-is without grouping by name to preserve unique instruments
   const groupedStages = React.useMemo(() => {
     if (!project) return []
-    const map = new Map<string, typeof project.stages[number]>()
-    for (const stage of project.stages) {
-      if (!map.has(stage.name)) {
-        map.set(stage.name, stage)
-      } else {
-        const existing = map.get(stage.name)!
-        if (stage.order < existing.order) {
-          map.set(stage.name, stage)
-        }
-      }
-    }
-    return Array.from(map.values()).sort((a, b) => a.order - b.order)
+
+    // Sort stages by order to maintain proper sequence
+    return [...project.stages].sort((a, b) => a.order - b.order)
   }, [project])
 
   // Get all unique students from all stages
@@ -333,13 +324,24 @@ export default function ProjectDetailPage({
                         }
                         submissions = submittedStudents;
                       } else {
-                        // For other instruments (like JOURNAL), group submissions by student to avoid duplicates
+                        // For other instruments (like JOURNAL), distribute submissions evenly across instruments of the same type
+                        // This ensures each instrument gets unique submissions instead of duplicates
                         const studentSubmissions = new Map();
+                        const instrumentsOfSameType = stage.requiredInstruments.filter(i => i.instrumentType === instrument.instrumentType);
+                        const instrumentIndex = instrumentsOfSameType.findIndex(i => i.id === instrument.id);
+
                         stage.students.forEach(student => {
                           const subs = student.submissions?.filter(sub => sub.instrumentType === instrument.instrumentType) || [];
                           if (subs.length > 0) {
-                            // For journal, use the first submission or combine them appropriately
-                            studentSubmissions.set(student.id, { student, submission: subs[0] });
+                            // Sort submissions by date to ensure consistent ordering
+                            const sortedSubs = subs.sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
+
+                            // Distribute submissions evenly across instruments of the same type
+                            // Using modulo operation to ensure each instrument gets different submissions
+                            const targetIndex = instrumentIndex % sortedSubs.length;
+                            const matchingSubmission = sortedSubs[targetIndex];
+
+                            studentSubmissions.set(student.id, { student, submission: matchingSubmission });
                           }
                         });
                         submissions = Array.from(studentSubmissions.values());
@@ -347,11 +349,30 @@ export default function ProjectDetailPage({
                       return (
                         <div key={instrument.id} className="rounded-lg border p-3 flex flex-col gap-2 bg-muted/40">
                           <div className="font-semibold text-foreground text-base mb-1">
-                            {instrument.instrumentType === "JOURNAL" && "Refleksi (Jurnal)"}
-                            {instrument.instrumentType === "SELF_ASSESSMENT" && "Self Assessment"}
-                            {instrument.instrumentType === "PEER_ASSESSMENT" && "Peer Assessment"}
-                            {instrument.instrumentType === "OBSERVATION" && "Lembar Observasi (Diisi Guru)"}
-                            {instrument.instrumentType === "DAILY_NOTE" && "Catatan Harian"}
+                            {(() => {
+                              const baseName =
+                                instrument.instrumentType === "JOURNAL" ? "Refleksi (Jurnal)" :
+                                instrument.instrumentType === "SELF_ASSESSMENT" ? "Self Assessment" :
+                                instrument.instrumentType === "PEER_ASSESSMENT" ? "Peer Assessment" :
+                                instrument.instrumentType === "OBSERVATION" ? "Lembar Observasi (Diisi Guru)" :
+                                instrument.instrumentType === "DAILY_NOTE" ? "Catatan Harian" :
+                                instrument.instrumentType;
+
+                              // Check if there are multiple instruments of the same type in this stage
+                              const instrumentsOfSameType = stage.requiredInstruments.filter(i => i.instrumentType === instrument.instrumentType);
+                              const sameTypeCount = instrumentsOfSameType.length;
+                              const displayIndex = instrumentsOfSameType.findIndex(i => i.id === instrument.id);
+
+                              // If multiple instruments of same type, add index to differentiate
+                              return sameTypeCount > 1
+                                ? `${baseName} ${displayIndex + 1}`
+                                : baseName;
+                            })()}
+                            {instrument.description && (
+                              <span className="text-sm text-muted-foreground font-normal ml-2">
+                                - {instrument.description}
+                              </span>
+                            )}
                           </div>
                           {/* Accordion submissions murid, default collapsed */}
                           <div className="ml-4">
@@ -366,7 +387,7 @@ export default function ProjectDetailPage({
                                 ) : (
                                   submissions.map(({ student, submission }, idx) => (
                                     <div
-                                      key={student.id}
+                                      key={`${student.id}-${instrument.id}`}
                                       className={`flex items-center gap-2 justify-between py-2 ${idx !== submissions.length - 1 ? 'border-b border-muted' : ''}`}
                                     >
                                       <span className="text-sm font-medium truncate max-w-[60vw] md:max-w-xs">{student.name || student.id}</span>
@@ -495,7 +516,7 @@ export default function ProjectDetailPage({
   );
   const allStudentsHaveObservation = allStudents.length > 0 &&
     allStudents.every(student => studentsWithObservation.has(student.id));
-  return allStudentsHaveObservation ? "Edit" : "Kerjakan";
+  return allStudentsHaveObservation ? "Ubah" : "Kerjakan";
 })()}
                               </Button>
                             </div>

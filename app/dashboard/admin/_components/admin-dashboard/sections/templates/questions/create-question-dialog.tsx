@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -58,11 +58,18 @@ const createQuestionSchema = (instrumentType: string) => z.object({
   questionType: getQuestionTypeEnum(instrumentType),
   scoringGuide: z.string().optional(),
   rubricCriteria: instrumentType === 'OBSERVATION' ? rubricCriteriaSchema : z.undefined().optional(),
+  dimensionId: z.string().uuid("Please select a dimension").optional().or(z.literal("no-dimension")),
 })
 
 
 type RubricCriterion = { score: string | number; description: string }
 type CreateQuestionSchema = z.infer<ReturnType<typeof createQuestionSchema>>
+
+type Dimension = {
+  id: string
+  name: string
+  description: string | null
+}
 
 type CreateQuestionDialogProps = {
   configId: string
@@ -80,6 +87,30 @@ export function CreateQuestionDialog({
   onSuccess,
 }: CreateQuestionDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [dimensions, setDimensions] = useState<Dimension[]>([])
+  const [isLoadingDimensions, setIsLoadingDimensions] = useState(false)
+
+  // Fetch dimensions when dialog opens
+  useEffect(() => {
+    if (open) {
+      fetchDimensions()
+    }
+  }, [open])
+
+  const fetchDimensions = async () => {
+    setIsLoadingDimensions(true)
+    try {
+      const response = await fetch('/api/admin/dimensions')
+      if (response.ok) {
+        const data = await response.json()
+        setDimensions(data.data || [])
+      }
+    } catch (error) {
+      console.error('Error fetching dimensions:', error)
+    } finally {
+      setIsLoadingDimensions(false)
+    }
+  }
 
   const form = useForm<CreateQuestionSchema>({
     resolver: zodResolver(createQuestionSchema(instrumentType)),
@@ -87,6 +118,7 @@ export function CreateQuestionDialog({
       questionText: "",
       questionType: "STATEMENT",
       scoringGuide: "",
+      dimensionId: "no-dimension",
       rubricCriteria: instrumentType === 'OBSERVATION' ? [
         { score: 4, description: '' },
         { score: 3, description: '' },
@@ -102,6 +134,7 @@ export function CreateQuestionDialog({
       const payload = {
         ...values,
         configId,
+        dimensionId: values.dimensionId === "no-dimension" ? null : values.dimensionId,
         rubricCriteria: instrumentType === 'OBSERVATION' ? JSON.stringify(values.rubricCriteria) : undefined,
       }
       const response = await fetch('/api/admin/templates/questions', {
@@ -114,14 +147,25 @@ export function CreateQuestionDialog({
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Failed to create question')
+        throw new Error(error.message || 'Gagal membuat pertanyaan')
       }
 
-      toast.success("Question created successfully!")
+      toast.success("Pertanyaan berhasil dibuat!")
       onSuccess()
-      form.reset()
+      form.reset({
+        questionText: "",
+        questionType: "STATEMENT",
+        scoringGuide: "",
+        dimensionId: "no-dimension",
+        rubricCriteria: instrumentType === 'OBSERVATION' ? [
+          { score: 4, description: '' },
+          { score: 3, description: '' },
+          { score: 2, description: '' },
+          { score: 1, description: '' },
+        ] : undefined,
+      })
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to create question")
+      toast.error(error instanceof Error ? error.message : "Gagal membuat pertanyaan")
     } finally {
       setIsSubmitting(false)
     }
@@ -201,14 +245,14 @@ function RubricCriteriaField({ value, onChange }: { value: RubricCriterion[]; on
   const getAvailableQuestionTypes = (type: string) => {
     switch (type) {
       case 'SELF_ASSESSMENT':
-        return [{ value: "STATEMENT", label: "Statement (Skala)" }]
+        return [{ value: "STATEMENT", label: "Pernyataan (Skala)" }]
       case 'JOURNAL':
       case 'PEER_ASSESSMENT':
       case 'OBSERVATION':
       default:
         return [
-          { value: "STATEMENT", label: "Statement (Skala)" },
-          { value: "ESSAY_PROMPT", label: "Essay Prompt (Jawaban Bebas)" }
+          { value: "STATEMENT", label: "Pernyataan (Skala)" },
+          { value: "ESSAY_PROMPT", label: "Pertanyaan Esai (Jawaban Bebas)" }
         ]
     }
   }
@@ -287,6 +331,43 @@ function RubricCriteriaField({ value, onChange }: { value: RubricCriterion[]; on
                         {getAvailableQuestionTypes(instrumentType).map((type) => (
                           <SelectItem key={type.value} value={type.value}>
                             {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="dimensionId"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <FormLabel className="text-[13px] font-semibold leading-none">Dimensi Penilaian</FormLabel>
+                      <span className="text-xs text-muted-foreground font-normal">(Opsional)</span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span tabIndex={0} className="cursor-pointer"><Info className="w-4 h-4 text-muted-foreground" /></span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs text-xs">
+                          Pilih dimensi penilaian yang sesuai untuk pertanyaan ini. Ini akan membantu dalam analisis skor per dimensi.
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingDimensions}>
+                      <FormControl>
+                        <SelectTrigger className="border border-input rounded-md focus:ring-2 focus:ring-primary/40 focus:border-primary/60 text-sm w-full">
+                          <SelectValue placeholder={isLoadingDimensions ? "Memuat dimensi..." : "Pilih dimensi penilaian"} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="no-dimension">Tidak ada dimensi</SelectItem>
+                        {dimensions.map((dimension) => (
+                          <SelectItem key={dimension.id} value={dimension.id}>
+                            {dimension.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

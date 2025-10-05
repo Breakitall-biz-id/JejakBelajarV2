@@ -226,11 +226,11 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Project</TableHead>
-                  <TableHead>Assessment Type</TableHead>
-                  <TableHead>Score</TableHead>
+                  <TableHead>Proyek</TableHead>
+                  <TableHead>Tipe Penilaian</TableHead>
+                  <TableHead>Skor</TableHead>
                   <TableHead>Feedback</TableHead>
-                  <TableHead>Submitted</TableHead>
+                  <TableHead>Dikumpulkan</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

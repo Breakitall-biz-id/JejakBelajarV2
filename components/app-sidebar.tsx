@@ -38,29 +38,29 @@ import type { CurrentUser } from "@/lib/auth/session"
 import type { UserRole } from "@/db/schema/auth"
 
 const adminNav: Array<{ title: string; url: string; icon: Icon }> = [
-  { title: "Overview", url: "/dashboard/admin", icon: IconDashboard },
-  { title: "Academic Terms", url: "/dashboard/admin/academic-terms", icon: IconCalendarEvent },
-  { title: "Classes & Cohorts", url: "/dashboard/admin/classes", icon: IconClipboardList },
-  { title: "Accounts", url: "/dashboard/admin/accounts", icon: IconUsers },
-  { title: "Templates", url: "/dashboard/admin/templates", icon: IconLayoutKanban },
-  { title: "Reports", url: "/dashboard/admin/reports", icon: IconChartBar },
+  { title: "Beranda", url: "/dashboard/admin", icon: IconDashboard },
+  { title: "Tahun Ajaran", url: "/dashboard/admin/academic-terms", icon: IconCalendarEvent },
+  { title: "Kelas & Siswa", url: "/dashboard/admin/classes", icon: IconClipboardList },
+  { title: "Akun Pengguna", url: "/dashboard/admin/accounts", icon: IconUsers },
+  { title: "Template Proyek", url: "/dashboard/admin/templates", icon: IconLayoutKanban },
+  { title: "Laporan", url: "/dashboard/admin/reports", icon: IconChartBar },
 ]
 
 const teacherNav: Array<{ title: string; url: string; icon: Icon }> = [
-  { title: "Overview", url: "/dashboard/teacher", icon: IconDashboard },
-  { title: "Review & Feedback", url: "/dashboard/teacher/review", icon: IconClipboardList },
-  { title: "Reports & Exports", url: "/dashboard/teacher/reports", icon: IconReport },
+  { title: "Beranda", url: "/dashboard/teacher", icon: IconDashboard },
+  { title: "Penilaian & Feedback", url: "/dashboard/teacher/review", icon: IconClipboardList },
+  { title: "Laporan & Ekspor", url: "/dashboard/teacher/reports", icon: IconReport },
 ]
 
 const studentNav: Array<{ title: string; url: string; icon: Icon }> = [
-  { title: "Home", url: "/dashboard/student", icon: IconDashboard },
+  { title: "Beranda", url: "/dashboard/student", icon: IconDashboard },
 ]
 
 
 const secondaryNav = [
-  { title: "Settings", url: "#", icon: IconSettings },
-  { title: "Get Help", url: "#", icon: IconHelp },
-  { title: "Search", url: "#", icon: IconSearch },
+  { title: "Pengaturan", url: "#", icon: IconSettings },
+  { title: "Bantuan", url: "#", icon: IconHelp },
+  { title: "Pencarian", url: "#", icon: IconSearch },
 ]
 
 type ExtendedRole = UserRole | "GUEST"
@@ -69,7 +69,7 @@ const NAV_BY_ROLE: Record<ExtendedRole, Array<{ title: string; url: string; icon
   ADMIN: adminNav,
   TEACHER: teacherNav,
   STUDENT: studentNav,
-  GUEST: [{ title: "Dashboard", url: "/dashboard", icon: IconDashboard }],
+  GUEST: [{ title: "Beranda", url: "/dashboard", icon: IconDashboard }],
 }
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
@@ -85,8 +85,8 @@ export function AppSidebar({ initialRole, initialUser, ...props }: AppSidebarPro
 
   const userData = useMemo(() => {
     const fallback = {
-      name: "Guest",
-      email: "guest@example.com",
+      name: "Tamu",
+      email: "tamu@example.com",
       avatar: "/codeguide-logo.png",
     }
 
@@ -97,7 +97,7 @@ export function AppSidebar({ initialRole, initialUser, ...props }: AppSidebarPro
     }
 
     return {
-      name: activeUser.name || "User",
+      name: activeUser.name || "Pengguna",
       email: activeUser.email,
       avatar: activeUser.image || "/codeguide-logo.png",
     }

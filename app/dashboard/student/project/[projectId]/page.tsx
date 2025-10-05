@@ -14,5 +14,5 @@ export default async function ProjectDetailPage(props: { params: Promise<{ proje
   const project = data.projects.find(p => p.id === projectId)
   if (!project) return notFound()
 
-  return <ProjectDetail project={project} />
+  return <ProjectDetail project={project} student={user} />
 }

@@ -100,7 +100,7 @@ export function ObservationSheetDialog({
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-lg font-medium text-center">
-            {title || "Observation Sheet"}
+            {title || "Lembar Observasi"}
           </DialogTitle>
         </DialogHeader>
         <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-4">

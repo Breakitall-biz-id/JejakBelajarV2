@@ -154,7 +154,7 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
               <div className="flex gap-2">
                 <Button variant="outline" size="sm">
                   <Download className="mr-2 h-4 w-4" />
-                  Export Grades
+                  Ekspor Nilai
                 </Button>
               </div>
             </div>
@@ -180,7 +180,7 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
       {/* Grades Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Student Grades</CardTitle>
+          <CardTitle>Nilai Siswa</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
@@ -283,7 +283,7 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
                           size="sm"
                           onClick={() => router.push(`/dashboard/teacher/reports/${classId}/student/${student.id}`)}
                         >
-                          View Details
+                          Lihat Detail
                         </Button>
                       </TableCell>
                     </TableRow>

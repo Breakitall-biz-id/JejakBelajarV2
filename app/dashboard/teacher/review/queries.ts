@@ -626,7 +626,7 @@ export async function getProjectDetail(classId: string, projectId: string, teach
         const questions = configId ? configIdToQuestions.get(configId) || [] : []
         const rubrics = instrument.instrumentType === "JOURNAL" && configId ? configIdToRubrics.get(configId) || [] : []
         return {
-          id: `${instrument.instrumentType.toLowerCase()}-${stage.id}`,
+          id: instrument.id,
           instrumentType: instrument.instrumentType,
           isRequired: instrument.isRequired,
           description: instrument.description,

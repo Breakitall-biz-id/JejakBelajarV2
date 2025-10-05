@@ -48,7 +48,7 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
   }
 
   const handleDeleteTemplate = async (template: ProjectTemplate) => {
-    if (!confirm(`Are you sure you want to delete the template "${template.templateName}"? This action cannot be undone.`)) {
+    if (!confirm(`Apakah Anda yakin ingin menghapus template "${template.templateName}"? Tindakan ini tidak dapat dibatalkan.`)) {
       return
     }
 
@@ -56,13 +56,13 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
       const result = await deleteTemplate({ templateId: template.id })
 
       if (!result.success) {
-        toast.error(result.error || "Failed to delete template")
+        toast.error(result.error || "Gagal menghapus template")
         return
       }
 
-      toast.success("Template deleted successfully!")
+      toast.success("Template berhasil dihapus!")
     } catch (error) {
-      toast.error("Failed to delete template")
+      toast.error("Gagal menghapus template")
       console.error(error)
     }
   }
@@ -100,13 +100,13 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
             <div className="mb-4 rounded-full bg-primary/10 p-4">
               <LayoutDashboard className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No templates yet</h3>
+            <h3 className="text-lg font-semibold mb-2">Belum ada template</h3>
             <p className="text-sm text-muted-foreground mb-4 max-w-md">
-              Create your first project template to get started. Templates help teachers structure their PjBL projects consistently.
+              Buat template proyek pertama Anda untuk memulai. Template membantu guru menyusun proyek PjBL secara konsisten.
             </p>
             <Button onClick={() => setShowCreateDialog(true)} size="lg">
               <Plus className="mr-2 h-4 w-4" />
-              Create Your First Template
+              Buat Template Pertama Anda
             </Button>
           </CardContent>
         </Card>
@@ -122,7 +122,7 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
                     </CardTitle>
                     <div className="flex items-center gap-2">
                       <Badge variant={template.isActive ? "default" : "secondary"} className="text-xs">
-                        {template.isActive ? "Active" : "Inactive"}
+                        {template.isActive ? "Aktif" : "Tidak Aktif"}
                       </Badge>
                       <Badge variant="outline" className="text-xs">
                         {getStageCount(template)} stages

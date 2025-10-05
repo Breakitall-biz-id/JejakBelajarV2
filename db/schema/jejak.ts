@@ -96,6 +96,24 @@ export const userClassAssignments = pgTable(
   }),
 );
 
+// Assessment Dimensions (P5 Dimensions)
+export const dimensions = pgTable(
+  "dimensions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: text("description"),
+    createdByAdminId: uuid("created_by_admin_id").references(() => user.id, {
+      onDelete: "set null"
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    uniqueness: uniqueIndex("dimensions_name_unique_idx").on(table.name),
+  }),
+);
+
 // Project Templates (created by Admin)
 export const projectTemplates = pgTable(
   "project_templates",
@@ -146,6 +164,7 @@ export const templateQuestions = pgTable(
     questionType: varchar("question_type", { length: 50 }).default("STATEMENT").notNull(), // STATEMENT, ESSAY_PROMPT
     scoringGuide: text("scoring_guide"), // For questionnaires: Always=4, Often=3, Sometimes=2, Never=1
     rubricCriteria: text("rubric_criteria"), // JSONB field for detailed rubric criteria per score level
+    dimensionId: uuid("dimension_id").references(() => dimensions.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -161,6 +180,7 @@ export const templateJournalRubrics = pgTable(
       .references(() => templateStageConfigs.id, { onDelete: "cascade" }),
     indicatorText: text("indicator_text").notNull(), // e.g., "Mengajukan pertanyaan terbuka..."
     criteria: jsonb("criteria").notNull(), // e.g., {"4": "Description for score 4", "3": "...", "2": "...", "1": "..."}
+    dimensionId: uuid("dimension_id").references(() => dimensions.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },

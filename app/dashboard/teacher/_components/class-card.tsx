@@ -58,7 +58,7 @@ export function ClassCard({
           </div>
           <div className="flex items-center gap-2">
             <Badge variant={classInfo.termStatus === "ACTIVE" ? "default" : "secondary"}>
-              {classInfo.termStatus === "ACTIVE" ? "Active" : "Inactive"}
+              {classInfo.termStatus === "ACTIVE" ? "Aktif" : "Tidak Aktif"}
             </Badge>
           </div>
         </div>
@@ -86,9 +86,9 @@ export function ClassCard({
         {projects.length === 0 ? (
           <div className="text-center py-8">
             <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h4 className="font-medium mb-2">No Projects Yet</h4>
+            <h4 className="font-medium mb-2">Belum Ada Proyek</h4>
             <p className="text-sm text-muted-foreground">
-              Create your first project to start managing PjBL activities
+              Buat proyek pertama Anda untuk mulai mengelola aktivitas PjBL
             </p>
           </div>
         ) : (

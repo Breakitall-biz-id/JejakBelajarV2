@@ -11,10 +11,15 @@ import {
   submissions,
   templateStageConfigs,
   userClassAssignments,
+  dimensions,
+  templateQuestions,
+  templateJournalRubrics,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
 import { user as targetStudent } from "@/db/schema/auth"
 import type { CurrentUser } from "@/lib/auth/session"
+import { calculateClassDimensionScores, DimensionScore } from "@/lib/scoring/dimension-scorer"
+import { convertToQualitativeScore } from "@/lib/scoring/qualitative-converter"
 
 export type TeacherReportData = {
   classes: Array<{
@@ -25,11 +30,9 @@ export type TeacherReportData = {
     totalStages: number
     completedAssignments: number
     completionRate: number
-    averageScores: {
-      observation: number | null
-      journal: number | null
-      dailyNote: number | null
-    }
+    dimensionScores: DimensionScore[]
+    overallAverageScore: number
+    overallQualitativeScore: string
     lastSubmissionAt: string | null
   }>
   peerAssessments: Array<{
@@ -62,20 +65,43 @@ type MetricsAccumulator = {
   totalProjects: number
   totalStages: number
   completedAssignments: number
-  scoreSums: {
-    observation: number
-    journal: number
-    dailyNote: number
-  }
-  scoreCounts: {
-    observation: number
-    journal: number
-    dailyNote: number
-  }
   lastSubmission: Date | null
+  projectIds: string[]
 }
 
-const TEACHER_GRADED_INSTRUMENTS = ["OBSERVATION", "JOURNAL", "DAILY_NOTE"] as const
+/**
+ * Menggabungkan dimension scores dari multiple projects
+ */
+function mergeDimensionScores(existing: DimensionScore[], newScores: DimensionScore[]): DimensionScore[] {
+  const scoreMap = new Map<string, DimensionScore>()
+
+  // Add existing scores to map
+  for (const score of existing) {
+    scoreMap.set(score.dimensionId, { ...score })
+  }
+
+  // Merge new scores
+  for (const newScore of newScores) {
+    const existingScore = scoreMap.get(newScore.dimensionId)
+    if (existingScore) {
+      // Calculate weighted average
+      const totalSubmissions = existingScore.totalSubmissions + newScore.totalSubmissions
+      const weightedScore = (existingScore.averageScore * existingScore.totalSubmissions +
+                           newScore.averageScore * newScore.totalSubmissions) / totalSubmissions
+
+      scoreMap.set(newScore.dimensionId, {
+        ...existingScore,
+        averageScore: Number(weightedScore.toFixed(2)),
+        totalSubmissions,
+        qualitativeScore: convertToQualitativeScore(weightedScore)
+      })
+    } else {
+      scoreMap.set(newScore.dimensionId, { ...newScore })
+    }
+  }
+
+  return Array.from(scoreMap.values())
+}
 
 export async function getTeacherReportData(teacher: CurrentUser): Promise<TeacherReportData> {
   const classRows = await db
@@ -139,20 +165,7 @@ export async function getTeacherReportData(teacher: CurrentUser): Promise<Teache
         .where(inArray(projects.id, projectIds))
     : []
 
-  const submissionRows = projectIds.length
-    ? await db
-        .select({
-          classId: projects.classId,
-          instrumentType: templateStageConfigs.instrumentType,
-          score: submissions.score,
-          submittedAt: submissions.submittedAt,
-        })
-        .from(submissions)
-        .innerJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
-        .innerJoin(projects, eq(submissions.projectId, projects.id))
-        .where(and(inArray(projects.id, projectIds), inArray(templateStageConfigs.instrumentType, TEACHER_GRADED_INSTRUMENTS)))
-    : []
-
+  
   const metricsMap = new Map<string, MetricsAccumulator>()
 
   for (const row of classRows) {
@@ -163,9 +176,8 @@ export async function getTeacherReportData(teacher: CurrentUser): Promise<Teache
       totalProjects: 0,
       totalStages: 0,
       completedAssignments: 0,
-      scoreSums: { observation: 0, journal: 0, dailyNote: 0 },
-      scoreCounts: { observation: 0, journal: 0, dailyNote: 0 },
       lastSubmission: null,
+      projectIds: [],
     })
   }
 
@@ -180,6 +192,7 @@ export async function getTeacherReportData(teacher: CurrentUser): Promise<Teache
     const metrics = metricsMap.get(row.classId)
     if (metrics) {
       metrics.totalProjects += 1
+      metrics.projectIds.push(row.id)
     }
   }
 
@@ -201,53 +214,63 @@ export async function getTeacherReportData(teacher: CurrentUser): Promise<Teache
     }
   }
 
-  for (const row of submissionRows) {
+  // Track last submission time
+  const allSubmissions = projectIds.length > 0
+    ? await db
+        .select({
+          classId: projects.classId,
+          submittedAt: submissions.submittedAt,
+        })
+        .from(submissions)
+        .innerJoin(projects, eq(submissions.projectId, projects.id))
+        .where(inArray(projects.id, projectIds))
+    : []
+
+  for (const row of allSubmissions) {
     const metrics = metricsMap.get(row.classId)
-    if (!metrics || row.score === null) {
-      continue
-    }
-
-    const instrument = row.instrumentType as (typeof TEACHER_GRADED_INSTRUMENTS)[number]
-
-    switch (instrument) {
-      case "OBSERVATION":
-        metrics.scoreSums.observation += row.score
-        metrics.scoreCounts.observation += 1
-        break
-      case "JOURNAL":
-        metrics.scoreSums.journal += row.score
-        metrics.scoreCounts.journal += 1
-        break
-      case "DAILY_NOTE":
-        metrics.scoreSums.dailyNote += row.score
-        metrics.scoreCounts.dailyNote += 1
-        break
-    }
-
-    if (!metrics.lastSubmission || metrics.lastSubmission < row.submittedAt) {
+    if (metrics && (!metrics.lastSubmission || metrics.lastSubmission < row.submittedAt)) {
       metrics.lastSubmission = row.submittedAt
     }
   }
 
-  const reportClasses = Array.from(metricsMap.values()).map((metrics) => {
+  // Calculate dimension-based scores for each class
+  const reportClasses = []
+
+  for (const metrics of metricsMap.values()) {
     const totalStageAssignments = metrics.totalStages * metrics.totalStudents
     const completionRate = totalStageAssignments > 0
       ? Math.round((metrics.completedAssignments / totalStageAssignments) * 100)
       : 0
 
-    const averageScores = {
-      observation: metrics.scoreCounts.observation > 0
-        ? Number((metrics.scoreSums.observation / metrics.scoreCounts.observation).toFixed(2))
-        : null,
-      journal: metrics.scoreCounts.journal > 0
-        ? Number((metrics.scoreSums.journal / metrics.scoreCounts.journal).toFixed(2))
-        : null,
-      dailyNote: metrics.scoreCounts.dailyNote > 0
-        ? Number((metrics.scoreSums.dailyNote / metrics.scoreCounts.dailyNote).toFixed(2))
-        : null,
+    // Calculate dimension scores for all projects in this class
+    let dimensionScores: DimensionScore[] = []
+    let totalOverallScore = 0
+    let validProjectsCount = 0
+
+    for (const projectId of metrics.projectIds) {
+      try {
+        const classScores = await calculateClassDimensionScores(metrics.id, projectId)
+        dimensionScores = mergeDimensionScores(dimensionScores, classScores.dimensions)
+
+        if (classScores.overallClassAverage > 0) {
+          totalOverallScore += classScores.overallClassAverage
+          validProjectsCount++
+        }
+      } catch (error) {
+        console.error(`Error calculating scores for class ${metrics.id}, project ${projectId}:`, error)
+        // Continue with other projects
+      }
     }
 
-    return {
+    const overallAverageScore = validProjectsCount > 0
+      ? totalOverallScore / validProjectsCount
+      : 0
+
+    const overallQualitativeScore = overallAverageScore > 0
+      ? convertToQualitativeScore(overallAverageScore)
+      : "Tidak Ada Data"
+
+    reportClasses.push({
       id: metrics.id,
       name: metrics.name,
       totalStudents: metrics.totalStudents,
@@ -255,10 +278,12 @@ export async function getTeacherReportData(teacher: CurrentUser): Promise<Teache
       totalStages: metrics.totalStages,
       completedAssignments: metrics.completedAssignments,
       completionRate,
-      averageScores,
+      dimensionScores,
+      overallAverageScore: Number(overallAverageScore.toFixed(2)),
+      overallQualitativeScore,
       lastSubmissionAt: metrics.lastSubmission ? metrics.lastSubmission.toISOString() : null,
-    }
-  })
+    })
+  }
 
   // Query peer assessment data - simplified approach
   const peerAssessmentSubmissions = classIds.length > 0

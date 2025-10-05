@@ -1,0 +1,1522 @@
+{
+    "id": "81f2763c-e41a-493b-8b89-1d35331442aa",
+    "title": "Proyek Kebun Atsiri",
+    "description": "-",
+    "stages": [
+        {
+            "id": "82f344eb-7971-478d-8c9c-ab28fae6808a",
+            "name": "Start with the essential question:",
+            "description": "-",
+            "order": 1,
+            "unlocksAt": null,
+            "dueAt": null,
+            "status": "IN_PROGRESS",
+            "requiredInstruments": [
+                {
+                    "id": "787e9c43-59da-414b-b6c7-695d37dc0dd5",
+                    "instrumentType": "JOURNAL",
+                    "isRequired": true,
+                    "description": "-",
+                    "questions": [
+                        {
+                            "id": "fa8f9632-5ee0-4b9b-969e-01bf4a54b2f7",
+                            "questionText": "<p>Anda bersama guru dan teman-teman telah merumuskan masalah utama dalam proyek kali ini. Dari masalah tersebut, pertanyaan-pertanyaan apa saja yang terlintas dalam pikiran Anda?</p>",
+                            "questionType": "ESSAY_PROMPT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        }
+                    ],
+                    "rubrics": [
+                        {
+                            "id": "eb46c4dc-5a2b-4c0b-b443-65197589f80b",
+                            "indicatorText": "Mengajukan pertanyaan terbuka yang relevan dengan masalah utama proyek\n",
+                            "criteria": {
+                                "1": "Pertanyaan tidak relevan, tidak mencerminkan pemahaman terhadap masalah proyek\n",
+                                "2": "Pertanyaan relevan namun bersifat tertutup, hanya memunculkan jawaban terbatas\n",
+                                "3": "Pertanyaan terbuka, relevan, belum mengarah langsung ke masalah utama proyek\n",
+                                "4": "Pertanyaan terbuka, relevan, berkaitan langsung dengan masalah utama proyek\n"
+                            }
+                        },
+                        {
+                            "id": "8bb6fc49-77b2-4652-bb4f-921146725d16",
+                            "indicatorText": "Mengajukan pertanyaan yang mendorong eksplorasi lebih lanjut\n",
+                            "criteria": {
+                                "1": "Pertanyaan hanya meminta informasi faktual yang mudah diperoleh (contohnya tentang definisi, data tunggal)\n",
+                                "2": "Pertanyaan hanya membutuhkan penelusuran sederhana antara lain dari membaca artikel atau buku\n",
+                                "3": "Pertanyaan mendorong eksplorasi, meskipun belum mengarah pada eksperimen nyata\n",
+                                "4": "Pertanyaan mengarah pada penyelidikan mendalam, dapat mendorong pengumpulan data maupun eksperimen nyata\n"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "submissionsByInstrument": {
+                "JOURNAL": [
+                    {
+                        "id": "031b4be3-5a3f-4bc4-95c8-eb1dccbbde21",
+                        "instrumentType": "JOURNAL",
+                        "content": {
+                            "text": "halooooo",
+                            "grades": [
+                                {
+                                    "score": 4,
+                                    "rubric_id": "eb46c4dc-5a2b-4c0b-b443-65197589f80b"
+                                },
+                                {
+                                    "score": 3,
+                                    "rubric_id": "8bb6fc49-77b2-4652-bb4f-921146725d16"
+                                }
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T13:05:49.405Z",
+                        "score": 4,
+                        "feedback": null,
+                        "teacherGrades": [
+                            {
+                                "score": 4,
+                                "rubric_id": "eb46c4dc-5a2b-4c0b-b443-65197589f80b"
+                            },
+                            {
+                                "score": 3,
+                                "rubric_id": "8bb6fc49-77b2-4652-bb4f-921146725d16"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "students": [
+                {
+                    "id": "33cff2cd-1a2f-47ce-8f6e-73897ece2392",
+                    "name": "Ihsan Syafiul Umam",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "COMPLETED"
+                    },
+                    "submissions": [
+                        {
+                            "id": "031b4be3-5a3f-4bc4-95c8-eb1dccbbde21",
+                            "instrumentType": "JOURNAL",
+                            "content": {
+                                "text": "halooooo",
+                                "grades": [
+                                    {
+                                        "score": 4,
+                                        "rubric_id": "eb46c4dc-5a2b-4c0b-b443-65197589f80b"
+                                    },
+                                    {
+                                        "score": 3,
+                                        "rubric_id": "8bb6fc49-77b2-4652-bb4f-921146725d16"
+                                    }
+                                ]
+                            },
+                            "submittedAt": "2025-10-05T13:05:49.405Z",
+                            "score": 4,
+                            "feedback": null,
+                            "teacherGrades": [
+                                {
+                                    "score": 4,
+                                    "rubric_id": "eb46c4dc-5a2b-4c0b-b443-65197589f80b"
+                                },
+                                {
+                                    "score": 3,
+                                    "rubric_id": "8bb6fc49-77b2-4652-bb4f-921146725d16"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "03bb2186-485c-4879-a67f-11493306c306",
+                    "name": "Abdul Aziz",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                },
+                {
+                    "id": "88f509ac-7bae-4713-8890-eae9d775adc4",
+                    "name": "pardi",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                },
+                {
+                    "id": "b9f42d60-7346-4119-afa5-f01a867f3c60",
+                    "name": "Budi Raharjo Wibowo",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                }
+            ]
+        },
+        {
+            "id": "b8c7cdd0-6196-4e47-9ef7-375d23acd7a1",
+            "name": "Design a plan for the project",
+            "description": "mendesain peluang2 pengembangan keunggulan produk\n",
+            "order": 2,
+            "unlocksAt": null,
+            "dueAt": null,
+            "status": "IN_PROGRESS",
+            "requiredInstruments": [
+                {
+                    "id": "4d615110-7075-4018-8661-046c26be5f42",
+                    "instrumentType": "PEER_ASSESSMENT",
+                    "isRequired": true,
+                    "description": "mendesain peluang2 pengembangan keunggulan produk\n",
+                    "questions": [
+                        {
+                            "id": "2ed041d4-c410-4055-aaef-38bf953deb6a",
+                            "questionText": "<p>Teman saya menunjukkan sikap menghargai saat mendengarkan pendapat teman kelompok.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "3be75cfc-e318-4dfd-aef9-1fd7f9e5136b",
+                            "questionText": "<p>Teman saya memberikan tanggapan yang membangun terhadap ide anggota kelompok untuk memperkuat hasil diskusi kelompok.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        }
+                    ],
+                    "rubrics": []
+                },
+                {
+                    "id": "af6cce51-8146-43b4-8a1f-42252534b7f7",
+                    "instrumentType": "SELF_ASSESSMENT",
+                    "isRequired": true,
+                    "description": "mendesain peluang2 pengembangan keunggulan produk\n",
+                    "questions": [
+                        {
+                            "id": "5beb7380-dddf-47e6-ad91-1d5752c608f7",
+                            "questionText": "<p>Saya menyampaikan pendapat tanpa menyalahkan atau meremehkan pendapat teman. Jika ada ide yang menurut saya kurang tepat, saya mengungkapkan pendapat dengan cara yang tidak membuat teman merasa malu atau disalahkan.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "82ef60e3-5101-4e06-a96e-92f2283f2eaf",
+                            "questionText": "<p>Saat berdiskusi, saya berusaha menghindari perdebatan yang tidak perlu agar target pembuatan rencana proyek tercapai.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "2fa1bac3-6c37-4934-aaa0-c8b70b687605",
+                            "questionText": "<p>Saya mengarahkan diskusi agar tetap fokus pada topik pembuatan rencana proyek.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "4fa24d37-7e5c-4513-8b4d-c308a190938b",
+                            "questionText": "<p>Saat berdiskusi tentang rencana proyek, saya menyampaikan ide-ide yang muncul dari pemikiran sendiri, bukan meniru ide teman.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "bfdf93be-02c1-4218-895b-0f249e10f498",
+                            "questionText": "<p>Saat membuat rencana proyek, saya berusaha memikirkan ide dari sudut pandang yang berbeda.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "62a3554f-2a05-4cd6-be3a-f485949cd92f",
+                            "questionText": "<p>Saya menyampaikan ide kreatif, tetapi tetap mempertimbangkan kemungkinan diterapkan</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "01ca8a9b-42ae-4921-94a1-553ee32a425e",
+                            "questionText": "<p>Saya berusaha menyampaikan ide yang masuk akal dan dapat dikerjakan</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        }
+                    ],
+                    "rubrics": []
+                },
+                {
+                    "id": "f6c64a77-41ff-4484-bf34-f1bb3dcac9d6",
+                    "instrumentType": "OBSERVATION",
+                    "isRequired": true,
+                    "description": "mendesain peluang2 pengembangan keunggulan produk\n",
+                    "questions": [
+                        {
+                            "id": "a74cdc48-6d06-4277-a2e5-00931f646d57",
+                            "questionText": "<p>Murid menyampaikan data, fakta, atau informasi yang berkaitan dengan proyek.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": [
+                                {
+                                    "score": 4,
+                                    "description": "Konsisten menunjukkan perilaku"
+                                },
+                                {
+                                    "score": 3,
+                                    "description": "Sering menunjukkan perilaku"
+                                },
+                                {
+                                    "score": 2,
+                                    "description": "Kadang-kadang menunjukkan perilaku"
+                                },
+                                {
+                                    "score": 1,
+                                    "description": "Tidak menunjukkan perilaku"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "5db7aea2-a0d8-4c3a-a1cf-e84fec6149b7",
+                            "questionText": "<p>Murid mengajukan pertanyaan kepada guru atau teman untuk memperjelas informasi.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": [
+                                {
+                                    "score": 4,
+                                    "description": "Konsisten menunjukkan perilaku"
+                                },
+                                {
+                                    "score": 3,
+                                    "description": "Sering menunjukkan perilaku"
+                                },
+                                {
+                                    "score": 2,
+                                    "description": "Kadang-kadang menunjukkan perilaku"
+                                },
+                                {
+                                    "score": 1,
+                                    "description": "Tidak menunjukkan perilaku"
+                                }
+                            ]
+                        }
+                    ],
+                    "rubrics": []
+                }
+            ],
+            "submissionsByInstrument": {
+                "PEER_ASSESSMENT": [
+                    {
+                        "id": "2ab7ae92-b45b-4539-bf9c-8fbc591489f6",
+                        "instrumentType": "PEER_ASSESSMENT",
+                        "content": {
+                            "answers": [
+                                4,
+                                2
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T13:59:33.697Z",
+                        "score": null,
+                        "feedback": null
+                    },
+                    {
+                        "id": "5658102c-4845-4dca-8efb-a23c530dac7f",
+                        "instrumentType": "PEER_ASSESSMENT",
+                        "content": {
+                            "answers": [
+                                3,
+                                2
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T13:59:31.757Z",
+                        "score": null,
+                        "feedback": null
+                    },
+                    {
+                        "id": "2cbbc9bf-219e-40a3-a64f-94a359a95df9",
+                        "instrumentType": "PEER_ASSESSMENT",
+                        "content": {
+                            "answers": [
+                                3,
+                                2
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T13:59:30.334Z",
+                        "score": null,
+                        "feedback": null
+                    }
+                ],
+                "SELF_ASSESSMENT": [
+                    {
+                        "id": "7dbb1a5f-10ee-4666-b5d6-33b19f3f28fa",
+                        "instrumentType": "SELF_ASSESSMENT",
+                        "content": {
+                            "answers": [
+                                4,
+                                4,
+                                3,
+                                4,
+                                3,
+                                2,
+                                1
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T13:59:59.470Z",
+                        "score": null,
+                        "feedback": null
+                    }
+                ],
+                "OBSERVATION": [
+                    {
+                        "id": "c738cfdb-e9a6-4316-8a76-c2789184d849",
+                        "instrumentType": "OBSERVATION",
+                        "targetStudentId": "b9f42d60-7346-4119-afa5-f01a867f3c60",
+                        "content": {
+                            "answers": [
+                                4,
+                                3
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:11:18.963Z",
+                        "score": null,
+                        "feedback": null
+                    },
+                    {
+                        "id": "5b797959-5d0a-4556-9020-d5b916e3bb25",
+                        "instrumentType": "OBSERVATION",
+                        "targetStudentId": "88f509ac-7bae-4713-8890-eae9d775adc4",
+                        "content": {
+                            "answers": [
+                                4,
+                                3
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:11:17.024Z",
+                        "score": null,
+                        "feedback": null
+                    },
+                    {
+                        "id": "9c614a88-d41d-4309-971d-2b87a6477466",
+                        "instrumentType": "OBSERVATION",
+                        "targetStudentId": "03bb2186-485c-4879-a67f-11493306c306",
+                        "content": {
+                            "answers": [
+                                4,
+                                3
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:11:15.640Z",
+                        "score": null,
+                        "feedback": null
+                    },
+                    {
+                        "id": "52314976-d646-4c24-b460-5b6d091ac6aa",
+                        "instrumentType": "OBSERVATION",
+                        "targetStudentId": "33cff2cd-1a2f-47ce-8f6e-73897ece2392",
+                        "content": {
+                            "answers": [
+                                4,
+                                3
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:11:14.737Z",
+                        "score": null,
+                        "feedback": null
+                    }
+                ]
+            },
+            "students": [
+                {
+                    "id": "33cff2cd-1a2f-47ce-8f6e-73897ece2392",
+                    "name": "Ihsan Syafiul Umam",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "COMPLETED"
+                    },
+                    "submissions": [
+                        {
+                            "id": "2ab7ae92-b45b-4539-bf9c-8fbc591489f6",
+                            "instrumentType": "PEER_ASSESSMENT",
+                            "content": {
+                                "answers": [
+                                    4,
+                                    2
+                                ]
+                            },
+                            "submittedAt": "2025-10-05T13:59:33.697Z",
+                            "score": null,
+                            "feedback": null
+                        },
+                        {
+                            "id": "5658102c-4845-4dca-8efb-a23c530dac7f",
+                            "instrumentType": "PEER_ASSESSMENT",
+                            "content": {
+                                "answers": [
+                                    3,
+                                    2
+                                ]
+                            },
+                            "submittedAt": "2025-10-05T13:59:31.757Z",
+                            "score": null,
+                            "feedback": null
+                        },
+                        {
+                            "id": "2cbbc9bf-219e-40a3-a64f-94a359a95df9",
+                            "instrumentType": "PEER_ASSESSMENT",
+                            "content": {
+                                "answers": [
+                                    3,
+                                    2
+                                ]
+                            },
+                            "submittedAt": "2025-10-05T13:59:30.334Z",
+                            "score": null,
+                            "feedback": null
+                        },
+                        {
+                            "id": "7dbb1a5f-10ee-4666-b5d6-33b19f3f28fa",
+                            "instrumentType": "SELF_ASSESSMENT",
+                            "content": {
+                                "answers": [
+                                    4,
+                                    4,
+                                    3,
+                                    4,
+                                    3,
+                                    2,
+                                    1
+                                ]
+                            },
+                            "submittedAt": "2025-10-05T13:59:59.470Z",
+                            "score": null,
+                            "feedback": null
+                        }
+                    ],
+                    "peerAssessmentMatrix": [
+                        [
+                            4,
+                            3,
+                            3
+                        ],
+                        [
+                            2,
+                            2,
+                            2
+                        ]
+                    ]
+                },
+                {
+                    "id": "03bb2186-485c-4879-a67f-11493306c306",
+                    "name": "Abdul Aziz",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                },
+                {
+                    "id": "88f509ac-7bae-4713-8890-eae9d775adc4",
+                    "name": "pardi",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                },
+                {
+                    "id": "b9f42d60-7346-4119-afa5-f01a867f3c60",
+                    "name": "Budi Raharjo Wibowo",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                }
+            ]
+        },
+        {
+            "id": "b986171e-6d3c-4c22-b941-eb14bb0d569c",
+            "name": "Create a schedule",
+            "description": "-",
+            "order": 3,
+            "unlocksAt": null,
+            "dueAt": null,
+            "status": "IN_PROGRESS",
+            "requiredInstruments": [
+                {
+                    "id": "cd9aa8fc-402f-4847-83de-6efa0b3c7f55",
+                    "instrumentType": "SELF_ASSESSMENT",
+                    "isRequired": true,
+                    "description": "-",
+                    "questions": [
+                        {
+                            "id": "b4439e44-8041-4b00-8ba6-776d6ec6b97f",
+                            "questionText": "<p>Saya menyampaikan usul&nbsp; secara jelas agar mudah dipahami teman.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "3fec942c-59cd-4d6d-9d1e-a68b6ada731a",
+                            "questionText": "<p>Saat tidak setuju dengan usul teman, saya menyampaikan dengan cara yang santun.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "5a90f1a4-00aa-4a37-9dfa-628e59db4315",
+                            "questionText": "<p>Saya tidak memaksakan pendapat</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "93852818-467c-41c3-b79a-32c89af8273e",
+                            "questionText": "<p>Saya tetap terlibat dan tidak diam saja saat kelompok merancang  proyek.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        }
+                    ],
+                    "rubrics": []
+                },
+                {
+                    "id": "9bbebca5-7f22-4da7-b6c1-5e02cb9f7490",
+                    "instrumentType": "PEER_ASSESSMENT",
+                    "isRequired": true,
+                    "description": "-",
+                    "questions": [
+                        {
+                            "id": "6b4a2e46-01de-4d78-942d-217643d96135",
+                            "questionText": "<p>Teman saya aktif terlibat dalam diskusi dan ikut memberikan pendapat.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        }
+                    ],
+                    "rubrics": []
+                }
+            ],
+            "submissionsByInstrument": {
+                "PEER_ASSESSMENT": [
+                    {
+                        "id": "1f2d965b-58d1-4f0b-bceb-5fe061e273e0",
+                        "instrumentType": "PEER_ASSESSMENT",
+                        "content": {
+                            "answers": [
+                                4
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:02:38.308Z",
+                        "score": null,
+                        "feedback": null
+                    },
+                    {
+                        "id": "1410d0fb-16cc-4e40-8321-67adc420bb3d",
+                        "instrumentType": "PEER_ASSESSMENT",
+                        "content": {
+                            "answers": [
+                                3
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:02:36.592Z",
+                        "score": null,
+                        "feedback": null
+                    },
+                    {
+                        "id": "d1344ef9-6830-420e-986f-9f60a12bf28a",
+                        "instrumentType": "PEER_ASSESSMENT",
+                        "content": {
+                            "answers": [
+                                3
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:02:34.620Z",
+                        "score": null,
+                        "feedback": null
+                    }
+                ],
+                "SELF_ASSESSMENT": [
+                    {
+                        "id": "0e05bd7b-dacb-4ef0-925b-b41c70328bcb",
+                        "instrumentType": "SELF_ASSESSMENT",
+                        "content": {
+                            "answers": [
+                                4,
+                                2,
+                                1,
+                                4
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:01:55.847Z",
+                        "score": null,
+                        "feedback": null
+                    }
+                ]
+            },
+            "students": [
+                {
+                    "id": "33cff2cd-1a2f-47ce-8f6e-73897ece2392",
+                    "name": "Ihsan Syafiul Umam",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "COMPLETED"
+                    },
+                    "submissions": [
+                        {
+                            "id": "1f2d965b-58d1-4f0b-bceb-5fe061e273e0",
+                            "instrumentType": "PEER_ASSESSMENT",
+                            "content": {
+                                "answers": [
+                                    4
+                                ]
+                            },
+                            "submittedAt": "2025-10-05T14:02:38.308Z",
+                            "score": null,
+                            "feedback": null
+                        },
+                        {
+                            "id": "1410d0fb-16cc-4e40-8321-67adc420bb3d",
+                            "instrumentType": "PEER_ASSESSMENT",
+                            "content": {
+                                "answers": [
+                                    3
+                                ]
+                            },
+                            "submittedAt": "2025-10-05T14:02:36.592Z",
+                            "score": null,
+                            "feedback": null
+                        },
+                        {
+                            "id": "d1344ef9-6830-420e-986f-9f60a12bf28a",
+                            "instrumentType": "PEER_ASSESSMENT",
+                            "content": {
+                                "answers": [
+                                    3
+                                ]
+                            },
+                            "submittedAt": "2025-10-05T14:02:34.620Z",
+                            "score": null,
+                            "feedback": null
+                        },
+                        {
+                            "id": "0e05bd7b-dacb-4ef0-925b-b41c70328bcb",
+                            "instrumentType": "SELF_ASSESSMENT",
+                            "content": {
+                                "answers": [
+                                    4,
+                                    2,
+                                    1,
+                                    4
+                                ]
+                            },
+                            "submittedAt": "2025-10-05T14:01:55.847Z",
+                            "score": null,
+                            "feedback": null
+                        }
+                    ],
+                    "peerAssessmentMatrix": [
+                        [
+                            4,
+                            3,
+                            3
+                        ]
+                    ]
+                },
+                {
+                    "id": "03bb2186-485c-4879-a67f-11493306c306",
+                    "name": "Abdul Aziz",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                },
+                {
+                    "id": "88f509ac-7bae-4713-8890-eae9d775adc4",
+                    "name": "pardi",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                },
+                {
+                    "id": "b9f42d60-7346-4119-afa5-f01a867f3c60",
+                    "name": "Budi Raharjo Wibowo",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                }
+            ]
+        },
+        {
+            "id": "7add88f8-6eaa-4563-9a89-0f5b7175069a",
+            "name": "Monitor the students and the progress of the project",
+            "description": "-",
+            "order": 4,
+            "unlocksAt": null,
+            "dueAt": null,
+            "status": "IN_PROGRESS",
+            "requiredInstruments": [
+                {
+                    "id": "e9613bdf-6a9b-4d9c-8773-0a24803cb438",
+                    "instrumentType": "SELF_ASSESSMENT",
+                    "isRequired": true,
+                    "description": "-",
+                    "questions": [
+                        {
+                            "id": "38116f7a-1851-4d08-992d-b9d87c97b07d",
+                            "questionText": "<p>Saya menjalankan kesepakatan kelompok tanpa harus diingatkan atau ditekan oleh teman.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "1d27f1aa-a00e-481a-af7f-1b79c56b3bf0",
+                            "questionText": "<p>Saya aktif terlibat menyelesaikan proyek sesuai rencana kelompok sebagai bentuk tanggung jawab pribadi.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "c51da34e-b2b5-4037-9bd0-c285e1f983e7",
+                            "questionText": "<p>Saya mengerjakan tugas kelompok dengan sungguh-sungguh, bukan asal selesai.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "e7a3a6a2-2f3a-48d0-aaae-8742683b91fc",
+                            "questionText": "<p>Saya memperhatikan kualitas hasil kerja saya agar tidak merepotkan teman kelompok.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "32459ca3-064b-46e4-a8f2-5616e7ee3b2c",
+                            "questionText": "<p>Saya memantau apakah kelompok saya sudah berjalan sesuai rencana.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        },
+                        {
+                            "id": "8933921d-8ba0-472f-aa66-a833ec033507",
+                            "questionText": "<p>Jika ada kendala dalam kelompok, saya berinisiatif memberikan solusi atau ide untuk mengatasinya.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        }
+                    ],
+                    "rubrics": []
+                },
+                {
+                    "id": "11948c0e-9d90-426e-a601-6b37eab60411",
+                    "instrumentType": "JOURNAL",
+                    "isRequired": true,
+                    "description": "-",
+                    "questions": [
+                        {
+                            "id": "d9c1987e-41df-4081-b9b1-574fa0597f1b",
+                            "questionText": "<p>Produk yang dibuat tentu masih sangat sederhana, apakah anda mempunyai ide untuk memodifikasi produk tersebut? Ide-ide apa saja yang muncul?</p>",
+                            "questionType": "ESSAY_PROMPT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        }
+                    ],
+                    "rubrics": [
+                        {
+                            "id": "2d298aa5-9f5f-4675-942d-220bdadb7faa",
+                            "indicatorText": "Memodifikasi rencana kerja berdasarkan kondisi baru atau kendala yang muncul\n",
+                            "criteria": {
+                                "1": "Tidak menceritakan kendala dengan jelas atau tidak menyebutkan solusi yang relevan. Refleksi tidak menggambarkan adanya modifikasi rencana kerja atau kurang mencerminkan pemahaman terhadap situasi\n",
+                                "2": "Menceritakan kendala secara umum, solusi yang diberikan kurang sesuai atau kurang jelas penerapannya\n",
+                                "3": "Menceritakan secara jelas kendala yang dihadapi, menyebutkan solusi yang relevan, diterapkan, menunjukkan adanya penyesuaian terhadap kondisi, namun belum sepenuhnya inovatif\n",
+                                "4": "Menceritakan secara jelas kendala yang dihadapi, menunjukkan pemahaman terhadap situasi, dan menyebutkan solusi yang relevan, kreatif (pemikiran baru, unik), dan diterapkan oleh kelompok\n"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "3b3a84bd-1d62-4f65-b35a-29a46ab4a91d",
+                    "instrumentType": "OBSERVATION",
+                    "isRequired": true,
+                    "description": "-",
+                    "questions": [
+                        {
+                            "id": "bbe117f9-a641-4367-9057-c0ac4f3f487f",
+                            "questionText": "<p>Murid menjalankan tanggung jawab sesuai peran yang disepakati dalam kelompok.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": [
+                                {
+                                    "score": 4,
+                                    "description": "Konsisten menunjukkan perilaku"
+                                },
+                                {
+                                    "score": 3,
+                                    "description": "Sering menunjukkan perilaku"
+                                },
+                                {
+                                    "score": 2,
+                                    "description": "Kadang-kadang menunjukkan perilaku"
+                                },
+                                {
+                                    "score": 1,
+                                    "description": "Tidak menunjukkan perilaku"
+                                }
+                            ]
+                        }
+                    ],
+                    "rubrics": []
+                },
+                {
+                    "id": "11d8cd56-6f4c-447c-a4f7-e192927e1e53",
+                    "instrumentType": "JOURNAL",
+                    "isRequired": true,
+                    "description": "-",
+                    "questions": [
+                        {
+                            "id": "d9c1987e-41df-4081-b9b1-574fa0597f1b",
+                            "questionText": "<p>Produk yang dibuat tentu masih sangat sederhana, apakah anda mempunyai ide untuk memodifikasi produk tersebut? Ide-ide apa saja yang muncul?</p>",
+                            "questionType": "ESSAY_PROMPT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        }
+                    ],
+                    "rubrics": [
+                        {
+                            "id": "2d298aa5-9f5f-4675-942d-220bdadb7faa",
+                            "indicatorText": "Memodifikasi rencana kerja berdasarkan kondisi baru atau kendala yang muncul\n",
+                            "criteria": {
+                                "1": "Tidak menceritakan kendala dengan jelas atau tidak menyebutkan solusi yang relevan. Refleksi tidak menggambarkan adanya modifikasi rencana kerja atau kurang mencerminkan pemahaman terhadap situasi\n",
+                                "2": "Menceritakan kendala secara umum, solusi yang diberikan kurang sesuai atau kurang jelas penerapannya\n",
+                                "3": "Menceritakan secara jelas kendala yang dihadapi, menyebutkan solusi yang relevan, diterapkan, menunjukkan adanya penyesuaian terhadap kondisi, namun belum sepenuhnya inovatif\n",
+                                "4": "Menceritakan secara jelas kendala yang dihadapi, menunjukkan pemahaman terhadap situasi, dan menyebutkan solusi yang relevan, kreatif (pemikiran baru, unik), dan diterapkan oleh kelompok\n"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "submissionsByInstrument": {
+                "SELF_ASSESSMENT": [
+                    {
+                        "id": "7416a050-37cf-4bbe-8563-2e43000e216d",
+                        "instrumentType": "SELF_ASSESSMENT",
+                        "content": {
+                            "answers": [
+                                4,
+                                2,
+                                4,
+                                4,
+                                3,
+                                4
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:03:01.397Z",
+                        "score": null,
+                        "feedback": null
+                    }
+                ],
+                "JOURNAL": [
+                    {
+                        "id": "ed5c61da-f258-498b-ab04-0747ff34b746",
+                        "instrumentType": "JOURNAL",
+                        "content": {
+                            "text": "okeyyyy",
+                            "grades": [
+                                {
+                                    "score": 1,
+                                    "rubric_id": "2d298aa5-9f5f-4675-942d-220bdadb7faa"
+                                }
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:04:39.777Z",
+                        "score": 1,
+                        "feedback": null,
+                        "teacherGrades": [
+                            {
+                                "score": 1,
+                                "rubric_id": "2d298aa5-9f5f-4675-942d-220bdadb7faa"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "58320ac8-a4d1-459b-8c2c-130cc53106cf",
+                        "instrumentType": "JOURNAL",
+                        "content": {
+                            "text": "tidak ada"
+                        },
+                        "submittedAt": "2025-10-05T14:04:19.460Z",
+                        "score": null,
+                        "feedback": null
+                    }
+                ],
+                "OBSERVATION": [
+                    {
+                        "id": "c447ed2a-2826-4eba-8de5-7a7098f6e06f",
+                        "instrumentType": "OBSERVATION",
+                        "targetStudentId": "b9f42d60-7346-4119-afa5-f01a867f3c60",
+                        "content": {
+                            "answers": [
+                                3
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:13:19.280Z",
+                        "score": null,
+                        "feedback": null
+                    },
+                    {
+                        "id": "3891f667-92b6-4729-8690-8be386d16a3a",
+                        "instrumentType": "OBSERVATION",
+                        "targetStudentId": "88f509ac-7bae-4713-8890-eae9d775adc4",
+                        "content": {
+                            "answers": [
+                                3
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:13:14.349Z",
+                        "score": null,
+                        "feedback": null
+                    },
+                    {
+                        "id": "fa805bc0-fe7a-48da-95ba-00ae2da040b2",
+                        "instrumentType": "OBSERVATION",
+                        "targetStudentId": "03bb2186-485c-4879-a67f-11493306c306",
+                        "content": {
+                            "answers": [
+                                2
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:13:11.209Z",
+                        "score": null,
+                        "feedback": null
+                    },
+                    {
+                        "id": "2cc8ee2e-276a-4c55-afe0-3ab193ad0379",
+                        "instrumentType": "OBSERVATION",
+                        "targetStudentId": "33cff2cd-1a2f-47ce-8f6e-73897ece2392",
+                        "content": {
+                            "answers": [
+                                1
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:13:08.791Z",
+                        "score": null,
+                        "feedback": null
+                    }
+                ]
+            },
+            "students": [
+                {
+                    "id": "33cff2cd-1a2f-47ce-8f6e-73897ece2392",
+                    "name": "Ihsan Syafiul Umam",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "COMPLETED"
+                    },
+                    "submissions": [
+                        {
+                            "id": "7416a050-37cf-4bbe-8563-2e43000e216d",
+                            "instrumentType": "SELF_ASSESSMENT",
+                            "content": {
+                                "answers": [
+                                    4,
+                                    2,
+                                    4,
+                                    4,
+                                    3,
+                                    4
+                                ]
+                            },
+                            "submittedAt": "2025-10-05T14:03:01.397Z",
+                            "score": null,
+                            "feedback": null
+                        },
+                        {
+                            "id": "ed5c61da-f258-498b-ab04-0747ff34b746",
+                            "instrumentType": "JOURNAL",
+                            "content": {
+                                "text": "okeyyyy",
+                                "grades": [
+                                    {
+                                        "score": 1,
+                                        "rubric_id": "2d298aa5-9f5f-4675-942d-220bdadb7faa"
+                                    }
+                                ]
+                            },
+                            "submittedAt": "2025-10-05T14:04:39.777Z",
+                            "score": 1,
+                            "feedback": null,
+                            "teacherGrades": [
+                                {
+                                    "score": 1,
+                                    "rubric_id": "2d298aa5-9f5f-4675-942d-220bdadb7faa"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "58320ac8-a4d1-459b-8c2c-130cc53106cf",
+                            "instrumentType": "JOURNAL",
+                            "content": {
+                                "text": "tidak ada"
+                            },
+                            "submittedAt": "2025-10-05T14:04:19.460Z",
+                            "score": null,
+                            "feedback": null
+                        }
+                    ]
+                },
+                {
+                    "id": "03bb2186-485c-4879-a67f-11493306c306",
+                    "name": "Abdul Aziz",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                },
+                {
+                    "id": "88f509ac-7bae-4713-8890-eae9d775adc4",
+                    "name": "pardi",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                },
+                {
+                    "id": "b9f42d60-7346-4119-afa5-f01a867f3c60",
+                    "name": "Budi Raharjo Wibowo",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                }
+            ]
+        },
+        {
+            "id": "6e3741eb-d20c-4425-a6af-cb8eb06281a3",
+            "name": "Assess the output:presentasi di kelas",
+            "description": "-",
+            "order": 5,
+            "unlocksAt": null,
+            "dueAt": null,
+            "status": "IN_PROGRESS",
+            "requiredInstruments": [
+                {
+                    "id": "512991a9-4959-45f9-86e3-2ea92130103e",
+                    "instrumentType": "OBSERVATION",
+                    "isRequired": true,
+                    "description": "-",
+                    "questions": [
+                        {
+                            "id": "dd94d813-d102-420d-81ff-6049c4d7fef0",
+                            "questionText": "<p>Murid menjelaskan keterkaitan produk dengan pertanyaan yang dirumuskan pada awal pembelajaran.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": [
+                                {
+                                    "score": 4,
+                                    "description": "Menjelaskan dengan jelas dan logis (disertai alasan ilmiah) keterkaitan antara produk dengan pertanyaan awal, penjelasan menunjukkan pemahaman yang mendalam."
+                                },
+                                {
+                                    "score": 3,
+                                    "description": "Menjelaskan keterkaitan antara produk dan pertanyaan awal dengan cukup jelas, meskipun kurang mendalam atau kurang lengkap."
+                                },
+                                {
+                                    "score": 2,
+                                    "description": "Menyebutkan keterkaitan produk dengan pertanyaan awal secara singkat, namun penjelasannya kurang logis atau tidak spesifik."
+                                },
+                                {
+                                    "score": 1,
+                                    "description": "Tidak menjelaskan keterkaitan antara produk dan pertanyaan awal."
+                                }
+                            ]
+                        },
+                        {
+                            "id": "d5c908d9-bca1-4fa0-8b91-9d6528755b36",
+                            "questionText": "<p>Murid merumuskan saran perbaikan terhadap  produk yang dihasilkan.</p>",
+                            "questionType": "STATEMENT",
+                            "scoringGuide": null,
+                            "rubricCriteria": [
+                                {
+                                    "score": 4,
+                                    "description": "Merumuskan saran perbaikan yang jelas, logis, dan tepat terhadap prosedur dan produk"
+                                },
+                                {
+                                    "score": 3,
+                                    "description": "Merumuskan saran perbaikan yang jelas, logis, dan tepat terhadap prosedur atau produk"
+                                },
+                                {
+                                    "score": 2,
+                                    "description": "Saran perbaikan kurang relevan atau terlalu umum."
+                                },
+                                {
+                                    "score": 1,
+                                    "description": "Tidak memberikan saran perbaikan"
+                                }
+                            ]
+                        }
+                    ],
+                    "rubrics": []
+                }
+            ],
+            "submissionsByInstrument": {
+                "OBSERVATION": [
+                    {
+                        "id": "68df6dbe-24db-4786-8856-68b902ab51fd",
+                        "instrumentType": "OBSERVATION",
+                        "targetStudentId": "b9f42d60-7346-4119-afa5-f01a867f3c60",
+                        "content": {
+                            "answers": [
+                                2,
+                                3
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:14:24.338Z",
+                        "score": null,
+                        "feedback": null
+                    },
+                    {
+                        "id": "230dbd01-96ad-49ed-a094-21871c3fefcf",
+                        "instrumentType": "OBSERVATION",
+                        "targetStudentId": "88f509ac-7bae-4713-8890-eae9d775adc4",
+                        "content": {
+                            "answers": [
+                                3,
+                                2
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:14:23.385Z",
+                        "score": null,
+                        "feedback": null
+                    },
+                    {
+                        "id": "fd0d28db-4080-4873-9d0a-f305adb08253",
+                        "instrumentType": "OBSERVATION",
+                        "targetStudentId": "03bb2186-485c-4879-a67f-11493306c306",
+                        "content": {
+                            "answers": [
+                                3,
+                                3
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:14:22.085Z",
+                        "score": null,
+                        "feedback": null
+                    },
+                    {
+                        "id": "701a4c38-28d4-4bf3-940b-903487a5bbc6",
+                        "instrumentType": "OBSERVATION",
+                        "targetStudentId": "33cff2cd-1a2f-47ce-8f6e-73897ece2392",
+                        "content": {
+                            "answers": [
+                                3,
+                                3
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:14:20.776Z",
+                        "score": null,
+                        "feedback": null
+                    }
+                ]
+            },
+            "students": [
+                {
+                    "id": "33cff2cd-1a2f-47ce-8f6e-73897ece2392",
+                    "name": "Ihsan Syafiul Umam",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "COMPLETED"
+                    },
+                    "submissions": []
+                },
+                {
+                    "id": "03bb2186-485c-4879-a67f-11493306c306",
+                    "name": "Abdul Aziz",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                },
+                {
+                    "id": "88f509ac-7bae-4713-8890-eae9d775adc4",
+                    "name": "pardi",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                },
+                {
+                    "id": "b9f42d60-7346-4119-afa5-f01a867f3c60",
+                    "name": "Budi Raharjo Wibowo",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                }
+            ]
+        },
+        {
+            "id": "b6342e9e-7fa8-4706-accf-f5373831b459",
+            "name": "Evaluate the experiences: review kegiatan",
+            "description": "-",
+            "order": 6,
+            "unlocksAt": null,
+            "dueAt": null,
+            "status": "IN_PROGRESS",
+            "requiredInstruments": [
+                {
+                    "id": "4e9bb81f-ba02-483f-95bf-8b57a1e51d4a",
+                    "instrumentType": "JOURNAL",
+                    "isRequired": true,
+                    "description": "-",
+                    "questions": [
+                        {
+                            "id": "32a2f652-9c64-409f-83cc-32d8b8ade800",
+                            "questionText": "<p>Berdasarkan pengalaman yang didapat selama proyek, Apa rencana pengembangan diri yang ingin Anda lakukan?<br>Apa saja dukungan atau bantuan yang Anda butuhkan untuk mendukung pengembangan diri ke depan?</p>",
+                            "questionType": "ESSAY_PROMPT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        }
+                    ],
+                    "rubrics": [
+                        {
+                            "id": "4e6333d0-e188-4955-9cf8-8aa4fdf0374e",
+                            "indicatorText": "Menyusun rencana pengembangan diri berdasarkan pengalaman proyek",
+                            "criteria": {
+                                "1": "Tidak menyebutkan rencana pengembangan diri atau respon yang diberikan tidak sesuai dengan konteks pengembangan diri.\n",
+                                "2": "Menyusun rencana pengembangan diri namun kurang relevan dengan pengalaman proyek\n",
+                                "3": "Menyusun rencana pengembangan diri yang relevan namun bersifat umum atau kurang spesifik\n",
+                                "4": "Menyusun rencana pengembangan diri secara jelas, spesifik, dan relevan dengan pengalaman proyek\n"
+                            }
+                        },
+                        {
+                            "id": "77c450c9-1728-4363-96c4-1d24dea93b57",
+                            "indicatorText": "Mengidentifikasi sumber daya atau dukungan yang dibutuhkan untuk pengembangan diri maupun pembelajaran selanjutnya\n",
+                            "criteria": {
+                                "1": "Tidak menyebutkan sumber daya atau dukungan yang dibutuhkan, atau respon yang diberikan tidak sesuai dengan konteks pengembangan diri\n",
+                                "2": "Menyebutkan dukungan, namun masih umum atau tidak jelas relevansinya dengan pengembangan diri\n",
+                                "3": "Menyebutkan dukungan yang relevan, tetapi belum dijelaskan bagaimana dukungan tersebut akan digunakan\n",
+                                "4": "Menyebutkan beragam dukungan yang relevan, menjelaskan bagaimana dukungan itu membantu pengembangan diri.\n"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "0c7626fc-384a-4ec1-a566-6597c3224110",
+                    "instrumentType": "JOURNAL",
+                    "isRequired": true,
+                    "description": "-",
+                    "questions": [
+                        {
+                            "id": "32a2f652-9c64-409f-83cc-32d8b8ade800",
+                            "questionText": "<p>Berdasarkan pengalaman yang didapat selama proyek, Apa rencana pengembangan diri yang ingin Anda lakukan?<br>Apa saja dukungan atau bantuan yang Anda butuhkan untuk mendukung pengembangan diri ke depan?</p>",
+                            "questionType": "ESSAY_PROMPT",
+                            "scoringGuide": null,
+                            "rubricCriteria": {}
+                        }
+                    ],
+                    "rubrics": [
+                        {
+                            "id": "4e6333d0-e188-4955-9cf8-8aa4fdf0374e",
+                            "indicatorText": "Menyusun rencana pengembangan diri berdasarkan pengalaman proyek",
+                            "criteria": {
+                                "1": "Tidak menyebutkan rencana pengembangan diri atau respon yang diberikan tidak sesuai dengan konteks pengembangan diri.\n",
+                                "2": "Menyusun rencana pengembangan diri namun kurang relevan dengan pengalaman proyek\n",
+                                "3": "Menyusun rencana pengembangan diri yang relevan namun bersifat umum atau kurang spesifik\n",
+                                "4": "Menyusun rencana pengembangan diri secara jelas, spesifik, dan relevan dengan pengalaman proyek\n"
+                            }
+                        },
+                        {
+                            "id": "77c450c9-1728-4363-96c4-1d24dea93b57",
+                            "indicatorText": "Mengidentifikasi sumber daya atau dukungan yang dibutuhkan untuk pengembangan diri maupun pembelajaran selanjutnya\n",
+                            "criteria": {
+                                "1": "Tidak menyebutkan sumber daya atau dukungan yang dibutuhkan, atau respon yang diberikan tidak sesuai dengan konteks pengembangan diri\n",
+                                "2": "Menyebutkan dukungan, namun masih umum atau tidak jelas relevansinya dengan pengembangan diri\n",
+                                "3": "Menyebutkan dukungan yang relevan, tetapi belum dijelaskan bagaimana dukungan tersebut akan digunakan\n",
+                                "4": "Menyebutkan beragam dukungan yang relevan, menjelaskan bagaimana dukungan itu membantu pengembangan diri.\n"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "submissionsByInstrument": {
+                "JOURNAL": [
+                    {
+                        "id": "763d89f0-6907-49a5-8016-d3a421391f1f",
+                        "instrumentType": "JOURNAL",
+                        "content": {
+                            "text": "okeyeye",
+                            "grades": [
+                                {
+                                    "score": 2,
+                                    "rubric_id": "4e6333d0-e188-4955-9cf8-8aa4fdf0374e"
+                                },
+                                {
+                                    "score": 3,
+                                    "rubric_id": "77c450c9-1728-4363-96c4-1d24dea93b57"
+                                }
+                            ]
+                        },
+                        "submittedAt": "2025-10-05T14:16:24.394Z",
+                        "score": 3,
+                        "feedback": null,
+                        "teacherGrades": [
+                            {
+                                "score": 2,
+                                "rubric_id": "4e6333d0-e188-4955-9cf8-8aa4fdf0374e"
+                            },
+                            {
+                                "score": 3,
+                                "rubric_id": "77c450c9-1728-4363-96c4-1d24dea93b57"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "ddd57ee7-b614-40d5-8b4c-299485df3457",
+                        "instrumentType": "JOURNAL",
+                        "content": {
+                            "text": "dfdfff"
+                        },
+                        "submittedAt": "2025-10-05T14:16:32.194Z",
+                        "score": null,
+                        "feedback": null
+                    }
+                ]
+            },
+            "students": [
+                {
+                    "id": "33cff2cd-1a2f-47ce-8f6e-73897ece2392",
+                    "name": "Ihsan Syafiul Umam",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "COMPLETED"
+                    },
+                    "submissions": [
+                        {
+                            "id": "763d89f0-6907-49a5-8016-d3a421391f1f",
+                            "instrumentType": "JOURNAL",
+                            "content": {
+                                "text": "okeyeye",
+                                "grades": [
+                                    {
+                                        "score": 2,
+                                        "rubric_id": "4e6333d0-e188-4955-9cf8-8aa4fdf0374e"
+                                    },
+                                    {
+                                        "score": 3,
+                                        "rubric_id": "77c450c9-1728-4363-96c4-1d24dea93b57"
+                                    }
+                                ]
+                            },
+                            "submittedAt": "2025-10-05T14:16:24.394Z",
+                            "score": 3,
+                            "feedback": null,
+                            "teacherGrades": [
+                                {
+                                    "score": 2,
+                                    "rubric_id": "4e6333d0-e188-4955-9cf8-8aa4fdf0374e"
+                                },
+                                {
+                                    "score": 3,
+                                    "rubric_id": "77c450c9-1728-4363-96c4-1d24dea93b57"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ddd57ee7-b614-40d5-8b4c-299485df3457",
+                            "instrumentType": "JOURNAL",
+                            "content": {
+                                "text": "dfdfff"
+                            },
+                            "submittedAt": "2025-10-05T14:16:32.194Z",
+                            "score": null,
+                            "feedback": null
+                        }
+                    ]
+                },
+                {
+                    "id": "03bb2186-485c-4879-a67f-11493306c306",
+                    "name": "Abdul Aziz",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                },
+                {
+                    "id": "88f509ac-7bae-4713-8890-eae9d775adc4",
+                    "name": "pardi",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                },
+                {
+                    "id": "b9f42d60-7346-4119-afa5-f01a867f3c60",
+                    "name": "Budi Raharjo Wibowo",
+                    "groupId": "4332c5b6-0f57-441d-9c34-3fad017a36c2",
+                    "groupName": "Alpha",
+                    "progress": {
+                        "status": "LOCKED"
+                    },
+                    "submissions": []
+                }
+            ]
+        }
+    ],
+    "group": {
+        "members": [
+            {
+                "studentId": "88f509ac-7bae-4713-8890-eae9d775adc4",
+                "name": "pardi",
+                "email": "pardi@breakitall.biz.id"
+            },
+            {
+                "studentId": "03bb2186-485c-4879-a67f-11493306c306",
+                "name": "Abdul Aziz",
+                "email": "aziz@breakitall.biz.id"
+            },
+            {
+                "studentId": "b9f42d60-7346-4119-afa5-f01a867f3c60",
+                "name": "Budi Raharjo Wibowo",
+                "email": "budi@breakitall.biz.id"
+            },
+            {
+                "studentId": "33cff2cd-1a2f-47ce-8f6e-73897ece2392",
+                "name": "Ihsan Syafiul Umam",
+                "email": "ihsan@breakitall.biz.id"
+            }
+        ]
+    }
+}

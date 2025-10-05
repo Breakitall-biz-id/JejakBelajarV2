@@ -93,19 +93,19 @@ export function InstrumentSubmissionCard({
     if (instrumentType === "PEER_ASSESSMENT") {
       if (!hasPeers) {
         return z.object({
-          response: z.string().trim().min(1, "Response is required."),
+          response: z.string().trim().min(1, "Jawaban wajib diisi."),
           targetStudentId: z.string().optional(),
         })
       }
 
       return z.object({
-        response: z.string().trim().min(1, "Response is required."),
-        targetStudentId: z.string().uuid({ message: "Select a peer." }),
+        response: z.string().trim().min(1, "Jawaban wajib diisi."),
+        targetStudentId: z.string().uuid({ message: "Pilih teman." }),
       })
     }
 
     return z.object({
-      response: z.string().trim().min(1, "Response is required."),
+      response: z.string().trim().min(1, "Jawaban wajib diisi."),
     })
   }, [instrumentType, hasPeers])
 
@@ -124,13 +124,13 @@ export function InstrumentSubmissionCard({
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (instrumentType === "PEER_ASSESSMENT" && !hasPeers) {
-      toast.error("No peers available in your group yet.")
+      toast.error("Belum ada teman sekelompok yang tersedia.")
       return
     }
 
     if (instrumentType === "PEER_ASSESSMENT" && "targetStudentId" in values) {
       if (!values.targetStudentId || values.targetStudentId.length === 0) {
-        form.setError("targetStudentId", { message: "Select a peer." })
+        form.setError("targetStudentId", { message: "Pilih teman." })
         return
       }
     }
@@ -157,7 +157,7 @@ export function InstrumentSubmissionCard({
         return
       }
 
-      toast.success("Submission saved.")
+      toast.success("Jawaban berhasil disimpan.")
       router.refresh()
     })
   }

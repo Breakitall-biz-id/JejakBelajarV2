@@ -64,13 +64,13 @@ export function EditTemplateDialog({
       }
       const result = await updateTemplate(payload)
       if (!result.success) {
-        toast.error(result.error || "Failed to update template")
+        toast.error(result.error || "Gagal memperbarui template")
         return
       }
-      toast.success("Template updated successfully!")
+      toast.success("Template berhasil diperbarui!")
       onSuccess()
     } catch (e) {
-      toast.error("Failed to update template")
+      toast.error("Gagal memperbarui template")
     } finally {
       setIsSubmitting(false)
     }

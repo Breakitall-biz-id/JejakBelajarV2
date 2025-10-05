@@ -39,13 +39,13 @@ export function CreateJournalRubricDialog({
     e.preventDefault()
 
     if (!indicatorText.trim()) {
-      alert("Indicator text is required")
+      alert("Teks indikator wajib diisi")
       return
     }
 
     // Validate that all criteria have descriptions
     if (Object.values(criteria).some(desc => !desc.trim())) {
-      alert("All score criteria must have descriptions")
+      alert("Semua kriteria skor harus memiliki deskripsi")
       return
     }
 
@@ -71,7 +71,7 @@ export function CreateJournalRubricDialog({
       onSuccess()
     } catch (error) {
       console.error('Error creating rubric:', error)
-      alert('Failed to create rubric')
+      alert('Gagal membuat rubrik')
     } finally {
       setIsSubmitting(false)
     }

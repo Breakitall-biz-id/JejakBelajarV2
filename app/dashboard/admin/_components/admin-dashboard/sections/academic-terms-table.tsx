@@ -19,7 +19,7 @@ export type AcademicTerm = {
 function StatusBadge({ status }: { status: string }) {
   return (
     <Badge variant={status === "ACTIVE" ? "default" : "destructive"}>
-      {status === "ACTIVE" ? "Active" : "Inactive"}
+      {status === "ACTIVE" ? "Aktif" : "Tidak Aktif"}
     </Badge>
   );
 }

@@ -91,7 +91,7 @@ export function ProjectCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                <DropdownMenuLabel>Ubah Status</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {projectStatusOptions.map((statusOption) => (
                   <DropdownMenuItem
@@ -127,7 +127,7 @@ export function ProjectCard({
               <Link href={`/dashboard/teacher/projects/${project.id}`}>
                 <Button variant="outline" size="sm" className="w-full">
                   <Eye className="h-4 w-4 mr-2" />
-                  View Project Details
+                  Lihat Detail Proyek
                 </Button>
               </Link>
             </div>

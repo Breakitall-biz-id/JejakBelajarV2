@@ -211,7 +211,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
           toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
             loading: `Saving ${row.original.header}`,
             success: "Done",
-            error: "Error",
+            error: "Terjadi kesalahan",
           })
         }}
       >
@@ -236,7 +236,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
           toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
             loading: `Saving ${row.original.header}`,
             success: "Done",
-            error: "Error",
+            error: "Terjadi kesalahan",
           })
         }}
       >

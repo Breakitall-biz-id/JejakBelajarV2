@@ -27,7 +27,7 @@ type ActionResult<T = void> =
 const feedbackSchema = z.object({
   submissionId: z.string().uuid(),
   score: z.number().int().min(0).max(100).nullable().optional(),
-  feedback: z.string().trim().min(1, "Feedback is required."),
+  feedback: z.string().trim().min(1, "Feedback wajib diisi."),
 })
 
 const overrideStageStatusSchema = z.object({

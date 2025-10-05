@@ -149,6 +149,22 @@ export const users = pgTable("users", {
 	unique("users_email_unique").on(table.email),
 ]);
 
+export const dimensions = pgTable("dimensions", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	name: varchar({ length: 255 }).notNull(),
+	description: text(),
+	createdByAdminId: uuid("created_by_admin_id"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	unique("dimensions_name_unique").on(table.name),
+	foreignKey({
+		columns: [table.createdByAdminId],
+		foreignColumns: [users.id],
+		name: "dimensions_created_by_admin_id_users_id_fk"
+	}).onDelete("set null"),
+]);
+
 export const groups = pgTable("groups", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	name: varchar({ length: 255 }).notNull(),
@@ -296,12 +312,18 @@ export const templateQuestions = pgTable("template_questions", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	rubricCriteria: text("rubric_criteria"),
+	dimensionId: uuid("dimension_id"),
 }, (table) => [
 	foreignKey({
 			columns: [table.configId],
 			foreignColumns: [templateStageConfigs.id],
 			name: "template_questions_config_id_template_stage_configs_id_fk"
 		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.dimensionId],
+			foreignColumns: [dimensions.id],
+			name: "template_questions_dimension_id_dimensions_id_fk"
+		}).onDelete("set null"),
 ]);
 
 export const templateJournalRubrics = pgTable("template_journal_rubrics", {
@@ -311,12 +333,18 @@ export const templateJournalRubrics = pgTable("template_journal_rubrics", {
 	criteria: jsonb().notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	dimensionId: uuid("dimension_id"),
 }, (table) => [
 	foreignKey({
 			columns: [table.configId],
 			foreignColumns: [templateStageConfigs.id],
 			name: "template_journal_rubrics_config_id_template_stage_configs_id_fk"
 		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.dimensionId],
+			foreignColumns: [dimensions.id],
+			name: "template_journal_rubrics_dimension_id_dimensions_id_fk"
+		}).onDelete("set null"),
 ]);
 
 export const groupMembers = pgTable("group_members", {

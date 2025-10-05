@@ -24,9 +24,9 @@ import { toast } from "sonner";
 import { createAccount } from "../../../actions";
 
 const createAccountForm = z.object({
-  name: z.string().trim().min(1, "Name is required").max(255),
+  name: z.string().trim().min(1, "Nama wajib diisi").max(255),
   email: z.string().trim().email(),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string().min(8, "Kata sandi harus minimal 8 karakter"),
 });
 
 type CreateAccountValues = z.infer<typeof createAccountForm>;
@@ -64,7 +64,7 @@ export function CreateAccountDialog({
         toast.error(result.error);
         return;
       }
-      toast.success(`${role === "TEACHER" ? "Teacher" : "Student"} account created.`);
+      toast.success(`Akun ${role === "TEACHER" ? "Guru" : "Siswa"} berhasil dibuat.`);
       form.reset();
       setOpen(false);
     });

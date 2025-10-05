@@ -65,14 +65,14 @@ export function EditTermDialog({ term, open, onOpenChange, onSuccess }: EditTerm
             })
           }
         }
-        toast.error(result.error || "Failed to update term")
+        toast.error(result.error || "Gagal memperbarui periode")
         return
       }
 
       toast.success("Term akademik berhasil diperbarui!")
       onSuccess()
     } catch (err) {
-      toast.error("Failed to update term")
+      toast.error("Gagal memperbarui periode")
       console.error(err)
     } finally {
       setIsSubmitting(false)

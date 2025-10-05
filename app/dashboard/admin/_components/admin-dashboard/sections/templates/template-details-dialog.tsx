@@ -15,6 +15,7 @@ import { QuestionsList, TemplateQuestion } from "./questions/questions-list"
 import { JournalRubricsList, JournalRubric } from "./journal-rubrics/journal-rubrics-list"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
+import { instrumentTypes } from "./constants"
 
 // Journal Rubrics Skeleton Component
 function JournalRubricsSkeleton() {
@@ -128,6 +129,11 @@ export function TemplateDetailsDialog({
     fetchAll()
   }, [open, template.stageConfigs])
 
+  const getInstrumentTypeLabel = (type: string) => {
+    const instrumentType = instrumentTypes.find(t => t.value === type)
+    return instrumentType ? instrumentType.label : type
+  }
+
   const loadQuestions = useCallback(async (configId: string) => {
     setLoading(prev => ({ ...prev, [configId]: true }))
     try {
@@ -215,8 +221,8 @@ export function TemplateDetailsDialog({
                 </Badge>
               </span>
               <span className="ml-4 text-xs text-muted-foreground">Tahapan: <span className="font-bold">{sortedStageGroups.length}</span></span>
-              <span className="ml-4 text-xs text-muted-foreground">Dibuat: {new Date(template.createdAt).toLocaleDateString()}</span>
-          
+              <span className="ml-4 text-xs text-muted-foreground">Dibuat: {new Date(template.createdAt).toLocaleDateString('id-ID')}</span>
+
             </div>
             {template.description && (
               <p className="text-xs text-muted-foreground font-sans mb-1">
@@ -269,7 +275,7 @@ export function TemplateDetailsDialog({
                           value={config.id}
                           className="text-xs font-sans data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-2 py-1 rounded"
                         >
-                          {config.instrumentType.replace('_', ' ')}
+                          {getInstrumentTypeLabel(config.instrumentType)}
                         </TabsTrigger>
                       ))}
                     </TabsList>
@@ -279,7 +285,7 @@ export function TemplateDetailsDialog({
                         <div className="border border-muted/40 rounded-md p-3 bg-card mb-2">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-semibold text-xs font-sans">
-                              {config.instrumentType.replace('_', ' ')}
+                              {getInstrumentTypeLabel(config.instrumentType)}
                             </span>
                             <Badge variant="secondary" className="text-[9px] h-4 px-1 rounded font-sans">
                               #{config.displayOrder}

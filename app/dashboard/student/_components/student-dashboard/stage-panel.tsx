@@ -148,7 +148,7 @@ function LockedStageNotice() {
       <span role="img" aria-label="locked">
         🔒
       </span>
-      <span>This stage unlocks after you complete the previous stage.</span>
+      <span>Tahapan ini terbuka setelah Anda menyelesaikan tahapan sebelumnya.</span>
     </div>
   )
 }

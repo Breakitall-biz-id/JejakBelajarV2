@@ -137,7 +137,7 @@ export function ReportsSection({ data }: ReportsSectionProps) {
                 value={data.classes.filter((kelas) => (data.assignments[kelas.id]?.studentIds.length ?? 0) === 0).length}
               />
               <Separator />
-              <ChecklistItem label="Published academic terms" value={data.terms.filter((term) => term.status === "ACTIVE").length} />
+              <ChecklistItem label="Periode akademik aktif" value={data.terms.filter((term) => term.status === "ACTIVE").length} />
             </>
           )}
         </CardContent>

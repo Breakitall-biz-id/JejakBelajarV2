@@ -23,6 +23,7 @@ export function QuestionnaireAssessmentDialog({
 	stageId,
 	projectId,
 	instrumentType,
+	templateStageConfigId,
 	onSubmitSuccess,
 }: {
 	open: boolean
@@ -35,6 +36,7 @@ export function QuestionnaireAssessmentDialog({
 	stageId: string
 	projectId: string
 	instrumentType: "SELF_ASSESSMENT" | "PEER_ASSESSMENT" | "OBSERVATION"
+	templateStageConfigId?: string | null
 	onSubmitSuccess?: () => void
 }) {
 	const [answers, setAnswers] = React.useState<number[]>(initialValue || Array(statements.length).fill(0))
@@ -89,6 +91,7 @@ export function QuestionnaireAssessmentDialog({
 				projectId,
 				stageId,
 				instrumentType,
+				templateStageConfigId,
 				content,
 			})
 

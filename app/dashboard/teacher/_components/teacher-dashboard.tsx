@@ -191,7 +191,7 @@ export function TeacherDashboard({
           <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Active Projects</p>
+                <p className="text-sm text-muted-foreground">Proyek Aktif</p>
                 <p className="text-2xl font-bold text-foreground">{activeProjects}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -291,7 +291,7 @@ function ClassProjectsCard({
             variant={classInfo.termStatus === "ACTIVE" ? "default" : "secondary"}
             className={`px-3 py-1 ${classInfo.termStatus === "ACTIVE" ? "bg-green-600 text-white hover:bg-green-700" : ""}`}
           >
-            {classInfo.termStatus === "ACTIVE" ? "Active" : "Inactive"}
+            {classInfo.termStatus === "ACTIVE" ? "Aktif" : "Tidak Aktif"}
           </Badge>
         </div>
 
@@ -427,7 +427,7 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
       setTemplates(templateData)
     } catch (error) {
       // Error logging removed for production
-      setFormError("Failed to load project templates")
+      setFormError("Gagal memuat template proyek")
     } finally {
       setIsLoadingTemplates(false)
     }
@@ -1156,7 +1156,7 @@ function DeleteProjectButton({ projectId, router }: { projectId: string; router:
       <AlertDialogTrigger asChild>
         <Button variant="destructive" size="sm" disabled={isPending}>
           <Trash className="mr-2 h-4 w-4" />
-          {isPending ? "Deleting…" : "Delete"}
+          {isPending ? "Menghapus…" : "Hapus"}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -2025,7 +2025,7 @@ function EditStageDialog({
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Simpan"}
               </Button>
             </div>
           </form>
@@ -2216,7 +2216,7 @@ function CreateGroupDialog({ projectId, router }: { projectId: string; router: R
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
+                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Buat"}
               </Button>
             </div>
           </form>
@@ -2301,7 +2301,7 @@ function EditGroupDialog({ group, projectId, router }: EditGroupDialogProps) {
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Simpan"}
               </Button>
             </div>
           </form>

@@ -58,12 +58,8 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
 
     const averageGrade = Math.round(
       data.classes.reduce((acc, item) => {
-        const scores = [
-          item.averageScores?.observation || 0,
-          item.averageScores?.journal || 0,
-          item.averageScores?.dailyNote || 0
-        ].filter(score => score > 0)
-        const avgScore = scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / scores.length : 0
+        // Use overallAverageScore from dimension-based calculation
+        const avgScore = item.overallAverageScore || 0
         return acc + avgScore
       }, 0) / data.classes.length
     )
@@ -107,7 +103,7 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
           <Button variant="outline" size="sm" asChild>
             <a href="/api/teacher/reports?type=summary" download>
               <Download className="mr-2 h-4 w-4" />
-              Export Summary
+              Ekspor Ringkasan
             </a>
           </Button>
           <Button size="sm" asChild>
@@ -134,7 +130,7 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Assignments</CardTitle>
+            <CardTitle className="text-sm font-medium">Tugas Aktif</CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -204,9 +200,9 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
           {/* Classes Table */}
           <Card>
             <CardHeader>
-              <CardTitle>Class Overview</CardTitle>
+              <CardTitle>Ringkasan Kelas</CardTitle>
               <CardDescription>
-                Monitor progress and performance for each class
+                Pantau kemajuan dan performa setiap kelas
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -249,9 +245,9 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <span className="font-medium">
-                                {calculateOverallGrade(cls.averageScores).toFixed(1)}
+                                {calculateOverallGrade(cls).toFixed(1)}
                               </span>
-                              <GradeBadge grade={calculateOverallGrade(cls.averageScores)} />
+                              <GradeBadge grade={calculateOverallGrade(cls)} />
                             </div>
                           </TableCell>
                           <TableCell>
@@ -284,9 +280,14 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
                                   Grades
                                 </a>
                               </Button>
-                              <Button size="sm" asChild>
+                              <Button variant="outline" size="sm" asChild>
                                 <a href={`/dashboard/teacher/reports/${cls.id}`}>
-                                  View Details
+                                  Lihat Detail
+                                </a>
+                              </Button>
+                              <Button size="sm" asChild>
+                                <a href={`/dashboard/teacher/reports/${cls.id}?view=rapor`}>
+                                  📊 Rapor
                                 </a>
                               </Button>
                             </div>
@@ -304,16 +305,9 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
   )
 }
 
-function calculateOverallGrade(scores: { observation?: number | null; journal?: number | null; dailyNote?: number | null }) {
-  const validScores = [
-    scores.observation || 0,
-    scores.journal || 0,
-    scores.dailyNote || 0
-  ].filter(score => score > 0)
-
-  return validScores.length > 0
-    ? validScores.reduce((sum, score) => sum + score, 0) / validScores.length
-    : 0
+function calculateOverallGrade(cls: any) {
+  // Use the new overallAverageScore from dimension-based calculation
+  return cls.overallAverageScore || 0
 }
 
 function GradeBadge({ grade }: { grade: number }) {

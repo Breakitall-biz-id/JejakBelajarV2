@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerAuthSession } from "@/lib/auth/session"
 import { db } from "@/db"
-import { templateQuestions } from "@/db/schema/jejak"
+import { templateQuestions, dimensions } from "@/db/schema/jejak"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 
@@ -9,6 +9,7 @@ const updateQuestionSchema = z.object({
   questionText: z.string(),
   questionType: z.enum(["STATEMENT", "ESSAY_PROMPT"]),
   rubricCriteria: z.string().optional(),
+  dimensionId: z.union([z.string().uuid().optional(), z.literal("no-dimension")]),
 })
 
 export async function PUT(
@@ -34,6 +35,7 @@ export async function PUT(
         questionText: validatedData.questionText,
         questionType: validatedData.questionType,
         rubricCriteria: validatedData.rubricCriteria || null,
+        dimensionId: validatedData.dimensionId === "no-dimension" ? null : validatedData.dimensionId || null,
         updatedAt: new Date(),
       })
       .where(eq(templateQuestions.id, params.id))
@@ -118,8 +120,24 @@ export async function GET(
     }
 
     const question = await db
-      .select()
+      .select({
+        id: templateQuestions.id,
+        configId: templateQuestions.configId,
+        questionText: templateQuestions.questionText,
+        questionType: templateQuestions.questionType,
+        scoringGuide: templateQuestions.scoringGuide,
+        rubricCriteria: templateQuestions.rubricCriteria,
+        dimensionId: templateQuestions.dimensionId,
+        createdAt: templateQuestions.createdAt,
+        updatedAt: templateQuestions.updatedAt,
+        dimension: {
+          id: dimensions.id,
+          name: dimensions.name,
+          description: dimensions.description,
+        },
+      })
       .from(templateQuestions)
+      .leftJoin(dimensions, eq(templateQuestions.dimensionId, dimensions.id))
       .where(eq(templateQuestions.id, params.id))
       .limit(1)
 

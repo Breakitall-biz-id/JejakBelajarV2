@@ -4,9 +4,12 @@ import { InstrumentChecklistItem } from "./instrument-checklist-item"
 import { JournalAssessmentDialog } from "./journal-assessment-dialog"
 import { QuestionnaireAssessmentDialog } from "./questionnaire-assessment-dialog"
 import { PeerAssessmentDialog } from "./peer-assessment-dialog"
+import { StudentDimensionScores } from "../student-dimension-scores"
+import { StudentRapor } from "../student-rapor"
 import { submitStageInstrument, debugStageProgress } from "../../actions"
 import { toast } from "sonner"
 import type { StudentDashboardData } from "../../queries"
+import type { CurrentUser } from "@/lib/auth/session"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { ProjectProgressBar } from "./project-progress-bar"
@@ -40,8 +43,30 @@ type Submission = {
   targetStudentName: string | null;
 };
 
-export function ProjectDetail({ project }: { project: StudentDashboardData["projects"][number] }) {
-  const [tab, setTab] = React.useState("stages")
+export function ProjectDetail({
+  project,
+  student
+}: {
+  project: StudentDashboardData["projects"][number]
+  student: CurrentUser
+}) {
+  const router = useRouter()
+  const [tab, setTab] = React.useState(() => {
+    // Check if tab is specified in URL
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      return params.get('tab') || 'stages'
+    }
+    return 'stages'
+  })
+
+  // Update URL when tab changes
+  const handleTabChange = (newTab: string) => {
+    setTab(newTab)
+    const url = new URL(window.location.href)
+    url.searchParams.set('tab', newTab)
+    router.replace(url.toString(), { scroll: false })
+  }
   const [journalDialog, setJournalDialog] = React.useState<{
     open: boolean
     stageName?: string
@@ -56,6 +81,7 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
     open: boolean
     stageName?: string
     instrumentId?: string
+    templateStageConfigId?: string | null
     statements?: string[]
     initialValue?: number[]
   }>({ open: false })
@@ -68,16 +94,6 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
   }>({ open: false })
   const [globalLoading, setGlobalLoading] = React.useState(false)
 
-  const handleDebugStage = async (stageId: string) => {
-    try {
-      const result = await debugStageProgress(project.id, stageId)
-      console.log('DEBUG RESULT:', result)
-      alert(`Debug info logged to console. Check browser dev tools.`)
-    } catch (error) {
-      console.error('Debug failed:', error)
-      alert('Debug failed')
-    }
-  }
 
   const groupedStages = React.useMemo(() => {
     type Instrument = InstrumentWithStatements;
@@ -144,7 +160,6 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
     return Array.from(map.values()).sort((a, b) => a.order - b.order)
   }, [project])
 
-  const router = useRouter()
   return (
     <>
       <OverlaySpinner show={globalLoading} text="Menyimpan dan memperbarui progres..." />
@@ -162,10 +177,12 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
           <ProjectProgressBar project={project} />
         </CardContent>
       </Card>
-      <Tabs value={tab} onValueChange={setTab} className="w-full">
+      <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="mb-4 w-full flex">
           <TabsTrigger value="about" className="flex-1">Tentang Proyek</TabsTrigger>
           <TabsTrigger value="stages" className="flex-1">Tahapan</TabsTrigger>
+          <TabsTrigger value="progress" className="flex-1">Progress</TabsTrigger>
+          <TabsTrigger value="rapor" className="flex-1">Rapor</TabsTrigger>
           <TabsTrigger value="group" className="flex-1">Kelompok</TabsTrigger>
         </TabsList>
         <TabsContent value="stages">
@@ -177,14 +194,8 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
                     <span className="w-7 h-7 flex items-center justify-center rounded-full text-background font-bold text-base bg-primary">{idx + 1}</span>
                     <span className="font-semibold text-foreground text-base">{stage.name}</span>
                     {stage.status === "LOCKED" && (
-                      <span className="ml-2 text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground border border-muted">Locked</span>
+                      <span className="ml-2 text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground border border-muted">Terkunci</span>
                     )}
-                    <button
-                      onClick={() => handleDebugStage(stage.id)}
-                      className="ml-2 text-xs px-2 py-0.5 rounded bg-red-500 text-white hover:bg-red-600"
-                    >
-                      Debug
-                    </button>
                   </div>
                   <div className="flex flex-col gap-1 mt-2 ml-8">
                     {stage.requiredInstruments.map((ins) => {
@@ -252,6 +263,7 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
                           open: true,
                           stageName: stage.name,
                           instrumentId: ins.id,
+                          templateStageConfigId: ins.templateStageConfigId,
                           statements: ins.questions?.map((q: { questionText: string }) => q.questionText) || [], // Pass questions as statements
                           initialValue: (() => {
                             // For journals, use unique key with templateStageConfigId to differentiate multiple journals
@@ -311,6 +323,12 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
               </Card>
             ))}
           </div>
+        </TabsContent>
+        <TabsContent value="progress">
+          <StudentDimensionScores student={student} projectId={project.id} />
+        </TabsContent>
+        <TabsContent value="rapor">
+          <StudentRapor student={student} projectId={project.id} />
         </TabsContent>
         <TabsContent value="group">
             <div className="flex flex-col gap-4">
@@ -398,6 +416,7 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
           return stage?.id || project.stages[0].id
         })() as string}
         instrumentType="SELF_ASSESSMENT"
+        templateStageConfigId={selfDialog.templateStageConfigId}
         readOnly={(() => {
           const stage = groupedStages.find(s => s.name === selfDialog.stageName)
           const instrument = stage?.requiredInstruments.find(i => i.id === selfDialog.instrumentId)
@@ -461,6 +480,7 @@ export function ProjectDetail({ project }: { project: StudentDashboardData["proj
           return stage?.id || project.stages[0].id
         })() as string}
         instrumentType="SELF_ASSESSMENT"
+        templateStageConfigId={selfDialog.templateStageConfigId}
         readOnly={(() => {
           const stage = groupedStages.find(s => s.name === selfDialog.stageName)
           const instrument = stage?.requiredInstruments.find(i => i.id === selfDialog.instrumentId)

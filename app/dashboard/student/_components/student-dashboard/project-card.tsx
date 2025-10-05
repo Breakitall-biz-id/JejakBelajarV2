@@ -16,7 +16,7 @@ type ProjectCardProps = {
 
 export function ProjectCard({ project, router }: Omit<ProjectCardProps, "student">) {
   const status = project.status === "PUBLISHED"
-    ? { label: "PUBLISHED", color: "bg-muted text-muted-foreground dark:bg-muted/60 dark:text-white" }
+    ? { label: "AKTIF", color: "bg-muted text-muted-foreground dark:bg-muted/60 dark:text-white" }
     : project.status === "DRAFT"
     ? { label: "DRAFT", color: "bg-muted text-muted-foreground dark:bg-muted/60 dark:text-white" }
     : { label: project.status, color: "bg-muted text-muted-foreground dark:bg-muted/60 dark:text-white" }
@@ -53,9 +53,9 @@ export function ProjectCard({ project, router }: Omit<ProjectCardProps, "student
         </div>
         <div className="border-b border-muted pb-3 mb-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
           <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block"><path d="M3 3h10v2H3zM3 7h10v2H3zM3 11h7v2H3z"/></svg> {totalStages} stages</span>
-            <span className="inline-flex items-center gap-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block"><circle cx="8" cy="8" r="6"/><path d="M8 10a2 2 0 100-4 2 2 0 000 4z"/></svg> {groupCount} groups</span>
-            <span className="inline-flex items-center gap-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block"><circle cx="8" cy="8" r="6"/><path d="M5.5 8a2.5 2.5 0 015 0v1a2.5 2.5 0 01-5 0V8z"/></svg> {studentCount} students</span>
+            <span className="inline-flex items-center gap-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block"><path d="M3 3h10v2H3zM3 7h10v2H3zM3 11h7v2H3z"/></svg> {totalStages} tahapan</span>
+            <span className="inline-flex items-center gap-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block"><circle cx="8" cy="8" r="6"/><path d="M8 10a2 2 0 100-4 2 2 0 000 4z"/></svg> {groupCount} kelompok</span>
+            <span className="inline-flex items-center gap-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" className="inline-block"><circle cx="8" cy="8" r="6"/><path d="M5.5 8a2.5 2.5 0 015 0v1a2.5 2.5 0 01-5 0V8z"/></svg> {studentCount} siswa</span>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             <div className="relative w-full sm:w-auto">
@@ -63,19 +63,27 @@ export function ProjectCard({ project, router }: Omit<ProjectCardProps, "student
                 variant="outline"
                 size="sm"
                 className="w-full sm:w-auto"
+                onClick={() => router.push(`/dashboard/student/project/${project.id}?tab=rapor`)}
+              >
+                📊 Lihat Rapor
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto mt-1 sm:mt-0 sm:ml-2"
                 onClick={() => router.push(`/dashboard/student/project/${project.id}`)}
               >
-                View Details
+                Lihat Detail
               </Button>
             </div>
           </div>
         </div>
         <ProjectProgressBar project={progressProject} />
         <div>
-          <div className="text-xs sm:text-sm font-semibold mb-2 text-foreground">Early Stages</div>
+          <div className="text-xs sm:text-sm font-semibold mb-2 text-foreground">Tahapan Awal</div>
           <div className="flex items-center gap-2 mb-2">
             {moreCount > 0 && (
-              <span className="ml-auto text-xs bg-muted border border-muted rounded-lg px-2 py-0.5 text-muted-foreground font-medium">+{moreCount} more</span>
+              <span className="ml-auto text-xs bg-muted border border-muted rounded-lg px-2 py-0.5 text-muted-foreground font-medium">+{moreCount} lagi</span>
             )}
           </div>
           <div className="flex flex-col gap-2">

@@ -53,13 +53,13 @@ export function EditJournalRubricDialog({
     e.preventDefault()
 
     if (!indicatorText.trim()) {
-      alert("Indicator text is required")
+      alert("Teks indikator wajib diisi")
       return
     }
 
     // Validate that all criteria have descriptions
     if (Object.values(criteria).some(desc => !desc.trim())) {
-      alert("All score criteria must have descriptions")
+      alert("Semua kriteria skor harus memiliki deskripsi")
       return
     }
 
@@ -84,7 +84,7 @@ export function EditJournalRubricDialog({
       onSuccess()
     } catch (error) {
       console.error('Error updating rubric:', error)
-      alert('Failed to update rubric')
+      alert('Gagal memperbarui rubrik')
     } finally {
       setIsSubmitting(false)
     }

@@ -58,6 +58,7 @@ const editQuestionSchema = (instrumentType: string) => z.object({
   questionType: getQuestionTypeEnum(instrumentType),
   scoringGuide: z.string().optional(),
   rubricCriteria: instrumentType === 'OBSERVATION' ? rubricCriteriaSchema : z.undefined().optional(),
+  dimensionId: z.string().uuid("Please select a dimension").optional().or(z.literal("no-dimension")),
 })
 
 type RubricCriterion = { score: string | number; description: string }
@@ -70,6 +71,14 @@ type TemplateQuestion = {
   scoringGuide: string | null
   createdAt: string
   rubricCriteria?: string | { score: string | number; description: string }[]
+  dimensionId?: string | null
+  dimensionName?: string | null
+}
+
+type Dimension = {
+  id: string
+  name: string
+  description: string | null
 }
 
 type EditQuestionDialogProps = {
@@ -88,6 +97,8 @@ export function EditQuestionDialog({
   onSuccess,
 }: EditQuestionDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [dimensions, setDimensions] = useState<Dimension[]>([])
+  const [isLoadingDimensions, setIsLoadingDimensions] = useState(false)
 
   const form = useForm<EditQuestionSchema>({
     resolver: zodResolver(editQuestionSchema(instrumentType)),
@@ -95,6 +106,7 @@ export function EditQuestionDialog({
       questionText: "",
       questionType: "STATEMENT",
       scoringGuide: "",
+      dimensionId: "no-dimension",
       rubricCriteria: instrumentType === 'OBSERVATION' ? [] : undefined,
     },
   })
@@ -114,6 +126,28 @@ export function EditQuestionDialog({
     }
   }
 
+  // Fetch dimensions when dialog opens
+  useEffect(() => {
+    if (open) {
+      fetchDimensions()
+    }
+  }, [open])
+
+  const fetchDimensions = async () => {
+    setIsLoadingDimensions(true)
+    try {
+      const response = await fetch('/api/admin/dimensions')
+      if (response.ok) {
+        const data = await response.json()
+        setDimensions(data.data || [])
+      }
+    } catch (error) {
+      console.error('Error fetching dimensions:', error)
+    } finally {
+      setIsLoadingDimensions(false)
+    }
+  }
+
   useEffect(() => {
     if (question) {
       if (instrumentType === 'SELF_ASSESSMENT') {
@@ -121,6 +155,7 @@ export function EditQuestionDialog({
           questionText: question.questionText,
           questionType: "STATEMENT" as const,
           scoringGuide: question.scoringGuide || "",
+          dimensionId: question.dimensionId || "no-dimension",
         })
       } else if (instrumentType === 'OBSERVATION') {
         let rubricCriteria: RubricCriterion[] = []
@@ -137,6 +172,7 @@ export function EditQuestionDialog({
           questionText: question.questionText,
           questionType: question.questionType as "STATEMENT" | "ESSAY_PROMPT",
           scoringGuide: question.scoringGuide || "",
+          dimensionId: question.dimensionId || "no-dimension",
           rubricCriteria,
         } as any)
       } else {
@@ -144,6 +180,7 @@ export function EditQuestionDialog({
           questionText: question.questionText,
           questionType: question.questionType as "STATEMENT" | "ESSAY_PROMPT",
           scoringGuide: question.scoringGuide || "",
+          dimensionId: question.dimensionId || "no-dimension",
         }
         form.reset(resetData as any)
       }
@@ -167,13 +204,13 @@ export function EditQuestionDialog({
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Failed to update question')
+        throw new Error(error.message || 'Gagal memperbarui pertanyaan')
       }
 
-      toast.success("Question updated successfully!")
+      toast.success("Pertanyaan berhasil diperbarui!")
       onSuccess()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to update question")
+      toast.error(error instanceof Error ? error.message : "Gagal memperbarui pertanyaan")
     } finally {
       setIsSubmitting(false)
     }
@@ -298,6 +335,43 @@ function RubricCriteriaField({ value, onChange }: { value: RubricCriterion[]; on
                         {getAvailableQuestionTypes(instrumentType).map((type) => (
                           <SelectItem key={type.value} value={type.value}>
                             {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="dimensionId"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <FormLabel className="text-[13px] font-semibold leading-none">Dimensi Penilaian</FormLabel>
+                      <span className="text-xs text-muted-foreground font-normal">(Opsional)</span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span tabIndex={0} className="cursor-pointer"><Info className="w-4 h-4 text-muted-foreground" /></span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs text-xs">
+                          Pilih dimensi penilaian yang sesuai untuk pertanyaan ini. Ini akan membantu dalam analisis skor per dimensi.
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingDimensions}>
+                      <FormControl>
+                        <SelectTrigger className="border border-input rounded-md focus:ring-2 focus:ring-primary/40 focus:border-primary/60 text-sm w-full">
+                          <SelectValue placeholder={isLoadingDimensions ? "Memuat dimensi..." : "Pilih dimensi penilaian"} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="no-dimension">Tidak ada dimensi</SelectItem>
+                        {dimensions.map((dimension) => (
+                          <SelectItem key={dimension.id} value={dimension.id}>
+                            {dimension.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

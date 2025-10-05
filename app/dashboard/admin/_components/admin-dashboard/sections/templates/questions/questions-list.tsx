@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { MoreHorizontal, Plus, Edit, Trash2 } from "lucide-react"
 import {
   DropdownMenu,
@@ -19,6 +20,8 @@ export type TemplateQuestion = {
   questionType: string
   scoringGuide: string | null
   createdAt: string
+  dimensionId?: string | null
+  dimensionName?: string | null
 }
 
 type QuestionsListProps = {
@@ -57,13 +60,13 @@ export function QuestionsList({
       })
 
       if (!response.ok) {
-        throw new Error('Failed to delete question')
+        throw new Error('Gagal menghapus pertanyaan')
       }
 
-      toast.success("Statement deleted successfully!")
+      toast.success("Pernyataan berhasil dihapus!")
       onRefresh?.()
     } catch (error) {
-      toast.error("Failed to delete statement")
+      toast.error("Gagal menghapus pernyataan")
       console.error(error)
     }
   }
@@ -73,8 +76,8 @@ export function QuestionsList({
     setShowEditDialog(true)
   }
 
-  // Label for JOURNAL = Prompt, else Statement
-  const label = instrumentType === 'JOURNAL' ? 'Prompt' : 'Statement';
+  // Label untuk JOURNAL = Petunjuk, selain itu Pernyataan
+  const label = instrumentType === 'JOURNAL' ? 'Petunjuk' : 'Pernyataan';
 
   return (
     <div className="space-y-1">
@@ -99,24 +102,31 @@ export function QuestionsList({
 
       {questions.length === 0 ? (
         <div className="text-center py-3 border border-dashed border-border rounded text-[10px] text-muted-foreground">
-          No {label.toLowerCase()}s yet
+          Belum ada {label.toLowerCase()}
         </div>
       ) : (
         <div className="space-y-1 max-h-[40vh] overflow-y-auto">
           {questions.map((question) => (
-            <div key={question.id} className="flex items-center justify-between p-2 border border-border rounded text-xs">
+            <div key={question.id} className="flex items-start justify-between p-2 border border-border rounded text-xs">
               <div className="flex-1 min-w-0">
-                <div
-                  className="break-words whitespace-pre-line text-[10px]"
-                  title={question.questionText.replace(/<[^>]+>/g, '')}
-                  dangerouslySetInnerHTML={{ __html: question.questionText }}
-                />
+                <div className="flex items-center gap-1 mb-1">
+                  {question.dimensionName && (
+                    <Badge variant="outline" className="text-[9px] h-4 px-1.5 font-mono">
+                      {question.dimensionName}
+                    </Badge>
+                  )}
+                  <div
+                    className="break-words whitespace-pre-line text-[10px]"
+                    title={question.questionText.replace(/<[^>]+>/g, '')}
+                    dangerouslySetInnerHTML={{ __html: question.questionText }}
+                  />
+                </div>
               </div>
-              <div className="flex items-center gap-1 ml-2">
+              <div className="flex items-center gap-1 ml-2 flex-shrink-0">
                 {question.scoringGuide && (
                   <div
                     className="w-2 h-2 rounded-full bg-blue-500 cursor-help"
-                    title={`Scoring: ${question.scoringGuide}`}
+                    title={`Penilaian: ${question.scoringGuide}`}
                   />
                 )}
                 <DropdownMenu>
@@ -135,7 +145,7 @@ export function QuestionsList({
                       className="text-destructive"
                     >
                       <Trash2 className="mr-2 h-3 w-3" />
-                      Delete
+                      Hapus
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

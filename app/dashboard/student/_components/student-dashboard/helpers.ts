@@ -57,7 +57,7 @@ export function getStageStatusBadge(status: StageStatus) {
       }
     default:
       return {
-        label: "Locked",
+        label: "Terkunci",
         variant: "outline" as const,
         badgeClassName: "border-muted-foreground/20 bg-muted text-muted-foreground",
         indicatorClassName: "bg-muted-foreground/40",

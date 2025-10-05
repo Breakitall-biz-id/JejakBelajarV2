@@ -12,7 +12,7 @@ import { TemplateFormData, InstrumentConfig } from "../types"
 
 interface TemplateWizardProps {
   onSubmit: (data: TemplateFormData) => Promise<void>
-  onCancel: () => void
+  onBatal: () => void
   initialData?: Partial<TemplateFormData>
   submitButtonText?: string
   isSubmitting?: boolean
@@ -20,7 +20,7 @@ interface TemplateWizardProps {
 
 export function TemplateWizard({
   onSubmit,
-  onCancel,
+  onBatal,
   initialData,
   submitButtonText = "Create Template",
   isSubmitting = false,
@@ -139,8 +139,8 @@ export function TemplateWizard({
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Button>
             )}
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
+            <Button type="button" variant="outline" onClick={onBatal}>
+              Batal
             </Button>
           </div>
 
