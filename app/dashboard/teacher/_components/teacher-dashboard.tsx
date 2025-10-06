@@ -227,8 +227,8 @@ export function TeacherDashboard({
 
         {data.classes.length === 0 ? (
           <EmptyState
-            title="No Classes Assigned"
-            description="You are not assigned to any classes yet. Contact your school administrator to get started."
+            title="Belum Ada Kelas Ditugaskan"
+            description="Anda belum ditugaskan ke kelas manapun. Hubungi administrator sekolah untuk memulai."
             icon={<Users className="h-12 w-12" />}
           />
         ) : (
@@ -436,8 +436,8 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
   const formSchema = useMemo(
     () =>
       z.object({
-        templateId: z.string().min(1, "Please select a project template"),
-        title: z.string().trim().min(1, "Project title is required").max(255),
+        templateId: z.string().min(1, "Silakan pilih template proyek"),
+        title: z.string().trim().min(1, "Judul proyek wajib diisi").max(255),
         theme: z.string().trim().optional(),
         description: z.string().trim().optional(),
       }),
@@ -817,14 +817,14 @@ function ProjectCard({
           <div className="mt-3 pt-3 border-t border-border">
             <div className="flex items-center justify-between mb-2">
               <h5 className="text-xs font-medium text-muted-foreground">
-                {isExpanded ? "All Stages" : "Early Stages"}
+                {isExpanded ? "Semua Tahapan" : "Tahapan Awal"}
                 {isExpanded && (
                   <span className="text-xs text-muted-foreground ml-1">({project.stages.length})</span>
                 )}
               </h5>
               {hasMoreStages && (
                 <Badge variant="outline" className="text-xs">
-                  +{project.stages.length - 2} more
+                  +{project.stages.length - 2} lainnya
                 </Badge>
               )}
             </div>
@@ -1100,10 +1100,10 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
                   setOpen(false)
                 }}
               >
-                Cancel
+                Batal
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save changes"}
+                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Simpan Perubahan"}
               </Button>
             </div>
           </form>
@@ -1388,17 +1388,17 @@ function StageDetailDialog({
   const getInstrumentDescription = (instrumentType: string) => {
     switch (instrumentType) {
       case "JOURNAL":
-        return "Student reflection journal entries for qualitative feedback"
+        return "Entri jurnal refleksi siswa untuk masukan kualitatif"
       case "SELF_ASSESSMENT":
-        return "Self-evaluation aligned to Kokurikuler dimensions"
+        return "Evaluasi diri yang selaras dengan dimensi Kokurikuler"
       case "PEER_ASSESSMENT":
-        return "Peer review within the project group"
+        return "Review teman sebaya dalam grup proyek"
       case "OBSERVATION":
-        return "Teacher observation and notes"
+        return "Observasi dan catatan guru"
       case "DAILY_NOTE":
-        return "Quick daily notes capturing student progress"
+        return "Catatan harian cepat untuk memantau kemajuan siswa"
       default:
-        return "Assessment instrument"
+        return "Instrumen penilaian"
     }
   }
 
@@ -1466,15 +1466,15 @@ function StageDetailDialog({
           {/* Timeline */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-muted/30 rounded-lg p-3">
-              <div className="text-xs text-muted-foreground mb-1">Unlock Date</div>
+              <div className="text-xs text-muted-foreground mb-1">Tanggal Buka</div>
               <div className="text-sm font-medium">
-                {stage.unlocksAt ? formatDate(stage.unlocksAt) : "Immediate"}
+                {stage.unlocksAt ? formatDate(stage.unlocksAt) : "Segera"}
               </div>
             </div>
             <div className="bg-muted/30 rounded-lg p-3">
-              <div className="text-xs text-muted-foreground mb-1">Due Date</div>
+              <div className="text-xs text-muted-foreground mb-1">Tanggal Tenggat</div>
               <div className="text-sm font-medium">
-                {stage.dueAt ? formatDate(stage.dueAt) : "No deadline"}
+                {stage.dueAt ? formatDate(stage.dueAt) : "Tenggat tidak ada"}
               </div>
             </div>
           </div>
@@ -1868,10 +1868,10 @@ function CreateStageDialog({
             {formError && <p className="text-sm text-destructive">{formError}</p>}
             <div className="flex justify-end gap-2">
               <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)}>
-                Cancel
+                Batal
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create stage"}
+                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Buat Tahapan"}
               </Button>
             </div>
           </form>
@@ -2128,10 +2128,10 @@ function StageInstrumentsDialog({
         </div>
         <div className="flex justify-end gap-2">
           <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-            Cancel
+            Batal
           </Button>
           <Button onClick={submit} disabled={isPending}>
-            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save instruments"}
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Simpan Instrumen"}
           </Button>
         </div>
       </DialogContent>

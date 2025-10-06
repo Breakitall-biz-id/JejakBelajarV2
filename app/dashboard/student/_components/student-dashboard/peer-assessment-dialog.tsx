@@ -57,17 +57,31 @@ export function PeerAssessmentDialog({
   }, [members, currentUserId])
 
   // answers[statementIdx][peerIdx]
-  const [answers, setAnswers] = React.useState<(number|null)[][]>(initialValue || Array.from({ length: statements.length }, () => Array(filteredMembers.length).fill(null)))
+  const [answers, setAnswers] = React.useState<(number|null)[][]>(() => {
+    const memberCount = currentUserId ? members.filter(m => m.id !== currentUserId).length : members.length
+    if (initialValue && initialValue.length === statements.length) {
+      return initialValue.map(row => [...row])
+    }
+    return Array.from({ length: statements.length }, () => 
+      Array.from({ length: memberCount }, () => null)
+    )
+  })
   const [currentStatement, setCurrentStatement] = React.useState(0)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    setAnswers(initialValue || Array.from({ length: statements.length }, () =>
-      Array.from({ length: filteredMembers.length }, () => null)
-    ));
-    setCurrentStatement(0) // Reset currentStatement when dialog opens or parameters change
-  }, [initialValue, filteredMembers.length, statements.length, open])
+    if (!open) return
+    
+    const newAnswers = initialValue && initialValue.length === statements.length
+      ? initialValue.map(row => [...row])
+      : Array.from({ length: statements.length }, () => 
+          Array.from({ length: filteredMembers.length }, () => null)
+        )
+    
+    setAnswers(newAnswers)
+    setCurrentStatement(0)
+  }, [open, initialValue, filteredMembers.length, statements.length])
 
   const allAnswered =
     answers.length === statements.length &&
@@ -142,9 +156,9 @@ export function PeerAssessmentDialog({
                 <div className="font-semibold text-foreground text-base mb-1">{member.name}</div>
                 <RadioGroup
                   value={
-                    answers[currentStatement] && typeof answers[currentStatement][idx] !== 'undefined'
-                      ? (answers[currentStatement][idx] != null ? String(answers[currentStatement][idx]) : undefined)
-                      : undefined
+                    answers[currentStatement]?.[idx] != null 
+                      ? String(answers[currentStatement][idx]) 
+                      : ""
                   }
                   onValueChange={val => handleChange(idx, Number(val))}
                   disabled={readOnly}
@@ -178,11 +192,18 @@ export function PeerAssessmentDialog({
         </div>
         {error && <p className="px-6 text-sm text-red-500">{error}</p>}
         <DialogFooter className="flex justify-between">
-          <Button variant="outline" disabled={currentStatement === 0} onClick={() => setCurrentStatement(currentStatement - 1)}>
+          <Button 
+            variant="outline" 
+            disabled={currentStatement === 0} 
+            onClick={() => setCurrentStatement(currentStatement - 1)}
+          >
             Previous
           </Button>
           {currentStatement < statements.length - 1 ? (
-            <Button onClick={() => setCurrentStatement(currentStatement + 1)} disabled={loading}>
+            <Button 
+              onClick={() => setCurrentStatement(currentStatement + 1)} 
+              disabled={loading}
+            >
               Next Question
             </Button>
           ) : (

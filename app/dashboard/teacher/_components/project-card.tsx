@@ -103,13 +103,13 @@ export function ProjectCard({
                 ))}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => onEdit(project)}>
-                  Edit Project
+                  Edit Proyek
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => onDelete(project.id)}
                   className="text-destructive"
                 >
-                  Delete Project
+                  Hapus Proyek
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -120,9 +120,9 @@ export function ProjectCard({
           <div className="mt-4 pt-4 border-t space-y-4">
             <div className="space-y-3">
               <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                <span>{project.stages.length} stages</span>
-                <span>{project.groups.length} groups</span>
-                <span>{project.groups.reduce((acc, group) => acc + group.members.length, 0)} students</span>
+                <span>{project.stages.length} tahapan</span>
+                <span>{project.groups.length} grup</span>
+                <span>{project.groups.reduce((acc, group) => acc + group.members.length, 0)} siswa</span>
               </div>
               <Link href={`/dashboard/teacher/projects/${project.id}`}>
                 <Button variant="outline" size="sm" className="w-full">
