@@ -12,7 +12,7 @@ import { TemplatesClient } from "./_components/templates-client"
 import { getAdminDashboardData } from "../queries"
 
 export const metadata: Metadata = {
-  title: "Template Management • JejakBelajar",
+  title: "Manajemen Template • JejakBelajar",
 }
 
 export default async function AdminTemplatesPage() {

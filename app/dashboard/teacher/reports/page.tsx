@@ -6,7 +6,7 @@ import { getTeacherReportData } from "./queries"
 import { TeacherReportsDashboard } from "./_components/teacher-reports-dashboard"
 
 export const metadata: Metadata = {
-  title: "Class Reports • JejakBelajar",
+  title: "Laporan Kelas • JejakBelajar",
 }
 
 export default async function TeacherReportsPage() {

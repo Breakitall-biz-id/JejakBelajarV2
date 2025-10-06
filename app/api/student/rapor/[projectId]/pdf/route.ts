@@ -31,14 +31,17 @@ export async function POST(request: Request) {
 
 function generatePDFHTML(data: RaporData): string {
   const getScoreColor = (score: number) => {
-    if (score >= 3.5) return "#16a34a"
-    if (score >= 3.0) return "#2563eb"
-    if (score >= 2.0) return "#ca8a04"
+    // Update thresholds for 0-100 scale
+    // 3.5/4.0 = 87.5%, 3.0/4.0 = 75%, 2.0/4.0 = 50%
+    if (score >= 87.5) return "#16a34a"
+    if (score >= 75.0) return "#2563eb"
+    if (score >= 50.0) return "#ca8a04"
     return "#dc2626"
   }
 
   const getProgressValue = (score: number) => {
-    return (score / 4) * 100
+    // Score is already in 0-100 scale, so return directly
+    return score
   }
 
   return `
@@ -243,7 +246,7 @@ function generatePDFHTML(data: RaporData): string {
 <body>
     <div class="header">
         <h1>Rapor Kokurikuler</h1>
-        <p>P5 Project Assessment Report - ${data.project.theme}</p>
+        <p>Kokurikuler Project Assessment Report - ${data.project.theme}</p>
         <p>Generated on ${new Date(data.generatedAt).toLocaleString('id-ID', {
           day: 'numeric',
           month: 'long',
@@ -316,7 +319,7 @@ function generatePDFHTML(data: RaporData): string {
                         </span>
                     </div>
                     <div class="dimension-score" style="background-color: ${getScoreColor(dimension.averageScore)};">
-                        ${dimension.averageScore.toFixed(1)}/4.0
+                        ${dimension.averageScore.toFixed(1)}/100
                     </div>
                 </div>
 
@@ -332,32 +335,32 @@ function generatePDFHTML(data: RaporData): string {
 
     <div class="insights-section">
         <div class="insight-card">
-            <h3>✅ Strengths</h3>
+            <h3>✅ Kelebihan</h3>
             <ul class="insight-list">
                 ${data.performanceInsights.strengths.length > 0
                   ? data.performanceInsights.strengths.map(strength =>
                       `<li>✅ ${strength}</li>`
                     ).join('')
-                  : '<li>Continue working on developing your skills and strengths.</li>'
+                  : '<li>Terus kembangkan keterampilan dan kelebihan Anda.</li>'
                 }
             </ul>
         </div>
 
         <div class="insight-card">
-            <h3>🎯 Areas for Growth</h3>
+            <h3>🎯 Area yang Perlu Dikembangkan</h3>
             <ul class="insight-list">
                 ${data.performanceInsights.areasForImprovement.length > 0
                   ? data.performanceInsights.areasForImprovement.map(area =>
                       `<li>🎯 ${area}</li>`
                     ).join('')
-                  : '<li>No specific areas identified for improvement at this time.</li>'
+                  : '<li>Tidak ada area khusus yang perlu perbaikan saat ini.</li>'
                 }
             </ul>
         </div>
     </div>
 
     <div class="recommendations">
-        <h3>💡 Development Recommendations</h3>
+        <h3>💡 Rekomendasi Pengembangan</h3>
         <ul class="insight-list">
             ${data.performanceInsights.recommendations.map(rec =>
                 `<li>💡 ${rec}</li>`
@@ -366,8 +369,8 @@ function generatePDFHTML(data: RaporData): string {
     </div>
 
     <div class="footer">
-        <p><strong>Rapor Kokurikuler - P5 Project Assessment System</strong></p>
-        <p>This report was automatically generated based on project assessments and activities.</p>
+        <p><strong>Rapor Kokurikuler - Sistem Penilaian Proyek Kokurikuler</strong></p>
+        <p>Laporan ini dibuat otomatis berdasarkan penilaian dan aktivitas proyek.</p>
     </div>
 </body>
 </html>

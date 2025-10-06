@@ -162,13 +162,14 @@ export async function GET(request: Request) {
           s.projectStageId && projectStageIds.includes(s.projectStageId)
         )
 
-        // Calculate average grade for this project
+        // Calculate average grade for this project using new formula
         const scores = projectSubmissions
           .map(s => s.score)
           .filter((score): score is number => score !== null)
 
+        // IMPLEMENTASI FORMULA BARU: X = ((jumlah skor pada seluruh item) / (jumlah item x 4)) x 100
         const avgGrade = scores.length > 0
-          ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+          ? ((scores.reduce((sum, score) => sum + score, 0)) / (scores.length * 4)) * 100
           : null
 
         // Get submission count vs total possible submissions
@@ -186,13 +187,18 @@ export async function GET(request: Request) {
         }
       })
 
-      // Calculate overall average grade
-      const allScores = projectGrades
-        .map(pg => pg.grade)
-        .filter((grade): grade is number => grade !== null)
+      // Calculate overall average grade using new formula
+      // Collect all individual scores from all projects for this student
+      const allIndividualScores = projectGrades.flatMap(pg =>
+        studentSubmissions
+          .filter(s => s.projectStageId && stageRows.some(sr => sr.projectId === pg.projectId && sr.id === s.projectStageId))
+          .map(s => s.score)
+          .filter((score): score is number => score !== null)
+      )
 
-      const averageGrade = allScores.length > 0
-        ? allScores.reduce((sum, grade) => sum + grade, 0) / allScores.length
+      // IMPLEMENTASI FORMULA BARU: X = ((jumlah skor pada seluruh item) / (jumlah item x 4)) x 100
+      const averageGrade = allIndividualScores.length > 0
+        ? ((allIndividualScores.reduce((sum, score) => sum + score, 0)) / (allIndividualScores.length * 4)) * 100
         : 0
 
       // Calculate completion rate
@@ -204,7 +210,7 @@ export async function GET(request: Request) {
 
       return {
         id: student.studentId,
-        name: student.studentName || "Unknown Student",
+        name: student.studentName || "Siswa Tidak Dikenal",
         email: student.studentEmail,
         className: classInfo.name,
         groupName: groupMembership?.groupName,

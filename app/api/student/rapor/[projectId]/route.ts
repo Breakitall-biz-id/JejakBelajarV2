@@ -165,20 +165,24 @@ function getPerformanceDescription(qualitativeCode: string): string {
       return "Pencapaian baik, memenuhi harapan dengan performa stabil"
     case "C":
       return "Pencapaian cukup, memerlukan perhatian untuk peningkatan"
-    case "P":
-      return "Memerlukan pemulihan dan bimbingan intensif"
+    case "R":
+      return "Pencapaian kurang, perlu bimbingan dan dukungan tambahan"
+    case "SR":
+      return "Pencapaian sangat rendah, memerlukan intervensi intensif"
     default:
       return "Tidak dapat dievaluasi"
   }
 }
 
 function generatePerformanceInsights(dimensionScores: RaporData["dimensionScores"]) {
+  // Update thresholds untuk skala 0-100
+  // 3.5/4.0 = 87.5%, 3.0/4.0 = 75%, 6.25 (threshold untuk R)
   const strengths = dimensionScores
-    .filter(d => d.averageScore >= 3.5)
+    .filter(d => d.averageScore >= 87.5) // SB threshold (81.25+)
     .map(d => d.dimensionName)
 
   const areasForImprovement = dimensionScores
-    .filter(d => d.averageScore < 3.0 && d.averageScore > 0)
+    .filter(d => d.averageScore < 75 && d.averageScore > 6.25) // Below B threshold but above SR
     .map(d => d.dimensionName)
 
   // Generate recommendations based on performance patterns
@@ -193,12 +197,12 @@ function generatePerformanceInsights(dimensionScores: RaporData["dimensionScores
   }
 
   const creativityScore = dimensionScores.find(d => d.dimensionName.toLowerCase().includes("kreativitas"))
-  if (creativityScore && creativityScore.averageScore < 3.0) {
+  if (creativityScore && creativityScore.averageScore < 75) { // B threshold
     recommendations.push("Libatkan dalam aktivitas yang merangsang pemikiran kreatif dan inovatif")
   }
 
   const collaborationScore = dimensionScores.find(d => d.dimensionName.toLowerCase().includes("kolaborasi"))
-  if (collaborationScore && collaborationScore.averageScore < 3.0) {
+  if (collaborationScore && collaborationScore.averageScore < 75) { // B threshold
     recommendations.push("Berikan kesempatan lebih banyak untuk bekerja dalam tim")
   }
 

@@ -49,11 +49,11 @@ export default function ProjectDetailPage({
   // Mock data - in real app, this would come from API
   const project: Project = {
     id: projectId,
-    title: "P5 Project: Environmental Awareness",
+    title: "Kokurikuler Project: Environmental Awareness",
     description: "Students will explore environmental issues and create solutions for local community problems.",
     theme: "Environmental Sustainability",
     status: "IN_PROGRESS",
-    templateName: "Standard P5 Template",
+    templateName: "Standard Kokurikuler Template",
     stages: [
       {
         id: "1",

@@ -2,7 +2,7 @@
  * Dimension-Based Scoring Logic
  *
  * Module ini mengimplementasikan logic scoring per dimensi sesuai PRD V6,
- * menggantikan sistem scoring per-instrument dengan scoring per-dimensi P5.
+ * menggantikan sistem scoring per-instrument dengan scoring per-dimensi Kokurikuler.
  */
 
 import { sql } from "drizzle-orm"
@@ -135,33 +135,36 @@ async function calculateJournalDimensionScores(submission: any): Promise<Dimensi
 
   const content = submission.content as any
   const grades = content?.grades || []
-  console.log(grades)
 
-  // Ambil semua score dari grades dan rata-ratakan
+  // Ambil semua score dari grades untuk formula baru
   const allScores = grades.map((g: any) => g.score).filter((s: any) => typeof s === 'number')
 
   // Debug
-  console.log("\n[DEBUG] Journal Scores:")
+  console.log("\n[DEBUG] Journal Scores (New Formula):")
   console.log(`  All Scores: ${JSON.stringify(allScores)}`)
 
   if (allScores.length === 0) {
     return []
   }
 
+  // IMPLEMENTASI FORMULA BARU: X = ((jumlah skor pada seluruh item) / (jumlah item x 4)) x 100
+  const totalScore = allScores.reduce((a: number, b: number) => a + b, 0)
+  const totalItems = allScores.length
+  const percentageScore = (totalScore / (totalItems * 4)) * 100
+
   // Gunakan dimension dari question pertama (asumsi journal punya satu dimension utama)
   const dimensionId = questions[0]?.dimensionId || 'default'
   const dimensionName = questions[0]?.dimensionName || 'Umum'
 
-  const totalScore = allScores.reduce((a: number, b: number) => a + b, 0)
-  const averageScore = totalScore / allScores.length
+  console.log(`  Formula: (${totalScore} / (${totalItems} x 4)) x 100 = ${percentageScore}`)
 
   const dimensionScores: DimensionScore[] = [{
     dimensionId,
     dimensionName,
-    averageScore: Number(averageScore.toFixed(2)),
-    totalSubmissions: allScores.length,
-    maxScore: 4,
-    qualitativeScore: convertToQualitativeScore(averageScore).qualitativeScore
+    averageScore: Number(percentageScore.toFixed(2)), // Now 0-100 scale
+    totalSubmissions: totalItems,
+    maxScore: 100, // Updated to 100 scale
+    qualitativeScore: convertToQualitativeScore(percentageScore).qualitativeScore
   }]
 
   return dimensionScores
@@ -228,40 +231,37 @@ async function calculateAssessmentDimensionScores(submission: any): Promise<Dime
     })
   })
 
-  // Calculate scores per dimension
+  // Calculate scores per dimension dengan formula baru
   for (const [dimensionId, dimensionItems] of dimensionGroups) {
     let totalScore = 0
-    let totalMaxScore = 0
-    let submissionCount = 0
+    let totalItems = 0
 
     for (const item of dimensionItems) {
       const answer = answers[item.answerIndex]
-
-    // Debug: print mapping per item (optional, bisa di-comment jika terlalu verbose)
-    // console.log(`[DEBUG] QID: ${item.question.id}, Q: ${item.question.questionText}, D: ${item.question.dimensionName}, Answer: ${answer}`)
 
       if (answer !== undefined && answer !== null) {
         // Map answer values (typically 1-4 scale)
         const score = typeof answer === 'number' ? answer : 0
         totalScore += score
-        totalMaxScore += 4 // Max score per question is 4
-        submissionCount++
+        totalItems++
       } else {
         console.warn(`No answer found for question ${item.question.id} at index ${item.answerIndex}`)
       }
     }
 
-    if (submissionCount > 0) {
-      const averageScore = totalScore / submissionCount
-      const maxScore = totalMaxScore / submissionCount
+    if (totalItems > 0) {
+      // IMPLEMENTASI FORMULA BARU: X = ((jumlah skor pada seluruh item) / (jumlah item x 4)) x 100
+      const percentageScore = (totalScore / (totalItems * 4)) * 100
+
+      console.log(`  [DEBUG] Dimension ${dimensionId}: (${totalScore} / (${totalItems} x 4)) x 100 = ${percentageScore}`)
 
       dimensionScores.push({
         dimensionId,
         dimensionName: dimensionItems[0].question.dimensionName || 'Umum',
-        averageScore: Number(averageScore.toFixed(2)),
-        totalSubmissions: submissionCount,
-        maxScore: Number(maxScore.toFixed(2)),
-  qualitativeScore: convertToQualitativeScore(averageScore).qualitativeScore
+        averageScore: Number(percentageScore.toFixed(2)), // Now 0-100 scale
+        totalSubmissions: totalItems,
+        maxScore: 100, // Updated to 100 scale
+        qualitativeScore: convertToQualitativeScore(percentageScore).qualitativeScore
       })
     } else {
       console.warn(`No valid submissions found for dimension ${dimensionId}`)
@@ -314,11 +314,10 @@ async function calculateObservationDimensionScores(submission: any): Promise<Dim
     })
   })
 
-  // Calculate scores per dimension
+  // Calculate scores per dimension dengan formula baru
   for (const [dimensionId, dimensionItems] of dimensionGroups) {
     let totalScore = 0
-    let totalMaxScore = 0
-    let submissionCount = 0
+    let totalItems = 0
 
     for (const item of dimensionItems) {
       const answer = answers[item.answerIndex]
@@ -327,24 +326,25 @@ async function calculateObservationDimensionScores(submission: any): Promise<Dim
         // Map answer values (typically 1-4 scale)
         const score = typeof answer === 'number' ? answer : 0
         totalScore += score
-        totalMaxScore += 4 // Max score per question is 4
-        submissionCount++
+        totalItems++
       } else {
         console.warn(`No answer found for observation question ${item.question.id} at index ${item.answerIndex}`)
       }
     }
 
-    if (submissionCount > 0) {
-      const averageScore = totalScore / submissionCount
-      const maxScore = totalMaxScore / submissionCount
+    if (totalItems > 0) {
+      // IMPLEMENTASI FORMULA BARU: X = ((jumlah skor pada seluruh item) / (jumlah item x 4)) x 100
+      const percentageScore = (totalScore / (totalItems * 4)) * 100
+
+      console.log(`  [DEBUG] Observation Dimension ${dimensionId}: (${totalScore} / (${totalItems} x 4)) x 100 = ${percentageScore}`)
 
       dimensionScores.push({
         dimensionId,
         dimensionName: dimensionItems[0].question.dimensionName || 'Observasi Umum',
-        averageScore: Number(averageScore.toFixed(2)),
-        totalSubmissions: submissionCount,
-        maxScore: Number(maxScore.toFixed(2)),
-        qualitativeScore: convertToQualitativeScore(averageScore).qualitativeScore
+        averageScore: Number(percentageScore.toFixed(2)), // Now 0-100 scale
+        totalSubmissions: totalItems,
+        maxScore: 100, // Updated to 100 scale
+        qualitativeScore: convertToQualitativeScore(percentageScore).qualitativeScore
       })
     } else {
       console.warn(`No valid observation submissions found for dimension ${dimensionId}`)
@@ -369,13 +369,16 @@ async function calculateDefaultDimensionScores(submission: any): Promise<Dimensi
     return []
   }
 
+  // Convert existing score (0-4 scale) to new 0-100 scale
+  const percentageScore = (submission.score / 4) * 100
+
   const dimensionScores: DimensionScore[] = [{
     dimensionId: allDimensions[0]?.id || 'default',
     dimensionName: allDimensions[0]?.name || 'Umum',
-    averageScore: submission.score,
+    averageScore: percentageScore, // Now 0-100 scale
     totalSubmissions: 1,
-    maxScore: 4,
-    qualitativeScore: convertToQualitativeScore(submission.score).qualitativeScore
+    maxScore: 100, // Updated to 100 scale
+    qualitativeScore: convertToQualitativeScore(percentageScore).qualitativeScore
   }]
 
   return dimensionScores
@@ -501,10 +504,10 @@ export async function calculateStudentDimensionScores(
     allDimensionScores.push(...dimensionScores)
   }
 
-  // Aggregate scores by dimension
+  // Aggregate scores by dimension dengan formula baru
   const dimensionAggregates = new Map<string, {
     totalScore: number
-    totalSubmissions: number
+    totalItems: number
     dimensionName: string
     maxScore: number
   }>()
@@ -514,40 +517,41 @@ export async function calculateStudentDimensionScores(
     if (!dimensionAggregates.has(key)) {
       dimensionAggregates.set(key, {
         totalScore: 0,
-        totalSubmissions: 0,
+        totalItems: 0,
         dimensionName: score.dimensionName,
         maxScore: score.maxScore
       })
     }
 
     const aggregate = dimensionAggregates.get(key)!
+    // Since individual scores are already in 0-100 scale, we can average them directly
     aggregate.totalScore += score.averageScore * score.totalSubmissions
-    aggregate.totalSubmissions += score.totalSubmissions
+    aggregate.totalItems += score.totalSubmissions
   }
 
-  // Calculate final dimension scores
+  // Calculate final dimension scores dengan formula agregasi
   const finalDimensionScores: DimensionScore[] = []
   let overallTotalScore = 0
-  let overallTotalSubmissions = 0
+  let overallTotalDimensions = 0
 
   for (const [dimensionId, aggregate] of dimensionAggregates) {
-    const averageScore = aggregate.totalScore / aggregate.totalSubmissions
+    const averageScore = aggregate.totalItems > 0 ? aggregate.totalScore / aggregate.totalItems : 0
     const dimensionScore: DimensionScore = {
       dimensionId,
       dimensionName: aggregate.dimensionName,
       averageScore: Number(averageScore.toFixed(2)),
-      totalSubmissions: aggregate.totalSubmissions,
-      maxScore: aggregate.maxScore,
-  qualitativeScore: convertToQualitativeScore(averageScore).qualitativeScore
+      totalSubmissions: aggregate.totalItems,
+      maxScore: 100, // Updated to 100 scale
+      qualitativeScore: convertToQualitativeScore(averageScore).qualitativeScore
     }
 
     finalDimensionScores.push(dimensionScore)
     overallTotalScore += averageScore
-    overallTotalSubmissions += 1
+    overallTotalDimensions += 1
   }
 
-  const overallAverageScore = overallTotalSubmissions > 0
-    ? overallTotalScore / overallTotalSubmissions
+  const overallAverageScore = overallTotalDimensions > 0
+    ? overallTotalScore / overallTotalDimensions
     : 0
 
   return {
@@ -599,10 +603,10 @@ export async function calculateClassDimensionScores(
     }
   }
 
-  // Aggregate scores by dimension for the entire class
+  // Aggregate scores by dimension for the entire class dengan formula baru
   const dimensionAggregates = new Map<string, {
     totalScore: number
-    totalSubmissions: number
+    totalItems: number
     dimensionName: string
     maxScore: number
   }>()
@@ -612,30 +616,31 @@ export async function calculateClassDimensionScores(
     if (!dimensionAggregates.has(key)) {
       dimensionAggregates.set(key, {
         totalScore: 0,
-        totalSubmissions: 0,
+        totalItems: 0,
         dimensionName: score.dimensionName,
         maxScore: score.maxScore
       })
     }
 
     const aggregate = dimensionAggregates.get(key)!
+    // Since individual scores are already in 0-100 scale, we can average them directly
     aggregate.totalScore += score.averageScore * score.totalSubmissions
-    aggregate.totalSubmissions += score.totalSubmissions
+    aggregate.totalItems += score.totalSubmissions
   }
 
-  // Calculate final dimension scores for class
+  // Calculate final dimension scores for class dengan formula agregasi
   const finalDimensionScores: DimensionScore[] = []
   let classTotalScore = 0
 
   for (const [dimensionId, aggregate] of dimensionAggregates) {
-    const averageScore = aggregate.totalScore / aggregate.totalSubmissions
+    const averageScore = aggregate.totalItems > 0 ? aggregate.totalScore / aggregate.totalItems : 0
     const dimensionScore: DimensionScore = {
       dimensionId,
       dimensionName: aggregate.dimensionName,
       averageScore: Number(averageScore.toFixed(2)),
-      totalSubmissions: aggregate.totalSubmissions,
-      maxScore: aggregate.maxScore,
-  qualitativeScore: convertToQualitativeScore(averageScore).qualitativeScore
+      totalSubmissions: aggregate.totalItems,
+      maxScore: 100, // Updated to 100 scale
+      qualitativeScore: convertToQualitativeScore(averageScore).qualitativeScore
     }
 
     finalDimensionScores.push(dimensionScore)

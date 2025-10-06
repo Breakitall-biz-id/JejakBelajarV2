@@ -88,7 +88,7 @@ export function ClassCard({
             <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h4 className="font-medium mb-2">Belum Ada Proyek</h4>
             <p className="text-sm text-muted-foreground">
-              Buat proyek pertama Anda untuk mulai mengelola aktivitas PjBL
+              Buat proyek pertama Anda untuk mulai mengelola aktivitas Kokurikuler
             </p>
           </div>
         ) : (

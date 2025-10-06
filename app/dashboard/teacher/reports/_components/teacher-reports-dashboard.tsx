@@ -94,9 +94,9 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Grades</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Nilai</h1>
           <p className="text-muted-foreground">
-            Track student progress and assignment completion across all your classes
+            Pantau kemajuan siswa dan penyelesaian tugas di semua kelas Anda
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -109,7 +109,7 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
           <Button size="sm" asChild>
             <a href="/api/teacher/reports?type=student" download>
               <Download className="mr-2 h-4 w-4" />
-              Export All Grades
+              Ekspor Semua Nilai
             </a>
           </Button>
         </div>
@@ -119,12 +119,12 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Siswa</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{aggregate.totalStudents}</div>
-            <p className="text-xs text-muted-foreground">Across all classes</p>
+            <p className="text-xs text-muted-foreground">Seluruh kelas</p>
           </CardContent>
         </Card>
 
@@ -135,29 +135,29 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{aggregate.totalProjects}</div>
-            <p className="text-xs text-muted-foreground">Projects and stages</p>
+            <p className="text-xs text-muted-foreground">Proyek dan tahapan</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Grade</CardTitle>
+            <CardTitle className="text-sm font-medium">Nilai Rata-rata</CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{aggregate.averageGrade.toFixed(1)}</div>
-            <p className="text-xs text-muted-foreground">Out of 4.0 scale</p>
+            <div className="text-2xl font-bold">{aggregate.averageGrade.toFixed(1)}/100</div>
+            <p className="text-xs text-muted-foreground">Skala 0-100</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">Tingkat Penyelesaian</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{aggregate.averageCompletion}%</div>
-            <p className="text-xs text-muted-foreground">Average completion</p>
+            <p className="text-xs text-muted-foreground">Penyelesaian rata-rata</p>
           </CardContent>
         </Card>
       </div>
@@ -174,7 +174,7 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search classes..."
+                    placeholder="Cari kelas..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
@@ -182,10 +182,10 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
                 </div>
                 <Select value={selectedClass} onValueChange={setSelectedClass}>
                   <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="All classes" />
+                    <SelectValue placeholder="Semua kelas" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Classes</SelectItem>
+                    <SelectItem value="all">Semua Kelas</SelectItem>
                     {data?.classes?.map((cls) => (
                       <SelectItem key={cls.id} value={cls.id}>
                         {cls.name}
@@ -208,20 +208,20 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
             <CardContent>
               {!filteredClasses.length ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No classes found matching your search criteria.
+                  Tidak ada kelas yang cocok dengan kriteria pencarian Anda.
                 </div>
               ) : (
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Class Name</TableHead>
-                        <TableHead>Students</TableHead>
-                        <TableHead>Projects</TableHead>
-                        <TableHead>Avg. Grade</TableHead>
-                        <TableHead>Completion</TableHead>
-                        <TableHead>Last Activity</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>Nama Kelas</TableHead>
+                        <TableHead>Siswa</TableHead>
+                        <TableHead>Proyek</TableHead>
+                        <TableHead>Nilai Rata-rata</TableHead>
+                        <TableHead>Penyelesaian</TableHead>
+                        <TableHead>Aktivitas Terakhir</TableHead>
+                        <TableHead className="text-right">Aksi</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -231,7 +231,7 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
                             <div>
                               <div className="font-medium">{cls.name}</div>
                               <div className="text-sm text-muted-foreground">
-                                {cls.totalStages} stages configured
+                                {cls.totalStages} tahapan dikonfigurasi
                               </div>
                             </div>
                           </TableCell>
@@ -245,7 +245,7 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <span className="font-medium">
-                                {calculateOverallGrade(cls).toFixed(1)}
+                                {calculateOverallGrade(cls).toFixed(1)}/100
                               </span>
                               <GradeBadge grade={calculateOverallGrade(cls)} />
                             </div>
@@ -269,7 +269,7 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
                                 {new Date(cls.lastSubmissionAt).toLocaleDateString()}
                               </div>
                             ) : (
-                              <span className="text-muted-foreground text-sm">No activity</span>
+                              <span className="text-muted-foreground text-sm">Tidak ada aktivitas</span>
                             )}
                           </TableCell>
                           <TableCell className="text-right">
@@ -277,7 +277,7 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
                               <Button variant="outline" size="sm" asChild>
                                 <a href={`/api/teacher/reports?type=student&classId=${cls.id}`} download>
                                   <Download className="mr-2 h-4 w-4" />
-                                  Grades
+                                  Nilai
                                 </a>
                               </Button>
                               <Button variant="outline" size="sm" asChild>
@@ -314,18 +314,20 @@ function GradeBadge({ grade }: { grade: number }) {
   let variant: "default" | "secondary" | "destructive" = "secondary"
   let label = ""
 
-  if (grade >= 3.5) {
+  // Update thresholds for 0-100 scale
+  // 3.5/4.0 = 87.5%, 3.0/4.0 = 75%, 2.0/4.0 = 50%
+  if (grade >= 87.5) {
     variant = "default"
-    label = "Excellent"
-  } else if (grade >= 3.0) {
+    label = "Sangat Baik"
+  } else if (grade >= 75.0) {
     variant = "default"
-    label = "Good"
-  } else if (grade >= 2.0) {
+    label = "Baik"
+  } else if (grade >= 50.0) {
     variant = "secondary"
-    label = "Satisfactory"
+    label = "Cukup"
   } else if (grade > 0) {
     variant = "destructive"
-    label = "Needs Improvement"
+    label = "Perlu Perbaikan"
   }
 
   if (!label) return null

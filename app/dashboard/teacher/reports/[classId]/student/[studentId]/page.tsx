@@ -73,17 +73,36 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
   }, [classId, studentId])
 
   function GradeBadge({ grade }: { grade: number }) {
-    if (grade >= 3.5) return (
-      <Badge variant="default" className="text-xs">Excellent</Badge>
+    // Update thresholds for 0-100 scale (for overall averages)
+    // 3.5/4.0 = 87.5%, 3.0/4.0 = 75%, 2.0/4.0 = 50%
+    if (grade >= 87.5) return (
+      <Badge variant="default" className="text-xs">Sangat Baik</Badge>
     )
-    if (grade >= 3.0) return (
-      <Badge variant="default" className="text-xs">Good</Badge>
+    if (grade >= 75.0) return (
+      <Badge variant="default" className="text-xs">Baik</Badge>
     )
-    if (grade >= 2.0) return (
-      <Badge variant="secondary" className="text-xs">Satisfactory</Badge>
+    if (grade >= 50.0) return (
+      <Badge variant="secondary" className="text-xs">Cukup</Badge>
     )
     if (grade > 0) return (
-      <Badge variant="destructive" className="text-xs">Needs Improvement</Badge>
+      <Badge variant="destructive" className="text-xs">Perlu Perbaikan</Badge>
+    )
+    return null
+  }
+
+  function IndividualScoreBadge({ score }: { score: number }) {
+    // For individual submission scores (1-4 scale)
+    if (score >= 3.5) return (
+      <Badge variant="default" className="text-xs">Sangat Baik</Badge>
+    )
+    if (score >= 3.0) return (
+      <Badge variant="default" className="text-xs">Baik</Badge>
+    )
+    if (score >= 2.0) return (
+      <Badge variant="secondary" className="text-xs">Cukup</Badge>
+    )
+    if (score > 0) return (
+      <Badge variant="destructive" className="text-xs">Perlu Perbaikan</Badge>
     )
     return null
   }
@@ -93,7 +112,7 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
       <div className="max-w-7xl mx-auto w-full px-2 sm:px-4 py-6">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="text-lg font-semibold mb-2">Loading...</div>
+            <div className="text-lg font-semibold mb-2">Memuat...</div>
           </CardContent>
         </Card>
       </div>
@@ -105,13 +124,13 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
       <div className="max-w-7xl mx-auto w-full px-2 sm:px-4 py-6">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="text-lg font-semibold mb-2">Student not found</div>
+            <div className="text-lg font-semibold mb-2">Siswa tidak ditemukan</div>
             <div className="text-muted-foreground mb-4">
-              The requested student could not be found.
+              Siswa yang diminta tidak dapat ditemukan.
             </div>
             <Button onClick={() => router.push(`/dashboard/teacher/reports/${classId}`)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Class
+              Kembali ke Kelas
             </Button>
           </CardContent>
         </Card>
@@ -129,7 +148,7 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Class
+          Kembali ke Kelas
         </Button>
 
         <Card>
@@ -146,19 +165,19 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="text-center">
-                  <div className="text-sm text-muted-foreground">Average Grade</div>
+                  <div className="text-sm text-muted-foreground">Nilai Rata-rata</div>
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold">{studentData.averageGrade.toFixed(1)}</span>
+                    <span className="text-2xl font-bold">{studentData.averageGrade.toFixed(1)}/100</span>
                     <GradeBadge grade={studentData.averageGrade} />
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-sm text-muted-foreground">Completion</div>
+                  <div className="text-sm text-muted-foreground">Penyelesaian</div>
                   <div className="text-2xl font-bold">{studentData.overallCompletionRate}%</div>
                 </div>
                 <Button variant="outline" size="sm">
                   <Download className="mr-2 h-4 w-4" />
-                  Export Report
+                  Ekspor Laporan
                 </Button>
               </div>
             </div>
@@ -219,7 +238,7 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
       {/* Detailed Submissions */}
       <Card>
         <CardHeader>
-          <CardTitle>All Submissions</CardTitle>
+          <CardTitle>Semua Pengumpulan</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
@@ -244,11 +263,11 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
                       <TableCell>
                         {submission.score !== null ? (
                           <div className="flex items-center gap-2">
-                            <span className="font-medium">{submission.score.toFixed(1)}</span>
-                            <GradeBadge grade={submission.score} />
+                            <span className="font-medium">{submission.score.toFixed(1)}/4</span>
+                            <IndividualScoreBadge score={submission.score} />
                           </div>
                         ) : (
-                          <span className="text-muted-foreground">Not graded</span>
+                          <span className="text-muted-foreground">Belum dinilai</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -257,7 +276,7 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
                             {submission.feedback}
                           </div>
                         ) : (
-                          <span className="text-muted-foreground text-sm">No feedback</span>
+                          <span className="text-muted-foreground text-sm">Tidak ada feedback</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -275,7 +294,7 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
                   <TableRow>
                     <TableCell colSpan={5} className="text-center">
                       <div className="py-8 text-muted-foreground">
-                        No submissions found for this student.
+                        Tidak ada pengumpulan untuk siswa ini.
                       </div>
                     </TableCell>
                   </TableRow>

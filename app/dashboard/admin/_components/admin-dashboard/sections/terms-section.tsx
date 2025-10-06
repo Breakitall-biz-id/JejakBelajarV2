@@ -100,11 +100,11 @@ export default function TermsSection({ terms }: TermsSectionProps) {
         <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => { if (!open) handleDeleteDialogClose(); }}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Hapus Academic Term?</AlertDialogTitle>
+              <AlertDialogTitle>Hapus Periode Akademik?</AlertDialogTitle>
               <AlertDialogDescription>
                 {deleteTerm && (
                   <span>
-                    Apakah Anda yakin ingin menghapus academic term <b>{deleteTerm.academicYear}</b> semester <b>{deleteTerm.semester}</b>? Tindakan ini tidak dapat dibatalkan.
+                    Apakah Anda yakin ingin menghapus periode akademik <b>{deleteTerm.academicYear}</b> semester <b>{deleteTerm.semester}</b>? Tindakan ini tidak dapat dibatalkan.
                   </span>
                 )}
               </AlertDialogDescription>

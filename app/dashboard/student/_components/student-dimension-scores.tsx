@@ -90,21 +90,24 @@ export function StudentDimensionScores({ student, projectId }: StudentDimensionS
   }
 
   const getScoreColor = (score: number) => {
-    if (score >= 3.5) return "text-green-600"
-    if (score >= 3.0) return "text-blue-600"
-    if (score >= 2.0) return "text-yellow-600"
+    // Update thresholds for 0-100 scale
+    // 3.5/4.0 = 87.5%, 3.0/4.0 = 75%, 2.0/4.0 = 50%
+    if (score >= 87.5) return "text-green-600"
+    if (score >= 75.0) return "text-blue-600"
+    if (score >= 50.0) return "text-yellow-600"
     return "text-red-600"
   }
 
   const getScoreVariant = (score: number): "default" | "secondary" | "destructive" => {
-    if (score >= 3.0) return "default"
-    if (score >= 2.0) return "secondary"
+    // Update thresholds for 0-100 scale
+    if (score >= 75.0) return "default"
+    if (score >= 50.0) return "secondary"
     return "destructive"
   }
 
   const getProgressValue = (score: number) => {
-    // Convert 0-4 scale to 0-100 percentage
-    return (score / 4) * 100
+    // Score is already in 0-100 scale, so return directly
+    return score
   }
 
   return (
@@ -113,11 +116,11 @@ export function StudentDimensionScores({ student, projectId }: StudentDimensionS
         <CardTitle className="flex items-center justify-between">
           Progres Dimensi
           <Badge variant={getScoreVariant(dimensionScores.overallAverageScore)}>
-            Rata-rata: {dimensionScores.overallAverageScore.toFixed(1)}/4.0
+            Rata-rata: {dimensionScores.overallAverageScore.toFixed(1)}/100
           </Badge>
         </CardTitle>
         <CardDescription>
-          Progres Anda dalam berbagai dimensi P5
+          Progres Anda dalam berbagai dimensi Kokurikuler
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -127,7 +130,7 @@ export function StudentDimensionScores({ student, projectId }: StudentDimensionS
             <div className="flex justify-between items-center">
               <span className="font-medium">Rata-rata Keseluruhan</span>
               <span className={`font-semibold ${getScoreColor(dimensionScores.overallAverageScore)}`}>
-                {dimensionScores.overallAverageScore.toFixed(1)}/4.0
+                {dimensionScores.overallAverageScore.toFixed(1)}/100
               </span>
             </div>
             <Progress value={getProgressValue(dimensionScores.overallAverageScore)} className="h-3" />
@@ -147,7 +150,7 @@ export function StudentDimensionScores({ student, projectId }: StudentDimensionS
                     <span className="font-medium text-sm">{dimension.dimensionName}</span>
                     <div className="flex items-center gap-2">
                       <span className={`font-semibold text-sm ${getScoreColor(dimension.averageScore)}`}>
-                        {dimension.averageScore.toFixed(1)}/4.0
+                        {dimension.averageScore.toFixed(1)}/100
                       </span>
                       <Badge variant="outline" className="text-xs">
                         {dimension.qualitativeScore?.qualitativeScore || dimension.qualitativeScore}
@@ -170,7 +173,7 @@ export function StudentDimensionScores({ student, projectId }: StudentDimensionS
                 <span className="text-sm font-medium text-green-600">Kelebihan</span>
                 <div className="text-sm text-muted-foreground">
                   {dimensionScores.dimensionScores
-                    .filter(d => d.averageScore >= 3.0)
+                    .filter(d => d.averageScore >= 75.0)
                     .map(d => d.dimensionName)
                     .join(', ') || 'Belum ada yang teridentifikasi'}
                 </div>
@@ -179,7 +182,7 @@ export function StudentDimensionScores({ student, projectId }: StudentDimensionS
                 <span className="text-sm font-medium text-yellow-600">Perlu Dikembangkan</span>
                 <div className="text-sm text-muted-foreground">
                   {dimensionScores.dimensionScores
-                    .filter(d => d.averageScore < 3.0 && d.averageScore > 0)
+                    .filter(d => d.averageScore < 75.0 && d.averageScore > 0)
                     .map(d => d.dimensionName)
                     .join(', ') || 'Belum ada yang teridentifikasi'}
                 </div>

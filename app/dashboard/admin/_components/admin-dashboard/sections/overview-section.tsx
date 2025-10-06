@@ -1,6 +1,7 @@
 "use client"
 
 import { Fragment } from "react"
+import { useRouter } from "next/navigation"
 import { CalendarCheck2, GraduationCap, Layers3, Users } from "lucide-react"
 
 import type { AdminDashboardData } from "../../../queries"
@@ -35,6 +36,7 @@ type MetricItem = {
 }
 
 export function OverviewSection({ data, onNavigate }: OverviewSectionProps) {
+  const router = useRouter()
   const activeTerm = data.terms.find((term) => term.status === "ACTIVE")
 
   const classesWithoutTeacher = data.classes.filter((kelas) =>
@@ -54,36 +56,36 @@ export function OverviewSection({ data, onNavigate }: OverviewSectionProps) {
   const metricItems: MetricItem[] = [
     {
       id: "terms",
-      label: "Academic Terms",
+      label: "Tahun Akademik",
       value: data.terms.length,
       helper: activeTerm
         ? `${activeTerm.academicYear} • Semester ${activeTerm.semester === "ODD" ? "Ganjil" : "Genap"}`
-        : "Activate a term to begin",
+        : "Aktifkan tahun ajaran untuk memulai",
     },
     {
       id: "classes",
-      label: "Classes",
+      label: "Kelas",
       value: data.classes.length,
       helper:
         data.classes.length === 0
-          ? "No classes created"
+          ? "Belum ada kelas dibuat"
           : classesWithoutTeacher.length === 0 && classesWithNoStudents.length === 0
-            ? "All classes staffed and enrolled"
-            : `${classesWithoutTeacher.length} without facilitator${
-                classesWithNoStudents.length ? ` • ${classesWithNoStudents.length} without students` : ""
+            ? "Semua kelas memiliki fasilitator dan siswa"
+            : `${classesWithoutTeacher.length} tanpa fasilitator${
+                classesWithNoStudents.length ? ` • ${classesWithNoStudents.length} tanpa siswa` : ""
               }`,
     },
     {
       id: "teachers",
-      label: "Teachers",
+      label: "Guru",
       value: data.teachers.length,
-      helper: data.teachers.length ? `${averageClassesPerTeacher} class avg` : "Invite facilitators",
+      helper: data.teachers.length ? `rata-rata ${averageClassesPerTeacher} kelas` : "Undang fasilitator",
     },
     {
       id: "students",
-      label: "Students",
+      label: "Siswa",
       value: data.students.length,
-      helper: data.students.length ? `${averageStudentsPerClass} learner avg / class` : "Awaiting enrollments",
+      helper: data.students.length ? `rata-rata ${averageStudentsPerClass} siswa/kelas` : "Menunggu pendaftaran",
     },
   ]
 
@@ -118,23 +120,23 @@ export function OverviewSection({ data, onNavigate }: OverviewSectionProps) {
       <Card className="rounded-xl shadow-md border bg-white dark:bg-card">
         <CardHeader className="flex flex-wrap items-start justify-between gap-4 pb-2">
           <div>
-            <CardTitle className="text-lg font-semibold">Active Term Snapshot</CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">Keep your school calendar aligned with the P5 implementation.</CardDescription>
+            <CardTitle className="text-lg font-semibold">Tampilan Tahun Ajaran Aktif</CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">Sinkronkan kalender akademik dengan implementasi Kokurikuler.</CardDescription>
           </div>
           <Button
             variant="default"
             size="sm"
             className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
-            onClick={() => onNavigate?.("terms")}
+            onClick={() => router.push("/dashboard/admin/academic-terms")}
           >
-            Manage terms
+            Kelola tahun ajaran
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           {activeTerm ? (
             <div className="flex flex-wrap items-center gap-8 rounded-lg border border-primary/10 bg-primary/5 p-5">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Current semester</p>
+                <p className="text-sm text-muted-foreground mb-1">Semester saat ini</p>
                 <p className="text-lg font-bold text-primary">
                   {activeTerm.academicYear} • Semester {activeTerm.semester === "ODD" ? "Ganjil" : "Genap"}
                 </p>
@@ -142,10 +144,10 @@ export function OverviewSection({ data, onNavigate }: OverviewSectionProps) {
               <Separator orientation="vertical" className="hidden h-10 md:block mx-4" />
               <div className="text-sm text-muted-foreground">
                 <p>
-                  Classes linked: <span className="font-semibold text-primary">{data.classes.filter((kelas) => kelas.termId === activeTerm.id).length}</span>
+                  Kelas terhubung: <span className="font-semibold text-primary">{data.classes.filter((kelas) => kelas.termId === activeTerm.id).length}</span>
                 </p>
                 <p>
-                  Teachers assigned: <span className="font-semibold text-primary">{
+                  Guru ditugaskan: <span className="font-semibold text-primary">{
                     data.classes.filter((kelas) => kelas.termId === activeTerm.id)
                       .filter((kelas) => (data.assignments[kelas.id]?.teacherIds.length ?? 0) > 0).length
                   }</span>
@@ -154,7 +156,7 @@ export function OverviewSection({ data, onNavigate }: OverviewSectionProps) {
             </div>
           ) : (
             <div className="rounded-lg border border-dashed border-primary/20 bg-primary/5 p-6 text-center text-sm text-muted-foreground">
-              Activate an academic term to coordinate projects, classes, and assessments.
+              Aktifkan tahun ajaran untuk mengoordinasikan proyek, kelas, dan penilaian.
             </div>
           )}
         </CardContent>
@@ -164,22 +166,22 @@ export function OverviewSection({ data, onNavigate }: OverviewSectionProps) {
       <Card className="rounded-xl shadow-md border bg-white dark:bg-card">
         <CardHeader className="flex flex-wrap items-start justify-between gap-4 pb-2">
           <div>
-            <CardTitle className="text-lg font-semibold">Recently Created Classes</CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">Track new cohorts and ensure facilitators are in place.</CardDescription>
+            <CardTitle className="text-lg font-semibold">Kelas yang Baru Dibuat</CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">Pantau kelas baru dan pastikan fasilitator sudah tersedia.</CardDescription>
           </div>
           <Button
             variant="default"
             size="sm"
             className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
-            onClick={() => onNavigate?.("classes")}
+            onClick={() => router.push("/dashboard/admin/classes")}
           >
-            View all classes
+            Lihat semua kelas
           </Button>
         </CardHeader>
         <CardContent className="divide-y divide-muted/20">
           {recentClasses.length === 0 ? (
             <div className="rounded-lg border border-dashed border-primary/20 bg-primary/5 p-6 text-center text-sm text-muted-foreground">
-              No classes have been created yet. Start by setting up a class for the active term.
+              Belum ada kelas yang dibuat. Mulai dengan membuat kelas untuk tahun ajaran aktif.
             </div>
           ) : (
             recentClasses.map((kelas) => {
@@ -199,10 +201,10 @@ export function OverviewSection({ data, onNavigate }: OverviewSectionProps) {
                         variant={assignment.teacherIds.length ? "default" : "destructive"}
                         className={assignment.teacherIds.length ? "bg-primary/90 text-primary-foreground" : ""}
                       >
-                        {assignment.teacherIds.length ? `${assignment.teacherIds.length} teacher${assignment.teacherIds.length > 1 ? "s" : ""}` : "No teacher"}
+                        {assignment.teacherIds.length ? `${assignment.teacherIds.length} guru` : "Tidak ada guru"}
                       </Badge>
                       <Badge variant="secondary" className="bg-secondary/80 text-secondary-foreground">
-                        {assignment.studentIds.length} student{assignment.studentIds.length === 1 ? "" : "s"}
+                        {assignment.studentIds.length} siswa
                       </Badge>
                     </div>
                   </div>

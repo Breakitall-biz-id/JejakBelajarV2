@@ -163,13 +163,14 @@ export async function GET(request: Request) {
         p.projectStageId && projectStageIds.includes(p.projectStageId)
       )
 
-      // Calculate average grade for this project
+      // Calculate average grade for this project using new formula
       const scores = projectSubmissions
         .map(s => s.score)
         .filter((score): score is number => score !== null)
 
+      // IMPLEMENTASI FORMULA BARU: X = ((jumlah skor pada seluruh item) / (jumlah item x 4)) x 100
       const averageGrade = scores.length > 0
-        ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+        ? ((scores.reduce((sum, score) => sum + score, 0)) / (scores.length * 4)) * 100
         : null
 
       // Calculate completion rate
@@ -198,13 +199,17 @@ export async function GET(request: Request) {
       }
     })
 
-    // Calculate overall stats
-    const allScores = projects
-      .map(p => p.grade)
-      .filter((grade): grade is number => grade !== null)
+    // Calculate overall stats using new formula
+    // First, collect all individual scores from all projects
+    const allIndividualScores = projects.flatMap(p =>
+      p.submissions
+        .map(s => s.score)
+        .filter((score): score is number => score !== null)
+    )
 
-    const overallAverageGrade = allScores.length > 0
-      ? allScores.reduce((sum, grade) => sum + grade, 0) / allScores.length
+    // IMPLEMENTASI FORMULA BARU: X = ((jumlah skor pada seluruh item) / (jumlah item x 4)) x 100
+    const overallAverageGrade = allIndividualScores.length > 0
+      ? ((allIndividualScores.reduce((sum, score) => sum + score, 0)) / (allIndividualScores.length * 4)) * 100
       : 0
 
     const totalStages = stageIds.length
@@ -215,7 +220,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       id: student.studentId,
-      name: student.studentName || "Unknown Student",
+      name: student.studentName || "Siswa Tidak Dikenal",
       email: student.studentEmail,
       className: classInfo.name,
       groupName: groupMembership?.groupName,

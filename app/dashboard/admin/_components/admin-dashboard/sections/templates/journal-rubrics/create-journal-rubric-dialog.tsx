@@ -139,10 +139,10 @@ export function CreateJournalRubricDialog({
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose}>
-              Cancel
+              Batal
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Rubric"}
+              {isSubmitting ? "Membuat..." : "Buat Rubrik"}
             </Button>
           </DialogFooter>
         </form>

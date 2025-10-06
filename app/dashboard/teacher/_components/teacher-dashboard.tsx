@@ -324,7 +324,7 @@ function ClassProjectsCard({
             </div>
             <h4 className="text-lg font-semibold text-foreground mb-2">No Projects Yet</h4>
             <p className="text-muted-foreground text-sm">
-              Create your first project to start managing PjBL activities
+              Create your first project to start managing Kokurikuler activities
             </p>
           </div>
         ) : (
@@ -1390,7 +1390,7 @@ function StageDetailDialog({
       case "JOURNAL":
         return "Student reflection journal entries for qualitative feedback"
       case "SELF_ASSESSMENT":
-        return "Self-evaluation aligned to P5 dimensions"
+        return "Self-evaluation aligned to Kokurikuler dimensions"
       case "PEER_ASSESSMENT":
         return "Peer review within the project group"
       case "OBSERVATION":
@@ -1806,7 +1806,7 @@ function CreateStageDialog({
         <DialogHeader>
           <DialogTitle>Add stage</DialogTitle>
           <DialogDescription>
-            Map the PjBL syntax to sequential stages. Students unlock stages in order.
+            Map the Kokurikuler syntax to sequential stages. Students unlock stages in order.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -2144,7 +2144,7 @@ function instrumentDescription(instrument: string) {
     case "JOURNAL":
       return "Student reflection journal entries for qualitative feedback."
     case "SELF_ASSESSMENT":
-      return "Self-evaluation aligned to P5 dimensions."
+      return "Self-evaluation aligned to Kokurikuler dimensions."
     case "PEER_ASSESSMENT":
       return "Peer review within the project group."
     case "OBSERVATION":

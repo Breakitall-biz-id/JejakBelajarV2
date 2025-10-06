@@ -135,10 +135,10 @@ export function AdminDashboard({ data, initialSection }: AdminDashboardProps) {
     <div className="space-y-8 px-4 pb-10 pt-6 lg:px-8">
       <header className="space-y-4">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">School Console</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Konsol Sekolah</p>
           <h1 className="mt-1 text-2xl font-semibold">JejakBelajar Admin</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Monitor academic terms, cohorts, and user accounts from a single hub tailored to the P5 implementation.
+            Pantau tahun ajaran, kohort, dan akun pengguna dari satu pusat kontrol yang disesuaikan untuk implementasi Kokurikuler.
           </p>
         </div>
 

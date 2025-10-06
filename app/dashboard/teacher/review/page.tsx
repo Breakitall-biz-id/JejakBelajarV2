@@ -6,7 +6,7 @@ import { getTeacherReviewData } from "./queries"
 import { TeacherReviewDashboard } from "./_components/teacher-review-dashboard"
 
 export const metadata: Metadata = {
-  title: "Assessment Review • JejakBelajar",
+  title: "Review Penilaian • JejakBelajar",
 }
 
 export default async function TeacherReviewPage() {

@@ -8,7 +8,7 @@ import { AccountRow } from "../_components/admin-dashboard/sections/accounts-tab
 import { AccountsTabsClient } from "../_components/admin-dashboard/sections/accounts-tabs-client"
 
 export const metadata: Metadata = {
-  title: "Accounts • JejakBelajar",
+  title: "Akun • JejakBelajar",
 }
 
 

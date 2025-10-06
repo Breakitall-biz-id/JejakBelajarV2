@@ -82,14 +82,14 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
-          <h2 className="text-2xl font-bold tracking-tight">Project Templates</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Template Proyek</h2>
           <p className="text-muted-foreground">
-            Manage project templates that teachers can use for their PjBL projects
+            Kelola template proyek yang dapat digunakan guru untuk proyek Kokurikuler mereka
           </p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)} size="lg">
           <Plus className="mr-2 h-4 w-4" />
-          Create Template
+          Buat Template
         </Button>
       </div>
 
@@ -102,7 +102,7 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
             </div>
             <h3 className="text-lg font-semibold mb-2">Belum ada template</h3>
             <p className="text-sm text-muted-foreground mb-4 max-w-md">
-              Buat template proyek pertama Anda untuk memulai. Template membantu guru menyusun proyek PjBL secara konsisten.
+              Buat template proyek pertama Anda untuk memulai. Template membantu guru menyusun proyek Kokurikuler secara konsisten.
             </p>
             <Button onClick={() => setShowCreateDialog(true)} size="lg">
               <Plus className="mr-2 h-4 w-4" />
@@ -125,7 +125,7 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
                         {template.isActive ? "Aktif" : "Tidak Aktif"}
                       </Badge>
                       <Badge variant="outline" className="text-xs">
-                        {getStageCount(template)} stages
+                        {getStageCount(template)} tahapan
                       </Badge>
                     </div>
                   </div>
@@ -138,7 +138,7 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem onClick={() => handleViewDetails(template)}>
                         <Eye className="mr-2 h-4 w-4" />
-                        View Details
+                        Lihat Detail
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleEditTemplate(template)}>
                         <Edit className="mr-2 h-4 w-4" />
@@ -149,7 +149,7 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
                         onClick={() => handleDeleteTemplate(template)}
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
+                        Hapus
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -165,7 +165,7 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
 
                 {/* Instrument Types */}
                 <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground">Assessment Instruments:</p>
+                  <p className="text-xs font-medium text-muted-foreground">Instrumen Penilaian:</p>
                   <div className="flex flex-wrap gap-1">
                     {getInstrumentTypes(template).map((type) => (
                       <Badge key={type} variant="secondary" className="text-xs">
@@ -184,7 +184,7 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
                     </div>
                     <div className="flex items-center gap-1">
                       <Users className="h-3 w-3" />
-                      {getStageCount(template)} stages
+                      {getStageCount(template)} tahapan
                     </div>
                   </div>
                   <Button
@@ -193,7 +193,7 @@ export function TemplateList({ templates = [] }: TemplateListProps) {
                     onClick={() => handleViewDetails(template)}
                     className="text-xs"
                   >
-                    View Details
+                    Lihat Detail
                   </Button>
                 </div>
               </CardContent>

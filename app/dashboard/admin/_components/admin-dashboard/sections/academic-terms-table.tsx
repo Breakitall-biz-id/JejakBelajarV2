@@ -29,10 +29,10 @@ function formatSchedule(startsAt: string | null, endsAt: string | null) {
     return `${format(new Date(startsAt), "dd MMM yyyy")} – ${format(new Date(endsAt), "dd MMM yyyy")}`;
   }
   if (startsAt) {
-    return `Starts ${format(new Date(startsAt), "dd MMM yyyy")}`;
+    return `Dimulai ${format(new Date(startsAt), "dd MMM yyyy")}`;
   }
   if (endsAt) {
-    return `Ends ${format(new Date(endsAt), "dd MMM yyyy")}`;
+    return `Berakhir ${format(new Date(endsAt), "dd MMM yyyy")}`;
   }
   return "—";
 }
@@ -54,7 +54,7 @@ export function AcademicTermsTable({
     () => [
       {
         accessorKey: "academicYear",
-        header: "Academic Year",
+        header: "Tahun Akademik",
         cell: ({ row }) => (
           <div className="font-medium">{row.original.academicYear}</div>
         ),
@@ -68,7 +68,7 @@ export function AcademicTermsTable({
       },
       {
         accessorKey: "schedule",
-        header: "Schedule",
+        header: "Jadwal",
         cell: ({ row }) => formatSchedule(row.original.startsAt, row.original.endsAt),
       },
       {
@@ -90,7 +90,7 @@ export function AcademicTermsTable({
                 <CheckIcon className="w-4 h-4 text-primary" />
               </Button>
             )}
-            <Button size="icon" variant="ghost" title="Edit" onClick={() => onEdit(row.original)}>
+            <Button size="icon" variant="ghost" title="Sunting" onClick={() => onEdit(row.original)}>
                 <Edit2Icon className="w-4 h-4 text-yellow-600" />
             </Button>
             <Button size="icon" variant="ghost" title="Hapus" onClick={() => onDelete(row.original)} disabled={activeTermId === row.original.id}>

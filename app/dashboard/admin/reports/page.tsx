@@ -4,7 +4,7 @@ import { getAdminDashboardData } from "../queries"
 import { ReportsSection } from "../_components/admin-dashboard/sections/reports-section"
 
 export const metadata: Metadata = {
-  title: "Reports • JejakBelajar",
+  title: "Laporan • JejakBelajar",
 }
 
 export default async function AdminReportsPage() {

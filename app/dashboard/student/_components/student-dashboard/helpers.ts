@@ -27,7 +27,7 @@ export function instrumentDescription(instrument: string) {
     case "JOURNAL":
       return "Reflect on today’s project experience."
     case "SELF_ASSESSMENT":
-      return "Evaluate your progress against the P5 competencies."
+      return "Evaluate your progress against the Kokurikuler competencies."
     case "PEER_ASSESSMENT":
       return "Provide constructive feedback for a group member."
     case "DAILY_NOTE":

@@ -240,7 +240,7 @@ function CreateAccountButton({ role }: { role: "TEACHER" | "STUDENT" }) {
         return
       }
 
-      toast.success(`${role === "TEACHER" ? "Teacher" : "Student"} account created.`)
+      toast.success(`Akun ${role === "TEACHER" ? "guru" : "siswa"} berhasil dibuat.`)
       form.reset()
       setOpen(false)
     })
@@ -355,7 +355,7 @@ function EditAccountButton({
         return
       }
 
-      toast.success("Account updated.")
+      toast.success("Akun berhasil diperbarui.")
       setOpen(false)
     })
   }
@@ -418,7 +418,7 @@ function DeleteAccountButton({ userId }: { userId: string }) {
         toast.error(result.error)
         return
       }
-      toast.success("Account deleted.")
+      toast.success("Akun berhasil dihapus.")
     })
   }
 

@@ -179,7 +179,7 @@ function AssignmentList({ title, description, options, assignedIds, onSubmit }: 
       </div>
       <div className="flex justify-end">
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving…" : "Save changes"}
+          {isPending ? "Menyimpan..." : "Simpan Perubahan"}
         </Button>
       </div>
     </form>

@@ -63,10 +63,10 @@ export function CreateTermDialog({ onSuccess }: { onSuccess: () => void }) {
             <TermFormFields form={form} />
             <div className="flex justify-end gap-2">
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-                Cancel
+                Batal
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "Saving…" : "Create"}
+                {isPending ? "Menyimpan..." : "Buat"}
               </Button>
             </div>
           </form>

@@ -12,7 +12,7 @@ import { getAdminDashboardData } from "./queries"
 import { OverviewSection } from "./_components/admin-dashboard/sections/overview-section"
 
 export const metadata: Metadata = {
-  title: "School Administration • JejakBelajar",
+  title: "Administrasi Sekolah • JejakBelajar",
 }
 
 type SerializableTerm = {

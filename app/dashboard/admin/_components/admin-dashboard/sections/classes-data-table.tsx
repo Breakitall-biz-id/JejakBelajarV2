@@ -68,9 +68,9 @@ export function ClassesDataTable({ data, onShowDetail, onEdit, onDelete, selecte
               variant="outline"
               size="sm"
               onClick={() => onEdit(row.original)}
-              title="Edit"
+              title="Sunting"
             >
-              Edit
+              Sunting
             </Button>
             <Button
               variant="destructive"

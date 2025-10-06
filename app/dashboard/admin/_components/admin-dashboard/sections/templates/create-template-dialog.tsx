@@ -71,7 +71,7 @@ export function CreateTemplateDialog({
             <DialogHeader>
               <DialogTitle className="text-xl font-bold">Buat Template Baru</DialogTitle>
               <DialogDescription>
-                Atur template proyek untuk digunakan guru dalam PjBL
+                Atur template proyek untuk digunakan guru dalam Kokurikuler
               </DialogDescription>
             </DialogHeader>
           </div>

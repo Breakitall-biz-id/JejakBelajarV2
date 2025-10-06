@@ -117,7 +117,7 @@ function convertRubricCriteria(rubricCriteria?: unknown): { [score: string]: str
           rubricCriteriaObject = parsed as { [score: string]: string };
         }
       } catch (e) {
-        console.warn('Failed to parse rubric criteria:', e);
+        console.warn('Gagal mengurai kriteria rubrik:', e);
       }
     }
   }
@@ -227,7 +227,7 @@ export default function ProjectDetailPage({
       <div className="max-w-7xl mx-auto w-full px-2 sm:px-4 py-6">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="text-lg font-semibold mb-2">Loading...</div>
+            <div className="text-lg font-semibold mb-2">Memuat...</div>
           </CardContent>
         </Card>
       </div>
@@ -239,13 +239,13 @@ export default function ProjectDetailPage({
       <div className="max-w-7xl mx-auto w-full px-2 sm:px-4 py-6">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="text-lg font-semibold mb-2">Project not found</div>
+            <div className="text-lg font-semibold mb-2">Proyek tidak ditemukan</div>
             <div className="text-muted-foreground mb-4">
-              The requested project could not be found.
+              Proyek yang diminta tidak dapat ditemukan.
             </div>
             <Button onClick={() => router.push("/dashboard/teacher/review")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Projects
+              Kembali ke Proyek
             </Button>
           </CardContent>
         </Card>
@@ -263,7 +263,7 @@ export default function ProjectDetailPage({
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Projects
+          Kembali ke Proyek
         </Button>
 
         <Card>
@@ -352,8 +352,8 @@ export default function ProjectDetailPage({
                             {(() => {
                               const baseName =
                                 instrument.instrumentType === "JOURNAL" ? "Refleksi (Jurnal)" :
-                                instrument.instrumentType === "SELF_ASSESSMENT" ? "Self Assessment" :
-                                instrument.instrumentType === "PEER_ASSESSMENT" ? "Peer Assessment" :
+                                instrument.instrumentType === "SELF_ASSESSMENT" ? "Penilaian Diri" :
+                                instrument.instrumentType === "PEER_ASSESSMENT" ? "Penilaian Teman" :
                                 instrument.instrumentType === "OBSERVATION" ? "Lembar Observasi (Diisi Guru)" :
                                 instrument.instrumentType === "DAILY_NOTE" ? "Catatan Harian" :
                                 instrument.instrumentType;
@@ -378,12 +378,12 @@ export default function ProjectDetailPage({
                           <div className="ml-4">
                             <details className="group" open={false}>
                               <summary className="flex items-center gap-2 cursor-pointer py-2 px-3 select-none rounded border focus:outline-none focus:ring-2 focus:ring-primary/30">
-                                <span className="font-semibold text-sm">Daftar Murid</span>
-                                <span className="ml-2 text-xs text-muted-foreground">{submissions.length} murid</span>
+                                <span className="font-semibold text-sm">Daftar Siswa</span>
+                                <span className="ml-2 text-xs text-muted-foreground">{submissions.length} siswa</span>
                               </summary>
                               <div className="pl-4 py-2 flex flex-col">
                                 {submissions.length === 0 ? (
-                                  <span className="text-sm text-muted-foreground py-4">Belum ada submission</span>
+                                  <span className="text-sm text-muted-foreground py-4">Belum ada pengumpulan</span>
                                 ) : (
                                   submissions.map(({ student, submission }, idx) => (
                                     <div
@@ -431,7 +431,7 @@ export default function ProjectDetailPage({
                                                 setDialog({ open: true, student: { ...student, submission }, instrumentType: instrument.instrumentType, instrumentDesc: instrument.description || '', stageId: stage.id })
                                               }
                                             } catch (error) {
-                                              console.error("Failed to fetch journal submissions:", error)
+                                              console.error("Gagal mengambil pengumpulan jurnal:", error)
                                               // Fallback to old dialog
                                               setDialog({ open: true, student: { ...student, submission }, instrumentType: instrument.instrumentType, instrumentDesc: instrument.description || '', stageId: stage.id })
                                             }
@@ -538,7 +538,7 @@ export default function ProjectDetailPage({
                 <CardContent className="p-4">
                   <div className="space-y-2">
                     <div>
-                      <h4 className="font-semibold">{student.name || 'Unknown Student'}</h4>
+                      <h4 className="font-semibold">{student.name || 'Siswa Tidak Dikenal'}</h4>
                       {student.groupName && (
                         <p className="text-sm text-muted-foreground">Kelompok: {student.groupName}</p>
                       )}
@@ -569,7 +569,7 @@ export default function ProjectDetailPage({
           <TeacherJournalAssessmentDialog
             open={dialog.open}
             onOpenChange={open => setDialog(d => ({ ...d, open }))}
-            studentName={dialog.student.name || "Unknown Student"}
+            studentName={dialog.student.name || "Siswa Tidak Dikenal"}
             studentAnswers={(() => {
               const content = dialog.student.submission.content;
               if (typeof content === 'object' && content) {
@@ -631,10 +631,10 @@ export default function ProjectDetailPage({
                   await loadProject();
                   setDialog(d => ({ ...d, open: false }));
                 } else {
-                  console.error('Failed to submit grades');
+                  console.error('Gagal mengirimkan nilai');
                 }
               } catch (error) {
-                console.error('Error submitting grades:', error);
+                console.error('Kesalahan mengirimkan nilai:', error);
               }
             }}
             onCancel={() => setDialog(d => ({ ...d, open: false }))}
@@ -726,7 +726,7 @@ export default function ProjectDetailPage({
                   });
 
                   if (!result.success) {
-                    console.error(`Failed to submit observation for student ${student.name}:`, result.error);
+                    console.error(`Gagal mengirimkan observasi untuk siswa ${student.name}:`, result.error);
                     return;
                   }
                 }
@@ -738,7 +738,7 @@ export default function ProjectDetailPage({
               // Refresh project data to update submission status
               await loadProject();
             } catch (error) {
-              console.error("Error submitting observation:", error);
+              console.error("Kesalahan mengirimkan observasi:", error);
             }
           }}
         />
@@ -749,7 +749,7 @@ export default function ProjectDetailPage({
         <TeacherJournalIndividualAssessmentDialog
           open={individualJournalDialog.open}
           onOpenChange={open => setIndividualJournalDialog(d => ({ ...d, open }))}
-          studentName={individualJournalDialog.student.name || "Unknown Student"}
+          studentName={individualJournalDialog.student.name || "Siswa Tidak Dikenal"}
           submissions={journalSubmissions}
           prompts={(() => {
             const stageObj = project.stages.find(s => s.id === individualJournalDialog.stageId)
@@ -779,10 +779,10 @@ export default function ProjectDetailPage({
               });
 
               if (!response.ok) {
-                throw new Error('Failed to submit grades');
+                throw new Error('Gagal mengirimkan nilai');
               }
             } catch (error) {
-              console.error('Error submitting grades:', error);
+              console.error('Kesalahan mengirimkan nilai:', error);
               throw error;
             }
           }}
@@ -794,7 +794,7 @@ export default function ProjectDetailPage({
                 setJournalSubmissions(data.data || [])
               }
             } catch (error) {
-              console.error("Failed to refresh journal submissions:", error)
+              console.error("Gagal memperbarui pengumpulan jurnal:", error)
             }
           }}
           onCancel={() => setIndividualJournalDialog(d => ({ ...d, open: false }))}

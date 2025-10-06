@@ -85,17 +85,19 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
   ) || []
 
   function GradeBadge({ grade }: { grade: number }) {
-    if (grade >= 3.5) return (
-      <Badge variant="default" className="text-xs">Excellent</Badge>
+    // Update thresholds for 0-100 scale
+    // 3.5/4.0 = 87.5%, 3.0/4.0 = 75%, 2.0/4.0 = 50%
+    if (grade >= 87.5) return (
+      <Badge variant="default" className="text-xs">Sangat Baik</Badge>
     )
-    if (grade >= 3.0) return (
-      <Badge variant="default" className="text-xs">Good</Badge>
+    if (grade >= 75.0) return (
+      <Badge variant="default" className="text-xs">Baik</Badge>
     )
-    if (grade >= 2.0) return (
-      <Badge variant="secondary" className="text-xs">Satisfactory</Badge>
+    if (grade >= 50.0) return (
+      <Badge variant="secondary" className="text-xs">Cukup</Badge>
     )
     if (grade > 0) return (
-      <Badge variant="destructive" className="text-xs">Needs Improvement</Badge>
+      <Badge variant="destructive" className="text-xs">Perlu Perbaikan</Badge>
     )
     return null
   }
@@ -105,7 +107,7 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
       <div className="max-w-7xl mx-auto w-full px-2 sm:px-4 py-6">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="text-lg font-semibold mb-2">Loading...</div>
+            <div className="text-lg font-semibold mb-2">Memuat...</div>
           </CardContent>
         </Card>
       </div>
@@ -117,13 +119,13 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
       <div className="max-w-7xl mx-auto w-full px-2 sm:px-4 py-6">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="text-lg font-semibold mb-2">Class not found</div>
+            <div className="text-lg font-semibold mb-2">Kelas tidak ditemukan</div>
             <div className="text-muted-foreground mb-4">
-              The requested class could not be found.
+              Kelas yang diminta tidak dapat ditemukan.
             </div>
             <Button onClick={() => router.push("/dashboard/teacher/reports")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Reports
+              Kembali ke Laporan
             </Button>
           </CardContent>
         </Card>
@@ -141,7 +143,7 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Reports
+          Kembali ke Laporan
         </Button>
 
         <Card>
@@ -149,7 +151,7 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <CardTitle className="text-2xl">{classData.className}</CardTitle>
-                <p className="text-muted-foreground">Student grades and progress overview</p>
+                <p className="text-muted-foreground">Gambaran nilai dan kemajuan siswa</p>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm">
@@ -168,7 +170,7 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search students..."
+              placeholder="Cari siswa..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -187,8 +189,8 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Student Name</TableHead>
-                  <TableHead>Group</TableHead>
+                  <TableHead>Nama Siswa</TableHead>
+                  <TableHead>Grup</TableHead>
                   {classData.projects.map((project) => (
                     <TableHead key={project.id} className="text-center">
                       <div className="text-xs font-medium">
@@ -198,9 +200,9 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
                       </div>
                     </TableHead>
                   ))}
-                  <TableHead className="text-center">Average</TableHead>
-                  <TableHead className="text-center">Completion</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-center">Rata-rata</TableHead>
+                  <TableHead className="text-center">Penyelesaian</TableHead>
+                  <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -208,7 +210,7 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
                   <TableRow>
                     <TableCell colSpan={4 + classData.projects.length} className="text-center">
                       <div className="py-8 text-muted-foreground">
-                        No students found matching your search.
+                        Tidak ada siswa yang cocok dengan pencarian Anda.
                       </div>
                     </TableCell>
                   </TableRow>
@@ -229,7 +231,7 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
                         {student.groupName ? (
                           <Badge variant="outline">{student.groupName}</Badge>
                         ) : (
-                          <span className="text-muted-foreground text-sm">No Group</span>
+                          <span className="text-muted-foreground text-sm">Tidak Ada Grup</span>
                         )}
                       </TableCell>
                       {student.projectGrades.map((projectGrade) => (
@@ -257,7 +259,7 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
                       <TableCell className="text-center">
                         <div className="flex flex-col items-center gap-1">
                           <span className="font-medium">
-                            {student.averageGrade.toFixed(1)}
+                            {student.averageGrade.toFixed(1)}/100
                           </span>
                           <GradeBadge grade={student.averageGrade} />
                         </div>

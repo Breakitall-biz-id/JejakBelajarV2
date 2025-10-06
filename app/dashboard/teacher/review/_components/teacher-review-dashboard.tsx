@@ -139,9 +139,9 @@ function ProjectCard({ project, onNavigate }: { project: TeacherProject; onNavig
           <ProjectProgressBar project={project} />
 
           <div className="flex justify-between items-center text-sm">
-            <span className="text-muted-foreground">{project.stages.length} stages</span>
+            <span className="text-muted-foreground">{project.stages.length} tahapan</span>
             <Badge variant={progressPercentage === 100 ? "default" : "secondary"}>
-              {progressPercentage}% complete
+              {progressPercentage}% selesai
             </Badge>
           </div>
         </div>
@@ -226,8 +226,8 @@ export function TeacherReviewDashboard({ data }: { data: TeacherReviewData }) {
         <CardContent className="p-6 flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <h1 className="text-2xl font-bold text-foreground mb-1">Review Project - {selectedClassInfo?.name || ''}</h1>
-              <div className="text-base text-muted-foreground font-medium">Monitor and assess student progress</div>
+              <h1 className="text-2xl font-bold text-foreground mb-1">Review Proyek - {selectedClassInfo?.name || ''}</h1>
+              <div className="text-base text-muted-foreground font-medium">Pantau dan nilai kemajuan siswa</div>
             </div>
             <div className="flex items-center gap-2 mt-2 sm:mt-0">
             </div>
@@ -255,9 +255,9 @@ export function TeacherReviewDashboard({ data }: { data: TeacherReviewData }) {
       {teacherProjects.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="text-lg font-semibold mb-2">No projects yet</div>
+            <div className="text-lg font-semibold mb-2">Belum ada proyek</div>
             <div className="text-muted-foreground">
-              No projects assigned to this class.
+              Belum ada proyek yang ditugaskan untuk kelas ini.
             </div>
           </CardContent>
         </Card>
