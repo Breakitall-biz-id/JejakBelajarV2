@@ -6,7 +6,7 @@ import { QuestionnaireAssessmentDialog } from "./questionnaire-assessment-dialog
 import { PeerAssessmentDialog } from "./peer-assessment-dialog"
 import { StudentDimensionScores } from "../student-dimension-scores"
 import { StudentRapor } from "../student-rapor"
-import { submitStageInstrument, debugStageProgress } from "../../actions"
+import { submitStageInstrument, debugStageProgress, updateGroupMemberComment } from "../../actions"
 import { toast } from "sonner"
 import type { StudentDashboardData } from "../../queries"
 import type { CurrentUser } from "@/lib/auth/session"
