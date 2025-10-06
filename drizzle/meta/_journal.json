@@ -33,6 +33,13 @@
     {
       "idx": 5,
       "version": "7",
+      "when": 1759328601767,
+      "tag": "0005_goofy_bloodstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
       "when": 1759587120863,
       "tag": "0005_boring_orphan",
       "breakpoints": true

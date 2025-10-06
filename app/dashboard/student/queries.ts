@@ -4,6 +4,7 @@ import { db } from "@/db"
 import {
   academicTerms,
   classes,
+  groupComments,
   groupMembers,
   groups,
   projectStageInstruments,
@@ -68,6 +69,7 @@ export type StudentDashboardData = {
         studentId: string
         name: string | null
         email: string
+        comment?: string | null
       }>
     } | null
     stages: Array<{
@@ -320,13 +322,33 @@ export async function getStudentDashboardData(
           studentId: groupMembers.studentId,
           studentName: user.name,
           studentEmail: user.email,
+          comment: groupComments.comment,
         })
         .from(groupMembers)
         .innerJoin(user, eq(user.id, groupMembers.studentId))
+        .leftJoin(groupComments, and(
+          eq(groupComments.groupId, groupMembers.groupId),
+          eq(groupComments.targetMemberId, groupMembers.studentId)
+        ))
         .where(inArray(groupMembers.groupId, groupIds))
+        .orderBy(groupComments.createdAt)
     : []
 
-  const membersByGroup = (groupMemberRows || []).reduce<Record<string, typeof groupMemberRows>>((acc, member) => {
+  // Process the data to keep only the latest comment for each member
+  const processedMemberRows = (groupMemberRows || []).reduce((acc, row) => {
+    const key = `${row.groupId}-${row.studentId}`
+    const existing = acc.get(key)
+
+    // If no existing entry or current row has a newer comment (not null), use this one
+    if (!existing || (row.comment && !existing.comment)) {
+      acc.set(key, row)
+    }
+
+    return acc
+  }, new Map<string, typeof groupMemberRows[0]>())
+
+  
+  const membersByGroup = Array.from(processedMemberRows.values()).reduce<Record<string, typeof groupMemberRows>>((acc, member) => {
     if (!acc[member.groupId]) {
       acc[member.groupId] = []
     }
@@ -572,6 +594,7 @@ export async function getStudentDashboardData(
               studentId: member.studentId,
               name: member.studentName,
               email: member.studentEmail,
+              comment: member.comment,
             })),
           }
         : null,

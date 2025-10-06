@@ -2,10 +2,12 @@
 
 import { z } from "zod"
 import { and, asc, eq, gt, sql } from "drizzle-orm"
+import { revalidatePath } from "next/cache"
 
 import { db } from "@/db"
 import { getCurrentUser } from "@/lib/auth/session"
 import {
+  groupComments,
   groupMembers,
   groups,
   projectStageInstruments,
@@ -201,9 +203,7 @@ export async function debugStageProgress(
       const hasJournalAssessment = requiredStudentInstruments.includes("JOURNAL")
       let hasCompleteJournalSubmission = true
       if (hasJournalAssessment) {
-        console.log('Calling checkCompleteJournalSubmission...')
         hasCompleteJournalSubmission = await checkCompleteJournalSubmission(tx, user.id, projectId, stageId)
-        console.log('checkCompleteJournalSubmission returned:', hasCompleteJournalSubmission)
       }
 
       return {
@@ -557,11 +557,7 @@ async function evaluateStageCompletion(
     .filter((instrument: any) => instrument.isRequired && studentInstrumentTypes.has(instrument.instrumentType))
     .map((instrument: any) => instrument.instrumentType)
 
-  console.log('Stage instruments:', stageInstruments)
-  console.log('Required student instruments:', requiredStudentInstruments)
-
   if (requiredStudentInstruments.length === 0) {
-    console.log(`Stage ${stageId} has no required student instruments, marking as completed`)
     await markStageCompleted(tx, progress.id)
     await unlockNextStage(tx, studentId, projectId, stage.order)
     return
@@ -620,20 +616,11 @@ async function evaluateStageCompletion(
     ? await checkCompleteJournalSubmission(tx, studentId, projectId, stageId)
     : true
 
-  // Debug logging
-  console.log('Required instruments:', requiredStudentInstruments)
-  console.log('Submitted instruments:', Array.from(submittedInstruments))
-  console.log('Has valid peer submission:', hasValidPeerSubmission)
-  console.log('Has complete journal submission:', hasCompleteJournalSubmission)
-
   const hasFulfilledAll = requiredStudentInstruments.every((instrument: any) =>
     submittedInstruments.has(instrument)
   ) && hasValidPeerSubmission && hasCompleteJournalSubmission
 
-  console.log('Has fulfilled all:', hasFulfilledAll)
-
   if (!hasFulfilledAll) {
-    console.log('Stage not completed - missing requirements')
     return
   }
 
@@ -661,10 +648,6 @@ async function checkCompleteJournalSubmission(
   projectId: string,
   stageId: string,
 ): Promise<boolean> {
-  console.log('=== DEBUG checkCompleteJournalSubmission ===')
-  console.log('Student ID:', studentId)
-  console.log('Project ID:', projectId)
-  console.log('Stage ID:', stageId)
   // Get all required journal instruments for this stage
   const requiredJournalInstruments = await tx
     .select({ id: projectStageInstruments.id })
@@ -677,12 +660,8 @@ async function checkCompleteJournalSubmission(
       ),
     )
 
-  console.log('Required journal instruments found:', requiredJournalInstruments.length)
-  console.log('Required journal instruments:', requiredJournalInstruments)
-
   if (requiredJournalInstruments.length === 0) {
     // No journal instruments required for this stage, consider it complete
-    console.log('No journal instruments required, returning true')
     return true
   }
 
@@ -700,13 +679,8 @@ async function checkCompleteJournalSubmission(
       ),
     )
 
-  console.log('Journal submissions found:', journalSubmissions.length)
-  console.log('Journal submissions:', journalSubmissions)
-
   // Simple check: if we have at least the same number of submissions as required instruments
   const hasCompleteJournalSubmission = journalSubmissions.length >= requiredJournalInstruments.length
-
-  console.log('Has complete journal submission:', hasCompleteJournalSubmission)
 
   return hasCompleteJournalSubmission
 }
@@ -811,6 +785,113 @@ export async function getTemplateQuestions(
   } catch (error) {
     console.error("Error fetching template questions:", error)
     return []
+  }
+}
+
+const commentSchema = z.object({
+  projectId: z.string().uuid(),
+  targetMemberId: z.string().uuid(),
+  comment: z.string().max(1000, "Comment too long").optional(),
+})
+
+export async function updateGroupMemberComment(
+  input: z.infer<typeof commentSchema>
+): Promise<ActionResult> {
+  const student = await requireStudentUser()
+
+  try {
+    const result = await db.transaction(async (tx) => {
+      // Validate that student belongs to this project and group
+      const studentGroup = await tx
+        .select({
+          groupId: groups.id,
+          projectId: projects.id,
+        })
+        .from(groups)
+        .innerJoin(groupMembers, eq(groups.id, groupMembers.groupId))
+        .innerJoin(projects, eq(groups.projectId, projects.id))
+        .where(
+          and(
+            eq(groups.projectId, input.projectId),
+            eq(groupMembers.studentId, student.user.id),
+            eq(projects.status, "PUBLISHED")
+          ),
+        )
+        .limit(1)
+        .then((rows: any[]) => rows[0])
+
+      if (!studentGroup) {
+        throw new ForbiddenError("You are not assigned to a group for this project.")
+      }
+
+      // Validate that the target member is in the same group
+      const targetMember = await tx
+        .select({ studentId: groupMembers.studentId })
+        .from(groupMembers)
+        .where(
+          and(
+            eq(groupMembers.groupId, studentGroup.groupId),
+            eq(groupMembers.studentId, input.targetMemberId),
+          ),
+        )
+        .limit(1)
+        .then((rows: any[]) => rows[0])
+
+      if (!targetMember) {
+        throw new ForbiddenError("Member not found in your group.")
+      }
+
+      // Check if comment already exists
+      const existingComment = await tx
+        .select({ id: groupComments.id })
+        .from(groupComments)
+        .where(
+          and(
+            eq(groupComments.groupId, studentGroup.groupId),
+            eq(groupComments.authorId, student.user.id),
+            eq(groupComments.targetMemberId, input.targetMemberId),
+          ),
+        )
+        .limit(1)
+        .then((rows: any[]) => rows[0])
+
+      if (input.comment && input.comment.trim()) {
+        // Add or update comment
+        if (existingComment) {
+          await tx
+            .update(groupComments)
+            .set({
+              comment: input.comment.trim(),
+              updatedAt: new Date(),
+            })
+            .where(eq(groupComments.id, existingComment.id))
+        } else {
+          await tx.insert(groupComments).values({
+            groupId: studentGroup.groupId,
+            authorId: student.user.id,
+            targetMemberId: input.targetMemberId,
+            comment: input.comment.trim(),
+          })
+        }
+      } else {
+        // Remove comment if empty
+        if (existingComment) {
+          await tx
+            .delete(groupComments)
+            .where(eq(groupComments.id, existingComment.id))
+        }
+      }
+
+      return { success: true }
+    })
+
+    // Revalidate multiple paths to ensure fresh data
+    revalidatePath("/dashboard/student")
+    revalidatePath("/")
+
+    return result as ActionResult
+  } catch (error) {
+    return handleError(error, "Failed to update comment")
   }
 }
 
