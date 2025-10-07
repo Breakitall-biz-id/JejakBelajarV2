@@ -25,7 +25,6 @@ import * as React from "react"
 import { use } from "react"
 import { Button } from "@/components/ui/button"
 import { Eye } from "lucide-react"
-import { JournalAssessmentDialog } from "../../../../student/_components/student-dashboard/journal-assessment-dialog"
 import { TeacherJournalAssessmentDialog } from "../../../_components/teacher-dashboard/teacher-journal-assessment-dialog"
 import { TeacherJournalIndividualAssessmentDialog } from "../../../_components/teacher-dashboard/teacher-journal-individual-assessment-dialog"
 import { PeerAssessmentDialog } from "../../../../student/_components/student-dashboard/peer-assessment-dialog"
@@ -67,6 +66,12 @@ type ObservationSubmission = {
   studentId: string;
   targetStudentId?: string;
   content: unknown;
+};
+
+
+type ObservationContent = {
+  answers?: number[];
+  [key: string]: unknown;
 };
 
 type StageData = {
@@ -165,6 +170,16 @@ export default function ProjectDetailPage({
       name: string | null
     } | null
     stageId?: string
+  }>({ open: false, student: null })
+
+  // Feedback dialog state
+  const [feedbackDialog, setFeedbackDialog] = React.useState<{
+    open: boolean
+    student: {
+      id: string
+      name: string | null
+    } | null
+    initialFeedback?: string
   }>({ open: false, student: null })
 
   const loadProject = React.useCallback(async () => {
@@ -477,11 +492,12 @@ export default function ProjectDetailPage({
                                           sub.targetStudentId === stu.id &&
                                           sub.content &&
                                           typeof sub.content === 'object' &&
+                                          sub.content !== null &&
                                           'answers' in sub.content &&
-                                          Array.isArray(sub.content.answers)
+                                          Array.isArray((sub.content as ObservationContent).answers)
                                         );
-                                        if (sub && sub.content?.answers && sub.content.answers[stmtIndex] !== undefined) {
-                                          row[stu.id] = sub.content.answers[stmtIndex];
+                                        if (sub && sub.content && typeof sub.content === 'object' && sub.content !== null && 'answers' in sub.content && (sub.content as ObservationContent).answers && (sub.content as ObservationContent).answers![stmtIndex] !== undefined) {
+                                          row[stu.id] = (sub.content as ObservationContent).answers![stmtIndex];
                                         }
                                       });
                                       return row;
@@ -532,33 +548,71 @@ export default function ProjectDetailPage({
         </TabsContent>
 
         <TabsContent value="murid">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {allStudents.map((student) => (
-              <Card key={student.id}>
-                <CardContent className="p-4">
-                  <div className="space-y-2">
-                    <div>
-                      <h4 className="font-semibold">{student.name || 'Siswa Tidak Dikenal'}</h4>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {allStudents.map((student) => (
+                <Card key={student.id} className="border border-border/50 shadow-none hover:shadow-sm transition-shadow">
+                  <CardContent className="p-3">
+                    <div className="space-y-2">
+                      {/* Student Info */}
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium text-sm">{student.name || 'Siswa Tidak Dikenal'}</h4>
+                        <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${
+                          student.progress.status === "COMPLETED" ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300" :
+                          student.progress.status === "IN_PROGRESS" ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" :
+                          "bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300"
+                        }`}>
+                          {student.progress.status === "COMPLETED" ? "Selesai" :
+                           student.progress.status === "IN_PROGRESS" ? "Proses" :
+                           "Belum"}
+                        </span>
+                      </div>
+
                       {student.groupName && (
-                        <p className="text-sm text-muted-foreground">Kelompok: {student.groupName}</p>
+                        <p className="text-xs text-muted-foreground">Kelompok: {student.groupName}</p>
                       )}
+
+                      {/* Progress Bar */}
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 bg-muted rounded-full h-1.5">
+                          <div
+                            className="bg-primary h-1.5 rounded-full transition-all duration-300"
+                            style={{
+                              width: `${Math.min(100, (student.submissions.length / Math.max(1, groupedStages.length)) * 100)}%`
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {student.submissions.length}/{groupedStages.length}
+                        </span>
+                      </div>
+
+                      {/* Feedback Button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full h-7 text-xs hover:bg-muted/50"
+                        onClick={() => {
+                          setFeedbackDialog({
+                            open: true,
+                            student: {
+                              id: student.id,
+                              name: student.name || 'Siswa Tidak Dikenal'
+                            },
+                            initialFeedback: ''
+                          });
+                        }}
+                      >
+                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Feedback
+                      </Button>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      Status: <span className={`font-medium ${
-                        student.progress.status === "COMPLETED" ? "text-green-600" :
-                        student.progress.status === "IN_PROGRESS" ? "text-blue-600" :
-                        "text-gray-600"
-                      }`}>
-                        {student.progress.status}
-                      </span>
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Submissions: {student.submissions.length}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </TabsContent>
       </Tabs>
@@ -582,9 +636,9 @@ export default function ProjectDetailPage({
                 } else if ('student_answers' in content && Array.isArray(content.student_answers)) {
                   // Handle teacher graded format
                   return content.student_answers.map((answer: unknown) => String(answer || ""));
-                } else if ('answers' in content && Array.isArray(content.answers)) {
+                } else if ('answers' in content && Array.isArray((content as { answers?: unknown[] }).answers)) {
                   // Handle multiple answers array (old format - for backward compatibility)
-                  return content.answers.map((answer: unknown) => String(answer || ""));
+                  return (content as { answers: unknown[] }).answers.map((answer: unknown) => String(answer || ""));
                 }
               }
               return [];
@@ -621,7 +675,7 @@ export default function ProjectDetailPage({
                     'Content-Type': 'application/json',
                   },
                   body: JSON.stringify({
-                    submissionId: dialog.student.submission.id,
+                    submissionId: dialog.student?.submission.id,
                     grades,
                   }),
                 });
@@ -649,7 +703,7 @@ export default function ProjectDetailPage({
               const instrumentObj = stageObj?.requiredInstruments.find(i => i.instrumentType === "SELF_ASSESSMENT") as InstrumentWithQuestions | undefined;
               return instrumentObj?.questions?.map((q: { questionText: string }) => q.questionText) || [];
             })()}
-            initialValue={typeof dialog.student.submission.content === 'object' && dialog.student.submission.content && 'answers' in dialog.student.submission.content ? (dialog.student.submission.content as { answers: number[] }).answers : []}
+            initialValue={typeof dialog.student?.submission.content === 'object' && dialog.student?.submission.content && 'answers' in dialog.student?.submission.content ? (dialog.student?.submission.content as { answers: number[] }).answers : []}
             projectId={project.id}
             stageId={dialog.stageId || ''}
             instrumentType="SELF_ASSESSMENT"
@@ -788,7 +842,7 @@ export default function ProjectDetailPage({
           }}
           onRefresh={async () => {
             try {
-              const response = await fetch(`/api/teacher/journal-submissions/${classId}/${projectId}/${individualJournalDialog.student.id}/${individualJournalDialog.stageId}`)
+              const response = await fetch(`/api/teacher/journal-submissions/${classId}/${projectId}/${individualJournalDialog.student?.id}/${individualJournalDialog.stageId}`)
               if (response.ok) {
                 const data = await response.json()
                 setJournalSubmissions(data.data || [])
@@ -799,6 +853,85 @@ export default function ProjectDetailPage({
           }}
           onCancel={() => setIndividualJournalDialog(d => ({ ...d, open: false }))}
         />
+      )}
+
+      {/* Feedback Dialog */}
+      {feedbackDialog.open && feedbackDialog.student && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border border-border/50 shadow-2xl w-full max-w-sm rounded-2xl">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base font-medium text-foreground">Feedback</h3>
+                <button
+                  onClick={() => setFeedbackDialog(d => ({ ...d, open: false }))}
+                  className="text-muted-foreground hover:text-foreground transition-all duration-200 p-1.5 rounded-lg hover:bg-muted/50"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Siswa</p>
+                  <p className="text-sm font-medium">{feedbackDialog.student.name}</p>
+                </div>
+
+                <div>
+                  <textarea
+                    id="feedback"
+                    rows={3}
+                    className="w-full px-2.5 py-2 text-sm bg-background border border-border/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none dark:bg-background dark:border-border/50"
+                    placeholder="Tulis feedback..."
+                    defaultValue={feedbackDialog.initialFeedback || ''}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="flex gap-2 justify-end">
+                  <button
+                    onClick={() => setFeedbackDialog(d => ({ ...d, open: false }))}
+                    className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all duration-200"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const feedbackText = (document.getElementById('feedback') as HTMLTextAreaElement)?.value;
+                      if (!feedbackText?.trim()) return;
+
+                      try {
+                        const response = await fetch('/api/teacher/student-feedback', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            studentId: feedbackDialog.student?.id,
+                            projectId: project.id,
+                            feedback: feedbackText.trim(),
+                          }),
+                        });
+
+                        if (response.ok) {
+                          setFeedbackDialog(d => ({ ...d, open: false }));
+                        } else {
+                          throw new Error('Gagal menyimpan feedback');
+                        }
+                      } catch (error) {
+                        console.error('Error saving feedback:', error);
+                      }
+                    }}
+                    className="px-3 py-1.5 text-xs font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-all duration-200"
+                  >
+                    Simpan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

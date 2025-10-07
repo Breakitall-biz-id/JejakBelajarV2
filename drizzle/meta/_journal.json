@@ -43,6 +43,13 @@
       "when": 1759587120863,
       "tag": "0005_boring_orphan",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1759844203840,
+      "tag": "0007_thin_chronomancer",
+      "breakpoints": true
     }
   ]
 }

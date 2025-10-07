@@ -300,6 +300,35 @@ export const groupComments = pgTable(
   }),
 );
 
+export const teacherFeedbacks = pgTable(
+  "teacher_feedbacks",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    teacherId: uuid("teacher_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    studentId: uuid("student_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    feedback: text("feedback").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    teacherStudentProjectIdx: uniqueIndex("teacher_feedbacks_teacher_student_project_idx").on(
+      table.teacherId,
+      table.studentId,
+      table.projectId,
+    ),
+    teacherIdx: index("teacher_feedbacks_teacher_idx").on(table.teacherId),
+    studentIdx: index("teacher_feedbacks_student_idx").on(table.studentId),
+    projectIdx: index("teacher_feedbacks_project_idx").on(table.projectId),
+  }),
+);
+
 export const projectStageProgress = pgTable(
   "project_stage_progress",
   {
