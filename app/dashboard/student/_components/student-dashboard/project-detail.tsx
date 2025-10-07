@@ -6,7 +6,7 @@ import { QuestionnaireAssessmentDialog } from "./questionnaire-assessment-dialog
 import { PeerAssessmentDialog } from "./peer-assessment-dialog"
 import { StudentDimensionScores } from "../student-dimension-scores"
 import { StudentRapor } from "../student-rapor"
-import { submitStageInstrument, debugStageProgress, updateGroupMemberComment } from "../../actions"
+import { submitStageInstrument, updateGroupMemberComment } from "../../actions"
 import { toast } from "sonner"
 import type { StudentDashboardData } from "../../queries"
 import type { CurrentUser } from "@/lib/auth/session"
@@ -43,6 +43,14 @@ type Submission = {
   submittedAt: string;
   targetStudentId: string | null;
   targetStudentName: string | null;
+};
+
+type GroupMember = {
+  studentId: string;
+  name: string | null;
+  email: string;
+  comment?: string | null;
+  feedbackToMe?: string | null;
 };
 
 export function ProjectDetail({
@@ -360,10 +368,14 @@ export function ProjectDetail({
                 </div>
               </div>
 
-              <div className="space-y-4">
-                {project.group?.members
-                  .filter((member) => member.studentId !== project.currentStudentId) // Filter current user
-                  .map((member) => (
+              <div className="space-y-6">
+                {/* Section for evaluations I gave to others */}
+                <div>
+                  <h4 className="text-md font-medium text-muted-foreground mb-3">Evaluasi yang saya berikan</h4>
+                  <div className="space-y-4">
+                    {project.group?.members
+                      .filter((member) => member.studentId !== project.currentStudentId) // Filter current user
+                      .map((member) => (
                   <Card key={member.studentId} className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -434,7 +446,7 @@ export function ProjectDetail({
                                       setEditingComment(null)
 
                                       // Refresh data to sync with server
-                                      await router.refresh()
+                                      router.refresh()
                                       setGlobalLoading(false)
                                     } else {
                                       setGlobalLoading(false)
@@ -474,8 +486,62 @@ export function ProjectDetail({
                         </div>
                       </div>
                     </div>
-                  </Card>
-                ))}
+                    </Card>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section for evaluations I received from others */}
+                <div>
+                  <h4 className="text-md font-medium text-muted-foreground mb-3">Evaluasi dari teman kepada saya</h4>
+                  <div className="space-y-4">
+                    {project.group?.members
+                      .filter((member) => member.studentId !== project.currentStudentId) // Filter current user
+                      .map((member) => {
+                        const feedbackFromMember = (member as GroupMember).feedbackToMe
+                        if (!feedbackFromMember) return null // Don't show members who haven't given feedback
+
+                        return (
+                          <Card key={`feedback-${member.studentId}`} className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center">
+                                  <span className="text-sm font-medium text-secondary">
+                                    {member.name?.charAt(0).toUpperCase() || member.email.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                                <div>
+                                  <div className="font-medium">{member.name || 'Tanpa Nama'}</div>
+                                  <div className="text-sm text-muted-foreground">{member.email}</div>
+                                </div>
+                              </div>
+
+                              <div className="w-80 bg-secondary/10 rounded-lg border border-secondary/30">
+                                <div className="p-3 border-b border-secondary/30">
+                                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Evaluasi untuk Saya</div>
+                                </div>
+                                <div className="p-3">
+                                  <div className="text-sm text-foreground min-h-[2.5rem] flex items-center">
+                                    <span className="line-clamp-2">{feedbackFromMember}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        )
+                      })}
+                  </div>
+
+                  {project.group?.members &&
+                   project.group.members.filter(member => member.studentId !== project.currentStudentId).length > 0 &&
+                   project.group.members.filter(member => member.studentId !== project.currentStudentId && (member as GroupMember).feedbackToMe).length === 0 && (
+                    <div className="text-center py-8">
+                      <div className="text-muted-foreground">
+                        Belum ada evaluasi dari teman-teman kelompok Anda
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {!project.group?.members || project.group.members.filter(member => member.studentId !== project.currentStudentId).length === 0 && (

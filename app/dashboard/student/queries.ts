@@ -70,6 +70,7 @@ export type StudentDashboardData = {
         name: string | null
         email: string
         comment?: string | null
+        feedbackToMe?: string | null
       }>
     } | null
     stages: Array<{
@@ -336,6 +337,31 @@ export async function getStudentDashboardData(
         .orderBy(groupComments.createdAt)
     : []
 
+  // Fetch feedback to current student from other group members
+  const feedbackToMeRows = groupIds.length
+    ? await db
+        .select({
+          groupId: groupComments.groupId,
+          authorId: groupComments.authorId,
+          comment: groupComments.comment,
+        })
+        .from(groupComments)
+        .where(
+          and(
+            inArray(groupComments.groupId, groupIds),
+            eq(groupComments.targetMemberId, student.id)
+          )
+        )
+    : []
+
+  // Create a map of feedback from each author to the current student
+  const feedbackToMeByAuthor = new Map<string, string>()
+  feedbackToMeRows.forEach(row => {
+    if (row.comment && row.authorId) {
+      feedbackToMeByAuthor.set(row.authorId, row.comment)
+    }
+  })
+
   // Process the data to keep only the latest comment for each member
   const processedMemberRows = (groupMemberRows || []).reduce((acc, row) => {
     const key = `${row.groupId}-${row.studentId}`
@@ -597,6 +623,7 @@ export async function getStudentDashboardData(
               name: member.studentName,
               email: member.studentEmail,
               comment: member.comment,
+              feedbackToMe: member.studentId !== student.id ? feedbackToMeByAuthor.get(member.studentId) : undefined,
             })),
           }
         : null,
