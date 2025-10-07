@@ -150,6 +150,7 @@ export default function ProjectDetailPage({
   const [tab, setTab] = React.useState("tentang")
   const [project, setProject] = React.useState<ProjectDetailData | null>(null)
   const [loading, setLoading] = React.useState(true)
+  const [teacherFeedbacks, setTeacherFeedbacks] = React.useState<Map<string, string>>(new Map())
   const [journalSubmissions, setJournalSubmissions] = React.useState<Array<{
     id: string
     questionIndex: number
@@ -180,6 +181,7 @@ export default function ProjectDetailPage({
       name: string | null
     } | null
     initialFeedback?: string
+    isLoading?: boolean
   }>({ open: false, student: null })
 
   const loadProject = React.useCallback(async () => {
@@ -211,9 +213,33 @@ export default function ProjectDetailPage({
     }
   }, [classId, projectId])
 
+  const loadTeacherFeedbacks = React.useCallback(async () => {
+    try {
+      const response = await fetch(`/api/teacher/student-feedback/list?projectId=${projectId}`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          const feedbackMap = new Map<string, string>()
+          data.data?.forEach((feedback: { studentId: string; feedback: string }) => {
+            feedbackMap.set(feedback.studentId, feedback.feedback)
+          })
+          setTeacherFeedbacks(feedbackMap)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading teacher feedbacks:', error)
+    }
+  }, [projectId])
+
   React.useEffect(() => {
     loadProject()
   }, [classId, projectId, loadProject])
+
+  React.useEffect(() => {
+    if (project) {
+      loadTeacherFeedbacks()
+    }
+  }, [project, loadTeacherFeedbacks])
 
   // Use stages as-is without grouping by name to preserve unique instruments
   const groupedStages = React.useMemo(() => {
@@ -556,7 +582,17 @@ export default function ProjectDetailPage({
                     <div className="space-y-2">
                       {/* Student Info */}
                       <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-sm">{student.name || 'Siswa Tidak Dikenal'}</h4>
+                        <div className="flex items-center gap-1.5">
+                          <h4 className="font-medium text-sm">{student.name || 'Siswa Tidak Dikenal'}</h4>
+                          {teacherFeedbacks.has(student.id) && (
+                            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 rounded-full">
+                              <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                              </svg>
+                              <span className="text-xs font-medium">Feedback</span>
+                            </div>
+                          )}
+                        </div>
                         <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${
                           student.progress.status === "COMPLETED" ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300" :
                           student.progress.status === "IN_PROGRESS" ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" :
@@ -592,15 +628,41 @@ export default function ProjectDetailPage({
                         variant="ghost"
                         size="sm"
                         className="w-full h-7 text-xs hover:bg-muted/50"
-                        onClick={() => {
+                        onClick={async () => {
+                          // Set loading state
                           setFeedbackDialog({
                             open: true,
                             student: {
                               id: student.id,
                               name: student.name || 'Siswa Tidak Dikenal'
                             },
-                            initialFeedback: ''
+                            initialFeedback: '',
+                            isLoading: true
                           });
+
+                          try {
+                            // Fetch existing feedback
+                            const response = await fetch(`/api/teacher/student-feedback?studentId=${student.id}&projectId=${projectId}`);
+                            const data = await response.json();
+
+                            if (response.ok && data.success) {
+                              setFeedbackDialog(prev => ({
+                                ...prev,
+                                initialFeedback: data.data?.feedback || '',
+                                isLoading: false
+                              }));
+                            } else {
+                              throw new Error(data.error || 'Failed to fetch feedback');
+                            }
+                          } catch (error) {
+                            console.error('Error fetching feedback:', error);
+                            // Still open dialog but with empty feedback
+                            setFeedbackDialog(prev => ({
+                              ...prev,
+                              initialFeedback: '',
+                              isLoading: false
+                            }));
+                          }
                         }}
                       >
                         <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -861,7 +923,9 @@ export default function ProjectDetailPage({
           <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border border-border/50 shadow-2xl w-full max-w-sm rounded-2xl">
             <div className="p-4">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-base font-medium text-foreground">Feedback</h3>
+                <h3 className="text-base font-medium text-foreground">
+                  {feedbackDialog.initialFeedback ? 'Edit Feedback' : 'Beri Feedback'}
+                </h3>
                 <button
                   onClick={() => setFeedbackDialog(d => ({ ...d, open: false }))}
                   className="text-muted-foreground hover:text-foreground transition-all duration-200 p-1.5 rounded-lg hover:bg-muted/50"
@@ -882,10 +946,11 @@ export default function ProjectDetailPage({
                   <textarea
                     id="feedback"
                     rows={3}
-                    className="w-full px-2.5 py-2 text-sm bg-background border border-border/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none dark:bg-background dark:border-border/50"
-                    placeholder="Tulis feedback..."
+                    className="w-full px-2.5 py-2 text-sm bg-background border border-border/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none dark:bg-background dark:border-border/50 disabled:opacity-50"
+                    placeholder={feedbackDialog.isLoading ? "Memuat feedback..." : "Tulis feedback..."}
                     defaultValue={feedbackDialog.initialFeedback || ''}
                     autoFocus
+                    disabled={feedbackDialog.isLoading}
                   />
                 </div>
 
@@ -915,6 +980,14 @@ export default function ProjectDetailPage({
                         });
 
                         if (response.ok) {
+                          // Update local feedbacks state
+                          if (feedbackDialog.student?.id) {
+                            setTeacherFeedbacks(prev => {
+                              const newMap = new Map(prev);
+                              newMap.set(feedbackDialog.student!.id, feedbackText.trim());
+                              return newMap;
+                            });
+                          }
                           setFeedbackDialog(d => ({ ...d, open: false }));
                         } else {
                           throw new Error('Gagal menyimpan feedback');
@@ -923,9 +996,10 @@ export default function ProjectDetailPage({
                         console.error('Error saving feedback:', error);
                       }
                     }}
-                    className="px-3 py-1.5 text-xs font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-all duration-200"
+                    disabled={feedbackDialog.isLoading}
+                    className="px-3 py-1.5 text-xs font-medium text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all duration-200"
                   >
-                    Simpan
+                    {feedbackDialog.initialFeedback ? 'Perbarui' : 'Simpan'}
                   </button>
                 </div>
               </div>

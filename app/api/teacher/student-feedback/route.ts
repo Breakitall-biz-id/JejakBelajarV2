@@ -12,6 +12,69 @@ const feedbackSchema = z.object({
   feedback: z.string().trim().min(1, 'Feedback tidak boleh kosong').max(1000, 'Feedback maksimal 1000 karakter'),
 })
 
+const getFeedbackSchema = z.object({
+  studentId: z.string().uuid(),
+  projectId: z.string().uuid(),
+})
+
+export async function GET(request: NextRequest) {
+  try {
+    const session = await requireTeacherUser()
+    const teacher = session.user
+
+    const { searchParams } = new URL(request.url)
+    const studentId = searchParams.get('studentId')
+    const projectId = searchParams.get('projectId')
+
+    const validatedData = getFeedbackSchema.parse({
+      studentId,
+      projectId,
+    })
+
+    const existingFeedback = await db
+      .select()
+      .from(teacherFeedbacks)
+      .where(
+        and(
+          eq(teacherFeedbacks.teacherId, teacher.id),
+          eq(teacherFeedbacks.studentId, validatedData.studentId),
+          eq(teacherFeedbacks.projectId, validatedData.projectId)
+        )
+      )
+      .limit(1)
+
+    if (existingFeedback.length === 0) {
+      return NextResponse.json({
+        success: true,
+        data: null,
+        message: 'Belum ada feedback'
+      })
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: existingFeedback[0],
+      message: 'Feedback ditemukan'
+    })
+
+  } catch (error) {
+    console.error('Error fetching student feedback:', error)
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid input data',
+        details: error.issues
+      }, { status: 400 })
+    }
+
+    return NextResponse.json({
+      success: false,
+      error: 'Gagal mengambil feedback'
+    }, { status: 500 })
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await requireTeacherUser()
@@ -79,7 +142,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         error: 'Invalid input data',
-        details: error.errors
+        details: error.issues
       }, { status: 400 })
     }
 
