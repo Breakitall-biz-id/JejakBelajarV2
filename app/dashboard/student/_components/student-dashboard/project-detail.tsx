@@ -206,13 +206,16 @@ export function ProjectDetail({
         </CardContent>
       </Card>
       <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="mb-4 w-full flex">
-          <TabsTrigger value="about" className="flex-1">Tentang Proyek</TabsTrigger>
-          <TabsTrigger value="stages" className="flex-1">Tahapan</TabsTrigger>
-          <TabsTrigger value="progress" className="flex-1">Progress</TabsTrigger>
-          <TabsTrigger value="rapor" className="flex-1">Rapor</TabsTrigger>
-          <TabsTrigger value="group" className="flex-1">Kelompok</TabsTrigger>
-        </TabsList>
+        {/* Mobile: Horizontal scroll, Desktop: Full width */}
+        <div className="mb-4 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+          <TabsList className="w-auto min-w-max sm:w-full sm:flex">
+            <TabsTrigger value="about" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Tentang</TabsTrigger>
+            <TabsTrigger value="stages" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Tahapan</TabsTrigger>
+            <TabsTrigger value="progress" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Progress</TabsTrigger>
+            <TabsTrigger value="rapor" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Rapor</TabsTrigger>
+            <TabsTrigger value="group" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Kelompok</TabsTrigger>
+          </TabsList>
+        </div>
         <TabsContent value="stages">
           <div className="flex flex-col gap-4">
             {groupedStages.map((stage, idx) => (
@@ -360,37 +363,37 @@ export function ProjectDetail({
         </TabsContent>
         <TabsContent value="group">
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
                 <h3 className="text-lg font-semibold">Evaluasi Anggota Kelompok</h3>
                 <div className="text-sm text-muted-foreground">
                   {project.group?.members.filter(member => member.studentId !== project.currentStudentId).length || 0} anggota untuk dievaluasi
                 </div>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Section for evaluations I gave to others */}
                 <div>
                   <h4 className="text-md font-medium text-muted-foreground mb-3">Evaluasi yang saya berikan</h4>
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {project.group?.members
                       .filter((member) => member.studentId !== project.currentStudentId) // Filter current user
                       .map((member) => (
-                  <Card key={member.studentId} className="p-4">
-                    <div className="flex items-center justify-between">
+                  <Card key={member.studentId} className="p-3 sm:p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                           <span className="text-sm font-medium text-primary">
                             {member.name?.charAt(0).toUpperCase() || member.email.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <div>
-                          <div className="font-medium">{member.name || 'Tanpa Nama'}</div>
-                          <div className="text-sm text-muted-foreground">{member.email}</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium truncate">{member.name || 'Tanpa Nama'}</div>
+                          <div className="text-sm text-muted-foreground truncate">{member.email}</div>
                         </div>
                       </div>
 
-                      <div className="w-80 bg-muted/30 rounded-lg border border-border/50">
+                      <div className="w-full sm:w-80 bg-muted/30 rounded-lg border border-border/50">
                         <div className="p-3 border-b border-border/50">
                           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Evaluasi Kontribusi</div>
                         </div>
@@ -494,59 +497,48 @@ export function ProjectDetail({
                 {/* Section for evaluations I received from others */}
                 <div>
                   <h4 className="text-md font-medium text-muted-foreground mb-3">Evaluasi dari teman kepada saya</h4>
-                  <div className="space-y-4">
-                    {project.group?.members
-                      .filter((member) => member.studentId !== project.currentStudentId) // Filter current user
-                      .map((member) => {
-                        const feedbackFromMember = (member as GroupMember).feedbackToMe
-                        if (!feedbackFromMember) return null // Don't show members who haven't given feedback
 
-                        return (
-                          <Card key={`feedback-${member.studentId}`} className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center">
-                                  <span className="text-sm font-medium text-secondary">
-                                    {member.name?.charAt(0).toUpperCase() || member.email.charAt(0).toUpperCase()}
-                                  </span>
-                                </div>
-                                <div>
-                                  <div className="font-medium">{member.name || 'Tanpa Nama'}</div>
-                                  <div className="text-sm text-muted-foreground">{member.email}</div>
-                                </div>
-                              </div>
+                  {/* Collect all feedback and display as anonymous cards */}
+                  {(() => {
+                    const allFeedback = project.group?.members
+                      .filter((member) => member.studentId !== project.currentStudentId)
+                      .map((member) => (member as GroupMember).feedbackToMe)
+                      .filter(feedback => feedback) || []
 
-                              <div className="w-80 bg-secondary/10 rounded-lg border border-secondary/30">
-                                <div className="p-3 border-b border-secondary/30">
-                                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Evaluasi untuk Saya</div>
-                                </div>
-                                <div className="p-3">
-                                  <div className="text-sm text-foreground min-h-[2.5rem] flex items-center">
-                                    <span className="line-clamp-2">{feedbackFromMember}</span>
-                                  </div>
-                                </div>
-                              </div>
+                    if (allFeedback.length === 0) {
+                      return (
+                        <div className="text-center py-4 sm:py-6">
+                          <div className="text-muted-foreground text-sm">
+                            Belum ada evaluasi dari teman-teman kelompok Anda
+                          </div>
+                        </div>
+                      )
+                    }
+
+                    return (
+                      <div className="space-y-3 sm:space-y-2">
+                        {allFeedback.map((feedback, index) => (
+                          <div
+                            key={`feedback-${index}`}
+                            className="bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-950/20 dark:to-purple-950/20 border-l-2 border-blue-200 dark:border-blue-800 px-3 sm:px-4 py-2.5 sm:py-3 rounded-r-lg"
+                          >
+                            <div className="flex items-start gap-2 sm:gap-2">
+                              <div className="w-1.5 h-1.5 bg-blue-400 dark:bg-blue-600 rounded-full mt-1.5 sm:mt-2 flex-shrink-0"></div>
+                              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed pr-2 sm:pr-0">
+                                {feedback}
+                              </p>
                             </div>
-                          </Card>
-                        )
-                      })}
-                  </div>
-
-                  {project.group?.members &&
-                   project.group.members.filter(member => member.studentId !== project.currentStudentId).length > 0 &&
-                   project.group.members.filter(member => member.studentId !== project.currentStudentId && (member as GroupMember).feedbackToMe).length === 0 && (
-                    <div className="text-center py-8">
-                      <div className="text-muted-foreground">
-                        Belum ada evaluasi dari teman-teman kelompok Anda
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  )}
+                    )
+                  })()}
                 </div>
               </div>
 
               {!project.group?.members || project.group.members.filter(member => member.studentId !== project.currentStudentId).length === 0 && (
-                <div className="text-center py-8">
-                  <div className="text-muted-foreground">
+                <div className="text-center py-6 sm:py-8">
+                  <div className="text-muted-foreground px-4">
                     {project.group?.members.length === 1
                       ? "Anda adalah satu-satunya anggota kelompok"
                       : "Tidak ada anggota kelompok lain yang dapat dievaluasi"}
