@@ -315,6 +315,7 @@ export async function getStudentDashboardData(
 
   const groupIds = (studentGroupRows || []).map((row) => row.groupId)
 
+  // Fetch group members with their comments from the current student
   const groupMemberRows = groupIds.length
     ? await db
         .select({
@@ -328,7 +329,8 @@ export async function getStudentDashboardData(
         .innerJoin(user, eq(user.id, groupMembers.studentId))
         .leftJoin(groupComments, and(
           eq(groupComments.groupId, groupMembers.groupId),
-          eq(groupComments.targetMemberId, groupMembers.studentId)
+          eq(groupComments.targetMemberId, groupMembers.studentId),
+          eq(groupComments.authorId, student.id)
         ))
         .where(inArray(groupMembers.groupId, groupIds))
         .orderBy(groupComments.createdAt)
