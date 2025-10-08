@@ -75,36 +75,51 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
   }, [classId, studentId])
 
   function GradeBadge({ grade }: { grade: number }) {
-    // Update thresholds for 0-100 scale (for overall averages)
-    // 3.5/4.0 = 87.5%, 3.0/4.0 = 75%, 2.0/4.0 = 50%
-    if (grade >= 87.5) return (
+    // Update thresholds based on µ ± 1.5σ and µ ± 0.5σ from documentation
+    // µ = 62.5, σ = 37.5
+    // SB: > 81.25 (µ + 0.5σ)
+    // B: > 43.75 and ≤ 81.25 (µ - 0.5σ to µ + 0.5σ)
+    // C: > 6.25 and ≤ 43.75 (µ - 1.5σ to µ - 0.5σ)
+    // R: > 0 and ≤ 6.25 (µ - 1.5σ threshold)
+    // SR: ≤ 6.25
+
+    if (grade >= 81.25) return (
       <Badge variant="default" className="text-xs">Sangat Baik</Badge>
     )
-    if (grade >= 75.0) return (
+    if (grade >= 43.75) return (
       <Badge variant="default" className="text-xs">Baik</Badge>
     )
-    if (grade >= 50.0) return (
+    if (grade >= 6.25) return (
       <Badge variant="secondary" className="text-xs">Cukup</Badge>
     )
     if (grade > 0) return (
-      <Badge variant="destructive" className="text-xs">Perlu Perbaikan</Badge>
+      <Badge variant="destructive" className="text-xs">Kurang</Badge>
+    )
+    if (grade >= 0) return (
+      <Badge variant="destructive" className="text-xs">Sangat Rendah</Badge>
     )
     return null
   }
 
   function IndividualScoreBadge({ score }: { score: number }) {
-    // For individual submission scores (1-4 scale)
-    if (score >= 3.5) return (
+    // Convert individual score (1-4 scale) to 0-100 scale for consistent thresholds
+    const score_0to100 = (score / 4) * 100
+
+    // Use same thresholds as GradeBadge based on µ ± 1.5σ and µ ± 0.5σ
+    if (score_0to100 >= 81.25) return (
       <Badge variant="default" className="text-xs">Sangat Baik</Badge>
     )
-    if (score >= 3.0) return (
+    if (score_0to100 >= 43.75) return (
       <Badge variant="default" className="text-xs">Baik</Badge>
     )
-    if (score >= 2.0) return (
+    if (score_0to100 >= 6.25) return (
       <Badge variant="secondary" className="text-xs">Cukup</Badge>
     )
-    if (score > 0) return (
-      <Badge variant="destructive" className="text-xs">Perlu Perbaikan</Badge>
+    if (score_0to100 > 0) return (
+      <Badge variant="destructive" className="text-xs">Kurang</Badge>
+    )
+    if (score_0to100 >= 0) return (
+      <Badge variant="destructive" className="text-xs">Sangat Rendah</Badge>
     )
     return null
   }
@@ -304,7 +319,7 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
                           <TableCell>
                             {submission.score !== null ? (
                               <div className="flex items-center gap-2">
-                                <span className="font-medium">{submission.score.toFixed(1)}/4</span>
+                                <span className="font-medium">{((submission.score / 4) * 100).toFixed(1)}/100</span>
                                 <IndividualScoreBadge score={submission.score} />
                               </div>
                             ) : (
