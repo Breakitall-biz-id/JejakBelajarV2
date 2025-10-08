@@ -149,22 +149,22 @@ export function TeacherDashboard({
         <div className="container mx-auto px-6 py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
-              <h1 className="text-2xl font-semibold">Teacher Dashboard</h1>
+              <h1 className="text-2xl font-semibold">Dashboard Guru</h1>
               <p className="text-muted-foreground mt-1">
-                Welcome back, {teacher.name ?? teacher.email}
+                Selamat datang kembali, {teacher.name ?? teacher.email}
               </p>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="outline" size="sm" asChild>
                 <Link href="/dashboard/teacher/reports">
                   <BarChart3 className="h-4 w-4 mr-2" />
-                  Reports
+                  Laporan
                 </Link>
               </Button>
               <Button size="sm" asChild>
                 <Link href="/dashboard/teacher/review">
                   <ClipboardCheck className="h-4 w-4 mr-2" />
-                  Review
+                  Tinjau
                 </Link>
               </Button>
             </div>
@@ -179,7 +179,7 @@ export function TeacherDashboard({
           <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Classes</p>
+                <p className="text-sm text-muted-foreground">Total Kelas</p>
                 <p className="text-2xl font-bold text-foreground">{totalClasses}</p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -203,7 +203,7 @@ export function TeacherDashboard({
           <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Students</p>
+                <p className="text-sm text-muted-foreground">Total Siswa</p>
                 <p className="text-2xl font-bold text-foreground">{totalStudents}</p>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -215,7 +215,7 @@ export function TeacherDashboard({
           <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Pending Reviews</p>
+                <p className="text-sm text-muted-foreground">Peninjauan Tertunda</p>
                 <p className="text-2xl font-bold text-foreground">12</p>
               </div>
               <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -300,15 +300,15 @@ function ClassProjectsCard({
           <div className="flex items-center gap-6 text-sm">
             <div className="text-center">
               <p className="text-xl font-bold text-foreground">{projects.length}</p>
-              <p className="text-xs text-muted-foreground">Projects</p>
+              <p className="text-xs text-muted-foreground">Proyek</p>
             </div>
             <div className="text-center">
               <p className="text-xl font-bold text-foreground">{activeProjects.length}</p>
-              <p className="text-xs text-muted-foreground">Active</p>
+              <p className="text-xs text-muted-foreground">Aktif</p>
             </div>
             <div className="text-center">
               <p className="text-xl font-bold text-foreground">{students.length}</p>
-              <p className="text-xs text-muted-foreground">Students</p>
+              <p className="text-xs text-muted-foreground">Siswa</p>
             </div>
           </div>
           <CreateProjectDialog classId={classInfo.id} router={router} />
@@ -322,9 +322,9 @@ function ClassProjectsCard({
             <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
               <BookOpen className="h-6 w-6 text-muted-foreground" />
             </div>
-            <h4 className="text-lg font-semibold text-foreground mb-2">No Projects Yet</h4>
+            <h4 className="text-lg font-semibold text-foreground mb-2">Belum Ada Proyek</h4>
             <p className="text-muted-foreground text-sm">
-              Create your first project to start managing Kokurikuler activities
+              Buat proyek pertama Anda untuk mulai mengelola aktivitas Kokurikuler
             </p>
           </div>
         ) : (
@@ -363,7 +363,7 @@ function GroupCard({ group, projectId, students, router }: {
             </div>
             <h4 className="font-semibold text-foreground">{group.name}</h4>
             <Badge variant="secondary" className="ml-2">
-              {group.members.length} members
+              {group.members.length} anggota
             </Badge>
           </div>
 
@@ -377,13 +377,13 @@ function GroupCard({ group, projectId, students, router }: {
                 ))}
                 {group.members.length > 3 && (
                   <Badge variant="outline" className="text-xs bg-muted">
-                    +{group.members.length - 3} more
+                    +{group.members.length - 3} lainnya
                   </Badge>
                 )}
               </div>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground ml-11">No members assigned</p>
+            <p className="text-sm text-muted-foreground ml-11">Belum ada anggota</p>
           )}
         </div>
 
@@ -491,12 +491,12 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
       <DialogTrigger asChild>
         <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shadow-sm">
           <Plus className="h-4 w-4" />
-          New Project
+          Proyek Baru
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Create New Project</DialogTitle>
+          <DialogTitle>Buat Proyek Baru</DialogTitle>
           <DialogDescription>
             Pilih template untuk memulai proyek.
           </DialogDescription>
@@ -534,8 +534,8 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
                             const totalStages = new Set(template.stageConfigs.map((c) => c.stageName)).size
                             const instruments = Array.from(new Set(template.stageConfigs.map((c) => c.instrumentType)))
                             const duration = template.stageConfigs.length > 0
-                              ? `${Math.ceil(template.stageConfigs.length / 2)} weeks`
-                              : "Flexible"
+                              ? `${Math.ceil(template.stageConfigs.length / 2)} minggu`
+                              : "Fleksibel"
 
                             return (
                               <div key={template.id} className="flex items-start space-x-3 p-1">
@@ -552,7 +552,7 @@ function CreateProjectDialog({ classId, router }: { classId: string; router: Ret
                                     <div className="flex items-center justify-between">
                                       <div className="font-semibold text-foreground">{template.templateName}</div>
                                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                        <span className="bg-muted px-2 py-1 rounded-md">{totalStages} stages</span>
+                                        <span className="bg-muted px-2 py-1 rounded-md">{totalStages} tahapan</span>
                                         <span className="bg-muted px-2 py-1 rounded-md">{duration}</span>
                                       </div>
                                     </div>
@@ -733,7 +733,7 @@ function ProjectCard({
               )}
             </div>
             <p className="text-xs text-muted-foreground line-clamp-2">
-              {project.description ?? "No description provided."}
+              {project.description ?? "Tidak ada deskripsi."}
             </p>
           </div>
 
@@ -753,7 +753,7 @@ function ProjectCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                <DropdownMenuLabel>Ubah Status</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {projectStatusOptions.map((statusOption) => (
                   <DropdownMenuItem
@@ -774,16 +774,16 @@ function ProjectCard({
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-1">
               <ListChecks className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">{project.stages.length} stages</span>
+              <span className="text-muted-foreground">{project.stages.length} tahapan</span>
             </div>
             <div className="flex items-center gap-1">
               <Users className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">{project.groups.length} groups</span>
+              <span className="text-muted-foreground">{project.groups.length} grup</span>
             </div>
             <div className="flex items-center gap-1">
               <Target className="h-3 w-3 text-muted-foreground" />
               <span className="text-muted-foreground">
-                {project.groups.reduce((acc, group) => acc + group.members.length, 0)} students
+                {project.groups.reduce((acc, group) => acc + group.members.length, 0)} siswa
               </span>
             </div>
           </div>
@@ -795,7 +795,7 @@ function ProjectCard({
               className="h-7 text-xs"
               onClick={() => setShowDetailDialog(true)}
             >
-              View Details
+              Lihat Detail
             </Button>
             <Button
               variant="ghost"
@@ -840,12 +840,12 @@ function ProjectCard({
                       <div className="flex items-center gap-1 flex-shrink-0">
                         {stage.unlocksAt && (
                           <span className="text-xs text-muted-foreground">
-                            {new Date(stage.unlocksAt).toLocaleDateString()}
+                            {new Date(stage.unlocksAt).toLocaleDateString('id-ID')}
                           </span>
                         )}
                         {stage.dueAt && (
                           <span className="text-xs text-muted-foreground">
-                            • {new Date(stage.dueAt).toLocaleDateString()}
+                            • {new Date(stage.dueAt).toLocaleDateString('id-ID')}
                           </span>
                         )}
                       </div>
@@ -874,7 +874,7 @@ function ProjectCard({
           {/* Compact Groups List */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h5 className="text-sm font-medium text-foreground">Groups ({project.groups.length})</h5>
+              <h5 className="text-sm font-medium text-foreground">Grup ({project.groups.length})</h5>
                <CreateGroupDialog projectId={project.id} router={router} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -907,8 +907,8 @@ function ProjectCard({
             {project.groups.length === 0 && (
               <div className="text-center py-4 border border-dashed border-border rounded-md bg-muted/20">
                 <Users className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">No groups created yet</p>
-                <p className="text-xs text-muted-foreground mt-1">Create groups to organize students</p>
+                <p className="text-sm text-muted-foreground">Belum ada grup dibuat</p>
+                <p className="text-xs text-muted-foreground mt-1">Buat grup untuk mengorganisir siswa</p>
               </div>
             )}
           </div>
@@ -1001,13 +1001,13 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <Edit className="mr-2 h-4 w-4" /> Edit project
+          <Edit className="mr-2 h-4 w-4" /> Edit proyek
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit project</DialogTitle>
-          <DialogDescription>Update the project information and stages for this class.</DialogDescription>
+          <DialogTitle>Edit proyek</DialogTitle>
+          <DialogDescription>Perbarui informasi proyek dan tahapan untuk kelas ini.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -1055,7 +1055,7 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-semibold">Project Stages</h4>
+                <h4 className="text-sm font-semibold">Tahapan Proyek</h4>
                 <Button
                   type="button"
                   variant="outline"
@@ -1063,14 +1063,14 @@ function EditProjectDialog({ project, classId, router }: EditProjectDialogProps)
                   onClick={() => setShowCreateStageDialog(true)}
                 >
                   <Plus className="mr-1 h-3 w-3" />
-                  Add Stage
+                  Tambah Tahapan
                 </Button>
               </div>
 
               <div className="space-y-2 max-h-[300px] overflow-y-auto">
                 {project.stages.length === 0 ? (
                   <div className="text-center py-4 text-sm text-muted-foreground border border-dashed border-border rounded">
-                    No stages yet. Click &quot;Add Stage&quot; to create one.
+                    Belum ada tahapan. Klik &quot;Tambah Tahapan&quot; untuk membuat satu.
                   </div>
                 ) : (
                   project.stages.map((stage, index) => (
@@ -1156,21 +1156,21 @@ function DeleteProjectButton({ projectId, router }: { projectId: string; router:
       <AlertDialogTrigger asChild>
         <Button variant="destructive" size="sm" disabled={isPending}>
           <Trash className="mr-2 h-4 w-4" />
-          {isPending ? "Menghapus…" : "Hapus"}
+          {isPending ? "Menghapus..." : "Hapus"}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete project?</AlertDialogTitle>
+          <AlertDialogTitle>Hapus proyek?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will remove the project, its stages, and associated student groups. This action
-            cannot be undone.
+            Tindakan ini akan menghapus proyek, tahapan, dan grup siswa terkait. Tindakan ini
+            tidak dapat dibatalkan.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>Batal</AlertDialogCancel>
           <AlertDialogAction onClick={onConfirm} className="bg-destructive text-destructive-foreground">
-            Confirm
+            Konfirmasi
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -1227,7 +1227,7 @@ function ProjectDetailDialog({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-0" showCloseButton={false}>
           <VisuallyHidden>
-            <DialogTitle>Project Details</DialogTitle>
+            <DialogTitle>Detail Proyek</DialogTitle>
           </VisuallyHidden>
           {/* Header */}
           <div className="sticky top-0 bg-background border-b p-6">
@@ -1263,14 +1263,14 @@ function ProjectDetailDialog({
             {/* Description */}
             {project.description && (
               <div>
-                <h3 className="text-sm font-medium text-foreground mb-2">Description</h3>
+                <h3 className="text-sm font-medium text-foreground mb-2">Deskripsi</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{project.description}</p>
               </div>
             )}
 
             {/* Stages */}
             <div>
-              <h3 className="text-sm font-medium text-foreground mb-3">Project Stages ({project.stages.length})</h3>
+              <h3 className="text-sm font-medium text-foreground mb-3">Tahapan Proyek ({project.stages.length})</h3>
               <div className="space-y-2">
                 {project.stages.map((stage, index) => (
                   <div
@@ -1281,10 +1281,10 @@ function ProjectDetailDialog({
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="secondary" className="text-xs">Stage {index + 1}</Badge>
+                          <Badge variant="secondary" className="text-xs">Tahapan {index + 1}</Badge>
                           <h4 className="font-medium text-sm">{stage.name}</h4>
                           <div className="ml-auto text-xs text-muted-foreground">
-                            Click for details →
+                            Klik untuk detail →
                           </div>
                         </div>
                         {stage.description && (
@@ -1292,10 +1292,10 @@ function ProjectDetailDialog({
                         )}
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           {stage.unlocksAt && (
-                            <span>Unlocks: {formatDate(stage.unlocksAt)}</span>
+                            <span>Buka: {formatDate(stage.unlocksAt)}</span>
                           )}
                           {stage.dueAt && (
-                            <span>Due: {formatDate(stage.dueAt)}</span>
+                            <span>Tenggat: {formatDate(stage.dueAt)}</span>
                           )}
                         </div>
                       </div>
@@ -1325,9 +1325,9 @@ function ProjectDetailDialog({
             {/* Groups */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-foreground">Student Groups ({project.groups.length})</h3>
+                <h3 className="text-sm font-medium text-foreground">Grup Siswa ({project.groups.length})</h3>
                 <Badge variant="outline" className="text-xs">
-                  {project.groups.reduce((total, group) => total + group.members.length, 0)} students
+                  {project.groups.reduce((total, group) => total + group.members.length, 0)} siswa
                 </Badge>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -1336,13 +1336,13 @@ function ProjectDetailDialog({
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-medium text-sm">{group.name}</h4>
                       <Badge variant="secondary" className="text-xs">
-                        {group.members.length} members
+                        {group.members.length} anggota
                       </Badge>
                     </div>
                     {group.members.length > 0 && (
                       <div className="text-xs text-muted-foreground">
                         {group.members.slice(0, 3).map(member => member.studentName).join(", ")}
-                        {group.members.length > 3 && ` +${group.members.length - 3} more`}
+                        {group.members.length > 3 && ` +${group.members.length - 3} lainnya`}
                       </div>
                     )}
                   </div>
@@ -1458,7 +1458,7 @@ function StageDetailDialog({
           {/* Description */}
           {stage.description && (
             <div>
-              <h3 className="text-sm font-medium text-foreground mb-2">Description</h3>
+              <h3 className="text-sm font-medium text-foreground mb-2">Deskripsi</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
             </div>
           )}

@@ -14,6 +14,7 @@ import {
   projectStageProgress,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
+import { calculateStudentDimensionScores } from "@/lib/scoring/dimension-scorer"
 
 
 export async function GET(request: Request) {
@@ -153,8 +154,8 @@ export async function GET(request: Request) {
       // Continue without group data
     }
 
-    // Transform data
-    const projects = projectRows.map(project => {
+    // Prepare project data first
+    const projectData = projectRows.map(project => {
       const projectStageIds = stageRows.filter(s => s.projectId === project.id).map(s => s.id)
       const projectSubmissions = submissionRows.filter(s =>
         s.projectStageId && projectStageIds.includes(s.projectStageId)
@@ -162,16 +163,6 @@ export async function GET(request: Request) {
       const projectProgress = progressRows.filter(p =>
         p.projectStageId && projectStageIds.includes(p.projectStageId)
       )
-
-      // Calculate average grade for this project using new formula
-      const scores = projectSubmissions
-        .map(s => s.score)
-        .filter((score): score is number => score !== null)
-
-      // IMPLEMENTASI FORMULA BARU: X = ((jumlah skor pada seluruh item) / (jumlah item x 4)) x 100
-      const averageGrade = scores.length > 0
-        ? ((scores.reduce((sum, score) => sum + score, 0)) / (scores.length * 4)) * 100
-        : null
 
       // Calculate completion rate
       const completedStages = projectProgress.filter(p => p.status === "COMPLETED").length
@@ -186,31 +177,92 @@ export async function GET(request: Request) {
       return {
         id: project.id,
         title: project.title,
-        grade: averageGrade,
-        submissions: projectSubmissions.map(submission => ({
-          id: `${project.id}-${submission.projectStageId}`,
-          instrumentType: submission.instrumentType,
-          score: submission.score,
-          feedback: submission.feedback,
-          submittedAt: submission.submittedAt.toISOString(),
-        })),
+        projectStageIds,
+        projectSubmissions,
         completionRate,
         lastSubmissionAt: lastSubmission?.submittedAt?.toISOString(),
       }
     })
 
-    // Calculate overall stats using new formula
-    // First, collect all individual scores from all projects
-    const allIndividualScores = projects.flatMap(p =>
-      p.submissions
-        .map(s => s.score)
-        .filter((score): score is number => score !== null)
+    // Calculate grades using dimension scoring for all projects
+    const projectsWithGrades = await Promise.all(
+      projectData.map(async (project) => {
+        let averageGrade: number | null = null
+
+        try {
+          // Use the same dimension scoring logic as overall calculation
+          const dimensionScoresData = await calculateStudentDimensionScores(studentId, project.id)
+
+          averageGrade = dimensionScoresData.overallAverageScore
+
+
+        } catch (error) {
+          console.error(`[Project Grade] Error calculating dimension scores for project ${project.id}:`, error)
+
+          // Fallback to original calculation if dimension scoring fails
+          const scores = project.projectSubmissions
+            .map(s => s.score)
+            .filter((score): score is number => score !== null)
+
+          averageGrade = scores.length > 0
+            ? ((scores.reduce((sum, score) => sum + score, 0)) / (scores.length * 4)) * 100
+            : null
+
+
+        }
+
+        return {
+          id: project.id,
+          title: project.title,
+          grade: averageGrade,
+          submissions: project.projectSubmissions.map(submission => ({
+            id: `${project.id}-${submission.projectStageId}`,
+            instrumentType: submission.instrumentType,
+            score: submission.score,
+            feedback: submission.feedback,
+            submittedAt: submission.submittedAt.toISOString(),
+          })),
+          completionRate: project.completionRate,
+          lastSubmissionAt: project.lastSubmissionAt,
+        }
+      })
     )
 
-    // IMPLEMENTASI FORMULA BARU: X = ((jumlah skor pada seluruh item) / (jumlah item x 4)) x 100
-    const overallAverageGrade = allIndividualScores.length > 0
-      ? ((allIndividualScores.reduce((sum, score) => sum + score, 0)) / (allIndividualScores.length * 4)) * 100
-      : 0
+    let overallAverageGrade = 0
+
+    if (projectIds.length > 0) {
+      try {
+        const firstProjectId = projectIds[0]
+
+        const dimensionScoresData = await calculateStudentDimensionScores(studentId, firstProjectId)
+
+        overallAverageGrade = dimensionScoresData.overallAverageScore
+
+        console.log(`[Student Detail API] Using dimension scoring for ${studentId}:`, {
+          projectId: firstProjectId,
+          overallAverage: overallAverageGrade,
+          dimensionsCount: dimensionScoresData.dimensionScores.length
+        })
+      } catch (error) {
+        console.error('[Student Detail API] Error calculating dimension scores:', error)
+
+        // Fallback to original calculation if dimension scoring fails
+        const allIndividualScores = projectsWithGrades.flatMap(p =>
+          p.submissions
+            .map(s => s.score)
+            .filter((score): score is number => score !== null)
+        )
+
+        overallAverageGrade = allIndividualScores.length > 0
+          ? ((allIndividualScores.reduce((sum, score) => sum + score, 0)) / (allIndividualScores.length * 4)) * 100
+          : 0
+
+        console.log(`[Student Detail API] Using fallback calculation:`, {
+          totalScores: allIndividualScores.length,
+          overallAverage: overallAverageGrade
+        })
+      }
+    }
 
     const totalStages = stageIds.length
     const completedStagesOverall = progressRows.filter(p => p.status === "COMPLETED").length
@@ -224,7 +276,7 @@ export async function GET(request: Request) {
       email: student.studentEmail,
       className: classInfo.name,
       groupName: groupMembership?.groupName,
-      projects,
+      projects: projectsWithGrades,
       averageGrade: overallAverageGrade,
       totalSubmissions: submissionRows.length,
       overallCompletionRate,
