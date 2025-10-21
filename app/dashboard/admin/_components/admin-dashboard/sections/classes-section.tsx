@@ -149,6 +149,25 @@ export function ClassesSection({ classes, terms, teachers, students, assignments
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [isDeletePending, setIsDeletePending] = useState(false)
   const [detailTarget, setDetailTarget] = useState<Kelas | null>(null)
+  const [studentSearchQuery, setStudentSearchQuery] = useState("")
+
+  // Filter students based on search query
+  const filteredStudents = useMemo(() => {
+    if (!detailTarget || !studentSearchQuery) return detailTarget?.students || []
+
+    const query = studentSearchQuery.toLowerCase()
+    return detailTarget.students.filter((student) =>
+      (student.name?.toLowerCase().includes(query) ||
+       student.email.toLowerCase().includes(query))
+    )
+  }, [detailTarget, studentSearchQuery])
+
+  // Reset search when detail target changes
+  useMemo(() => {
+    if (detailTarget) {
+      setStudentSearchQuery("")
+    }
+  }, [detailTarget])
 
   // Default: tahun akademik aktif
   const activeTermId = useMemo(() => {
@@ -258,70 +277,126 @@ export function ClassesSection({ classes, terms, teachers, students, assignments
         />
         {/* Modal Detail Kelas */}
         <Dialog open={!!detailTarget} onOpenChange={open => !open && setDetailTarget(null)}>
-          <DialogContent className="max-w-xl p-0 overflow-hidden">
+          <DialogContent className="max-w-2xl max-h-[85vh] p-0 overflow-hidden">
             {detailTarget && (
-              <div className="bg-card">
-                <div className="px-6 pt-6 pb-2 border-b border-muted/60">
+              <div className="bg-card flex flex-col h-full">
+                <div className="px-6 pt-6 pb-4 border-b border-muted/60 flex-shrink-0">
                   <DialogHeader>
                     <DialogTitle className="text-xl font-bold tracking-tight mb-1">{detailTarget.name}</DialogTitle>
                     <DialogDescription className="text-base text-muted-foreground mb-0">{detailTarget.termLabel}</DialogDescription>
+                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                      <span>{detailTarget.teachers.length} Guru</span>
+                      <span>•</span>
+                      <span>{detailTarget.students.length} Siswa</span>
+                      <span>•</span>
+                      <span className={detailTarget.termStatus === 'ACTIVE' ? 'text-green-600' : 'text-muted-foreground'}>
+                        {detailTarget.termStatus === 'ACTIVE' ? 'Aktif' : 'Tidak Aktif'}
+                      </span>
+                    </div>
                   </DialogHeader>
                 </div>
-                <div className="px-6 py-4 space-y-6">
-                  <section>
-                    <div className="font-semibold text-sm mb-2 text-muted-foreground uppercase tracking-wide">Guru Pengampu</div>
-                    <div className="rounded-lg border bg-muted/40">
-                      {detailTarget.teachers.length === 0 ? (
-                        <div className="text-xs text-muted-foreground px-4 py-6 text-center">Belum ada guru yang ditautkan.</div>
-                      ) : (
-                        <ScrollArea className="max-h-32">
-                          <ul className="divide-y divide-muted/60">
-                            {detailTarget.teachers.map((teacher) => (
-                              <li key={teacher.id} className="flex items-center gap-3 px-4 py-2">
-                                <Avatar className="h-8 w-8 border">
-                                  <AvatarFallback className="text-xs font-semibold uppercase">
-                                    {getInitials(teacher.name?.trim() || teacher.email.split("@")[0])}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="min-w-0">
-                                  <div className="truncate text-sm font-medium leading-tight">{teacher.name || teacher.email.split("@")[0]}</div>
-                                  <div className="truncate text-xs text-muted-foreground">{teacher.email}</div>
+                <div className="flex-1 overflow-hidden">
+                  <div className="px-6 py-4 space-y-6 h-full overflow-y-auto">
+                    <section>
+                      <div className="font-semibold text-sm mb-3 text-muted-foreground uppercase tracking-wide flex items-center justify-between">
+                        <span>Guru Pengampu</span>
+                        <span className="font-normal text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                          {detailTarget.teachers.length} guru
+                        </span>
+                      </div>
+                      <div className="rounded-lg border bg-muted/40">
+                        {detailTarget.teachers.length === 0 ? (
+                          <div className="text-sm text-muted-foreground px-4 py-8 text-center">Belum ada guru yang ditautkan.</div>
+                        ) : (
+                          <div className="max-h-48 overflow-y-auto">
+                            <ul className="divide-y divide-muted/60">
+                              {detailTarget.teachers.map((teacher, index) => (
+                                <li key={teacher.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/60 transition-colors">
+                                  <div className="text-sm font-medium text-muted-foreground w-8 text-center">
+                                    {index + 1}.
+                                  </div>
+                                  <Avatar className="h-10 w-10 border">
+                                    <AvatarFallback className="text-sm font-semibold uppercase">
+                                      {getInitials(teacher.name?.trim() || teacher.email.split("@")[0])}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="truncate text-sm font-medium leading-tight">{teacher.name || teacher.email.split("@")[0]}</div>
+                                    <div className="truncate text-xs text-muted-foreground">{teacher.email}</div>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </section>
+                    <section>
+                      <div className="font-semibold text-sm mb-3 text-muted-foreground uppercase tracking-wide flex items-center justify-between">
+                        <span>Daftar Siswa</span>
+                        <span className="font-normal text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                          {filteredStudents.length} dari {detailTarget.students.length} siswa
+                        </span>
+                      </div>
+                      <div className="rounded-lg border bg-muted/40">
+                        {detailTarget.students.length === 0 ? (
+                          <div className="text-sm text-muted-foreground px-4 py-8 text-center">Belum ada siswa yang ditambahkan.</div>
+                        ) : (
+                          <>
+                            {/* Search and filter for student lists */}
+                            <div className="p-3 border-b border-muted/60 bg-muted/20">
+                              <input
+                                type="text"
+                                placeholder="Cari siswa berdasarkan nama atau email..."
+                                value={studentSearchQuery}
+                                onChange={(e) => setStudentSearchQuery(e.target.value)}
+                                className="w-full px-3 py-2 text-sm border border-muted bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                              />
+                              {studentSearchQuery && (
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  Menampilkan {filteredStudents.length} hasil pencarian dari {detailTarget.students.length} siswa
                                 </div>
-                              </li>
-                            ))}
-                          </ul>
-                        </ScrollArea>
-                      )}
-                    </div>
-                  </section>
-                  <section>
-                    <div className="font-semibold text-sm mb-2 text-muted-foreground uppercase tracking-wide">Siswa</div>
-                    <div className="rounded-lg border bg-muted/40">
-                      {detailTarget.students.length === 0 ? (
-                        <div className="text-xs text-muted-foreground px-4 py-6 text-center">Belum ada siswa yang ditambahkan.</div>
-                      ) : (
-                        <ScrollArea className="max-h-40">
-                          <ul className="divide-y divide-muted/60">
-                            {detailTarget.students.map((student) => (
-                              <li key={student.id} className="flex items-center gap-3 px-4 py-2">
-                                <Avatar className="h-8 w-8 border">
-                                  <AvatarFallback className="text-xs font-semibold uppercase">
-                                    {getInitials(student.name?.trim() || student.email.split("@")[0])}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="min-w-0">
-                                  <div className="truncate text-sm font-medium leading-tight">{student.name || student.email.split("@")[0]}</div>
-                                  <div className="truncate text-xs text-muted-foreground">{student.email}</div>
+                              )}
+                            </div>
+                            <div className="max-h-96 overflow-y-auto">
+                              {filteredStudents.length === 0 ? (
+                                <div className="text-sm text-muted-foreground px-4 py-8 text-center">
+                                  Tidak ada siswa yang cocok dengan pencarian "{studentSearchQuery}"
                                 </div>
-                              </li>
-                            ))}
-                          </ul>
-                        </ScrollArea>
-                      )}
-                    </div>
-                  </section>
+                              ) : (
+                                <ul className="divide-y divide-muted/60" id="student-list">
+                                  {filteredStudents.map((student) => (
+                                    <li key={student.id} className="flex items-center gap-3 px-4 py-2 hover:bg-muted/60 transition-colors">
+                                      <div className="text-sm font-medium text-muted-foreground w-8 text-center">
+                                        {detailTarget.students.findIndex(s => s.id === student.id) + 1}.
+                                      </div>
+                                      <Avatar className="h-8 w-8 border">
+                                        <AvatarFallback className="text-xs font-semibold uppercase">
+                                          {getInitials(student.name?.trim() || student.email.split("@")[0])}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div className="min-w-0 flex-1">
+                                        <div className="truncate text-sm font-medium leading-tight">
+                                          {student.name || student.email.split("@")[0]}
+                                        </div>
+                                        <div className="truncate text-xs text-muted-foreground">{student.email}</div>
+                                      </div>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </section>
+                  </div>
+                </div>
+                <div className="px-6 py-4 border-t border-muted/60 flex-shrink-0">
                   <DialogClose asChild>
-                    <button className="mt-2 w-full rounded-md bg-primary text-primary-foreground py-2 font-semibold hover:bg-primary/90 transition">Tutup</button>
+                    <button className="w-full rounded-md bg-primary text-primary-foreground py-3 font-semibold hover:bg-primary/90 transition-colors">
+                      Tutup
+                    </button>
                   </DialogClose>
                 </div>
               </div>

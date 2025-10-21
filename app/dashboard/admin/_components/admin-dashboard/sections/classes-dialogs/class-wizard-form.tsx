@@ -36,6 +36,7 @@ type ClassWizardFormProps = {
   submitLabel?: string
   onSubmit: (values: ClassWizardValues) => Promise<boolean>
   onCancel: () => void
+  onStepChange?: (step: number) => void
 }
 
 type StepConfig = {
@@ -75,8 +76,15 @@ export function ClassWizardForm({
   submitLabel,
   onSubmit,
   onCancel,
+  onStepChange,
 }: ClassWizardFormProps) {
   const [currentStep, setCurrentStep] = useState(0)
+
+  // Notify parent component when step changes
+  const handleStepChange = (step: number) => {
+    setCurrentStep(step)
+    onStepChange?.(step + 1) // +1 because steps are 0-indexed internally but 1-indexed for UI
+  }
   const initialValuesRef = useRef(defaultValues)
 
   const form = useForm<ClassWizardValues>({
@@ -88,7 +96,7 @@ export function ClassWizardForm({
   useEffect(() => {
     initialValuesRef.current = defaultValues
     form.reset(defaultValues)
-    setCurrentStep(0)
+    handleStepChange(0)
   }, [defaultValues, form])
 
   const isLastStep = currentStep === STEP_DEFINITIONS.length - 1
@@ -110,18 +118,18 @@ export function ClassWizardForm({
     const targetFields = STEP_DEFINITIONS[currentStep]?.fields ?? []
     const valid = await form.trigger(targetFields, { shouldFocus: true })
     if (!valid) return
-    setCurrentStep((prev) => Math.min(prev + 1, STEP_DEFINITIONS.length - 1))
+    handleStepChange(Math.min(currentStep + 1, STEP_DEFINITIONS.length - 1))
   }
 
   const handleBack = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 0))
+    handleStepChange(Math.max(currentStep - 1, 0))
   }
 
   const submitHandler = form.handleSubmit(async (values) => {
     const success = await onSubmit(values)
     if (success) {
       form.reset(initialValuesRef.current)
-      setCurrentStep(0)
+      handleStepChange(0)
       onCancel()
     }
   })
@@ -316,6 +324,8 @@ function ParticipantChecklist({
   emptyMessage,
 }: ParticipantChecklistProps) {
   const [query, setQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 25
   const selectedSet = useMemo(() => new Set(value ?? []), [value])
 
   const filteredOptions = useMemo(() => {
@@ -326,6 +336,19 @@ function ParticipantChecklist({
       return source.includes(normalized)
     })
   }, [options, query])
+
+  const paginatedOptions = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return filteredOptions.slice(startIndex, endIndex)
+  }, [filteredOptions, currentPage])
+
+  const totalPages = Math.ceil(filteredOptions.length / itemsPerPage)
+
+  // Reset page when search changes
+  useMemo(() => {
+    setCurrentPage(1)
+  }, [query])
 
   const toggle = (id: string) => {
     const next = new Set(selectedSet)
@@ -346,52 +369,193 @@ function ParticipantChecklist({
   })
 
   return (
-    <div className="space-y-3">
-      <div>
-        <FormLabel>{label}</FormLabel>
-        <p className="text-xs text-muted-foreground pt-4">{description}</p>
-      </div>
-      <Input
-        placeholder="Cari berdasarkan nama atau email"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        disabled={disabled || options.length === 0}
-        className="border-[1px]"
-      />
-      <div className="max-h-60 space-y-2 overflow-y-auto rounded-md border bg-muted/40 p-3">
-        {options.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{emptyMessage}</p>
-        ) : filteredOptions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Tidak ditemukan akun yang cocok.</p>
-        ) : (
-          filteredOptions.map((option) => {
-            const checkboxId = `${label}-${option.id}`
-            return (
-              <label key={option.id} htmlFor={checkboxId} className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-background">
-                <Checkbox
-                  id={checkboxId}
-                  checked={selectedSet.has(option.id)}
-                  onCheckedChange={() => toggle(option.id)}
-                  disabled={disabled}
-                />
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium leading-none">{option.name ?? option.email}</span>
-                  <span className="text-xs text-muted-foreground">{option.email}</span>
+    <div className="flex flex-col lg:flex-row gap-6 h-full">
+      {/* Main Selection Area */}
+      <div className="flex-1 min-w-0">
+        <div className="space-y-3">
+          <div>
+            <FormLabel>{label}</FormLabel>
+            <p className="text-xs text-muted-foreground pt-4">{description}</p>
+          </div>
+          <Input
+            placeholder="Cari berdasarkan nama atau email"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            disabled={disabled || options.length === 0}
+            className="border-[1px]"
+          />
+          {query && (
+            <p className="text-xs text-muted-foreground">
+              Menampilkan {filteredOptions.length} hasil pencarian dari {options.length} {label.toLowerCase()}
+            </p>
+          )}
+          {!query && options.length > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Total {options.length} {label.toLowerCase()} tersedia
+            </p>
+          )}
+
+          {/* Selection List */}
+          <div className="max-h-96 space-y-2 overflow-y-auto rounded-md border bg-muted/40 p-3">
+            {options.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{emptyMessage}</p>
+            ) : filteredOptions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Tidak ditemukan akun yang cocok.</p>
+            ) : (
+              paginatedOptions.map((option) => {
+                const checkboxId = `${label}-${option.id}`
+                return (
+                  <label key={option.id} htmlFor={checkboxId} className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-background">
+                    <Checkbox
+                      id={checkboxId}
+                      checked={selectedSet.has(option.id)}
+                      onCheckedChange={() => toggle(option.id)}
+                      disabled={disabled}
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium leading-none">{option.name ?? option.email}</span>
+                      <span className="text-xs text-muted-foreground">{option.email}</span>
+                    </div>
+                  </label>
+                )
+              })
+            )}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex flex-col gap-2 text-xs text-muted-foreground bg-background border rounded-lg p-3">
+              <div className="flex items-center justify-between px-1">
+                <span>
+                  Menampilkan {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, filteredOptions.length)} dari {filteredOptions.length} {label.toLowerCase()}
+                </span>
+                <span>Halaman {currentPage} dari {totalPages}</span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1 || disabled}
+                  className="px-2 py-1 text-xs border border-muted rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  ← Sebelumnya
+                </button>
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum
+                    if (totalPages <= 5) {
+                      pageNum = i + 1
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i
+                    } else {
+                      pageNum = currentPage - 2 + i
+                    }
+
+                    return (
+                      <button
+                        key={pageNum}
+                        type="button"
+                        onClick={() => setCurrentPage(pageNum)}
+                        disabled={disabled}
+                        className={`w-6 h-6 text-xs border rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed ${
+                          currentPage === pageNum
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'border-muted'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    )
+                  })}
                 </div>
-              </label>
-            )
-          })
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages || disabled}
+                  className="px-2 py-1 text-xs border border-muted rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Berikutnya →
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Selected Items Sidebar */}
+      <div className="lg:w-80 lg:flex-shrink-0 w-full">
+        {selectedBadges.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-semibold">
+                {label} yang Dipilih ({selectedBadges.length})
+              </h4>
+              <button
+                type="button"
+                onClick={() => onChange([])}
+                disabled={disabled}
+                className="text-xs text-red-600 hover:text-red-700 disabled:opacity-50"
+              >
+                Hapus Semua
+              </button>
+            </div>
+            <div className="max-h-64 lg:max-h-96 overflow-y-auto rounded-md border bg-muted/40 p-3">
+              <div className="space-y-2">
+                {selectedBadges.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between gap-2 p-2 bg-background rounded-md border"
+                  >
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
+                      <span className="text-sm font-medium truncate">{item.label}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = selectedBadges.filter(b => b.id !== item.id).map(b => b.id)
+                        onChange(next)
+                      }}
+                      disabled={disabled}
+                      className="text-xs text-red-600 hover:text-red-700 disabled:opacity-50 flex-shrink-0"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="text-xs text-muted-foreground bg-background border rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <span>Total Terpilih:</span>
+                <span className="font-semibold">{selectedBadges.length}</span>
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <span>Sisa Tersedia:</span>
+                <span className="font-semibold">{filteredOptions.length - paginatedOptions.filter(p => selectedSet.has(p.id)).length}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedBadges.length === 0 && (
+          <div className="text-center py-8 px-4 border-2 border-dashed border-muted rounded-lg">
+            <div className="text-muted-foreground">
+              <div className="text-lg mb-2">📝</div>
+              <p className="text-sm">Belum ada {label.toLowerCase()} yang dipilih</p>
+              <p className="text-xs mt-1">
+                Centang {label.toLowerCase()} dari daftar di sebelah
+                <span className="hidden lg:inline"> kiri</span>
+                <span className="lg:hidden"> atas</span>
+              </p>
+            </div>
+          </div>
         )}
       </div>
-      {selectedBadges.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {selectedBadges.map((item) => (
-            <Badge key={item.id} variant="secondary">
-              {item.label}
-            </Badge>
-          ))}
-        </div>
-      )}
     </div>
   )
 }

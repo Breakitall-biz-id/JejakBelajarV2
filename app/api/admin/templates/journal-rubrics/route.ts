@@ -20,6 +20,7 @@ export async function GET(request: Request) {
         id: templateJournalRubrics.id,
         indicatorText: templateJournalRubrics.indicatorText,
         criteria: templateJournalRubrics.criteria,
+        dimensionId: templateJournalRubrics.dimensionId,
         createdAt: templateJournalRubrics.createdAt,
       })
       .from(templateJournalRubrics)
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
     const session = await requireAdminUser()
 
     const body = await request.json()
-    const { configId, indicatorText, criteria } = body
+    const { configId, indicatorText, criteria, dimensionId } = body
 
     if (!configId || !indicatorText || !criteria) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -58,6 +59,7 @@ export async function POST(request: Request) {
         configId,
         indicatorText,
         criteria,
+        dimensionId: dimensionId || null,
       })
       .returning()
 

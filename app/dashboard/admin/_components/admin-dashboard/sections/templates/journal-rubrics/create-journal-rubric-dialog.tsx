@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -12,12 +12,25 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 type CreateJournalRubricDialogProps = {
   configId: string
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
+}
+
+type Dimension = {
+  id: string
+  name: string
+  description: string | null
 }
 
 export function CreateJournalRubricDialog({
@@ -33,7 +46,34 @@ export function CreateJournalRubricDialog({
     "2": "",
     "1": ""
   })
+  const [dimensionId, setDimensionId] = useState("no-dimension")
+  const [dimensions, setDimensions] = useState<Dimension[]>([])
+  const [isLoadingDimensions, setIsLoadingDimensions] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Fetch dimensions when dialog opens
+  React.useEffect(() => {
+    if (open) {
+      fetchDimensions()
+    }
+  }, [open])
+
+  const fetchDimensions = async () => {
+    setIsLoadingDimensions(true)
+    try {
+      const response = await fetch('/api/admin/dimensions')
+      if (response.ok) {
+        const data = await response.json()
+        setDimensions(data.data || [])
+      } else {
+        console.error('Error fetching dimensions')
+      }
+    } catch (error) {
+      console.error('Error fetching dimensions:', error)
+    } finally {
+      setIsLoadingDimensions(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,7 +100,8 @@ export function CreateJournalRubricDialog({
         body: JSON.stringify({
           configId,
           indicatorText,
-          criteria
+          criteria,
+          dimensionId: dimensionId === "no-dimension" ? null : dimensionId
         })
       })
 
@@ -86,6 +127,7 @@ export function CreateJournalRubricDialog({
         "2": "",
         "1": ""
       })
+      setDimensionId("no-dimension")
       onOpenChange(false)
     }
   }
@@ -108,6 +150,23 @@ export function CreateJournalRubricDialog({
               rows={2}
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="dimension">Dimension</Label>
+            <Select value={dimensionId} onValueChange={setDimensionId} disabled={isLoadingDimensions}>
+              <SelectTrigger>
+                <SelectValue placeholder={isLoadingDimensions ? "Memuat dimensi..." : "Pilih dimensi penilaian"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="no-dimension">Tidak ada dimensi</SelectItem>
+                {dimensions.map((dimension) => (
+                  <SelectItem key={dimension.id} value={dimension.id}>
+                    {dimension.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-3">

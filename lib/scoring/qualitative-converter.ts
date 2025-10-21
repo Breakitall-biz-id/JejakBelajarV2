@@ -88,7 +88,7 @@ export function convertToQualitativeScore(
     qualitativeScore = "Kurang (R)"
     qualitativeLabel = "Kurang"
     qualitativeCode = "R"
-  } else if (numericScore >= 0 && numericScore <= rMinThreshold) {
+  } else if (numericScore >= 0 && numericScore <= 0) {
     qualitativeScore = "Sangat Rendah (SR)"
     qualitativeLabel = "Sangat Rendah"
     qualitativeCode = "SR"

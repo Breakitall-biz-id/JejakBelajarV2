@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
-import { and, eq, ne, inArray } from "drizzle-orm"
+import { and, eq, ne, inArray, sql } from "drizzle-orm"
 
 import { db } from "@/db"
 import {
@@ -27,6 +27,9 @@ import {
   createClassroomSchema,
   updateClassroomSchema,
 } from "./classroom-schemas"
+import { parseStudentImportExcel, ParsedStudent } from "@/lib/utils/excel-parser"
+import { generateUniqueEmail, generateDefaultPassword } from "@/lib/utils/email-generator"
+import { generateStudentExportExcel, generateStudentCredentialsExcel } from "@/lib/utils/student-export"
 
 const DASHBOARD_ADMIN_PATH = "/dashboard/admin"
 
@@ -1043,5 +1046,270 @@ export async function toggleTemplateStatus(
 
   } catch (error) {
     return handleError(error, "Unable to toggle template status.")
+  }
+}
+
+// Schema for import validation
+const importStudentsSchema = z.object({
+  fileData: z.string(), // Base64 encoded file
+  academicTermId: z.string().uuid().optional()
+})
+
+export async function importStudentsFromExcel(
+  values: z.input<typeof importStudentsSchema>,
+): Promise<ActionResult> {
+  const parsed = importStudentsSchema.safeParse(values)
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Invalid import data.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    }
+  }
+
+  try {
+    await requireAdminUser()
+
+    // Get active academic term if not provided
+    let academicTermId = parsed.data.academicTermId
+    if (!academicTermId) {
+      const [activeTerm] = await db
+        .select({ id: academicTerms.id })
+        .from(academicTerms)
+        .where(eq(academicTerms.status, "ACTIVE"))
+        .limit(1)
+
+      if (!activeTerm) {
+        return { success: false, error: "Tidak ada tahun ajaran aktif. Silakan buat tahun ajaran terlebih dahulu." }
+      }
+      academicTermId = activeTerm.id
+    }
+
+    // Decode base64 file
+    const buffer = Buffer.from(parsed.data.fileData, 'base64')
+
+    // Parse Excel file
+    const parseResult = parseStudentImportExcel(buffer)
+
+    if (parseResult.errors.length > 0) {
+      return {
+        success: false,
+        error: parseResult.errors.join('; ')
+      }
+    }
+
+    if (parseResult.validRows === 0) {
+      return { success: false, error: "Tidak ada data siswa yang valid untuk diimport." }
+    }
+
+    // Process valid students
+    const results = []
+    const errors = []
+    let successCount = 0
+    const createdClasses = new Set<string>()
+
+    for (const studentData of parseResult.students) {
+      if (studentData.errors.length > 0) {
+        errors.push(`Baris ${studentData.rowIndex}: ${studentData.errors.join(', ')}`)
+        continue
+      }
+
+      try {
+        // Generate unique email
+        const email = await generateUniqueEmail(studentData.nama)
+        const password = generateDefaultPassword()
+
+        // Create user account via Better Auth
+        const authResponse = await auth.api.signUpEmail({
+          body: {
+            email,
+            password,
+            name: studentData.nama,
+          }
+        })
+
+        const createdUser = authResponse?.user
+        if (!createdUser?.id) {
+          errors.push(`Baris ${studentData.rowIndex}: Gagal membuat akun user`)
+          continue
+        }
+
+        // Update user role to STUDENT
+        await db
+          .update(user)
+          .set({ role: "STUDENT" })
+          .where(eq(user.id, createdUser.id))
+
+        // Find or create class
+        let classRecord = await db
+          .select({ id: classes.id })
+          .from(classes)
+          .where(
+            and(
+              eq(classes.name, studentData.kelas),
+              eq(classes.academicTermId, academicTermId)
+            )
+          )
+          .limit(1)
+
+        if (classRecord.length === 0) {
+          // Create new class
+          const [newClass] = await db
+            .insert(classes)
+            .values({
+              name: studentData.kelas,
+              academicTermId
+            })
+            .returning()
+
+          classRecord = [{ id: newClass.id }]
+          createdClasses.add(studentData.kelas)
+        }
+
+        // Assign user to class
+        await db
+          .insert(userClassAssignments)
+          .values({
+            userId: createdUser.id,
+            classId: classRecord[0].id
+          })
+
+        results.push({
+          rowIndex: studentData.rowIndex,
+          nama: studentData.nama,
+          kelas: studentData.kelas,
+          email,
+          password,
+          status: 'success'
+        })
+
+        successCount++
+      } catch (error) {
+        console.error(`Error processing student ${studentData.nama}:`, error)
+        errors.push(`Baris ${studentData.rowIndex}: Gagal memproses siswa ${studentData.nama}`)
+      }
+    }
+
+    revalidatePath(DASHBOARD_ADMIN_PATH)
+
+    const response = {
+      success: true,
+      data: {
+        totalProcessed: parseResult.students.length,
+        successCount,
+        errorCount: errors.length,
+        createdClasses: Array.from(createdClasses),
+        results,
+        errors: errors.slice(0, 10) // Limit errors to first 10
+      }
+    }
+
+    if (errors.length > 0) {
+      return {
+        success: true,
+        data: response.data,
+        error: `${successCount} siswa berhasil diimport, ${errors.length} gagal. Lihat detail error di hasil.`
+      }
+    }
+
+    return response
+
+  } catch (error) {
+    return handleError(error, "Gagal mengimport data siswa.")
+  }
+}
+
+// Schema for class filtering
+const getClassesSchema = z.object({
+  termId: z.string().uuid().optional()
+})
+
+export async function getAvailableClasses(
+  values: z.input<typeof getClassesSchema>,
+): Promise<ActionResult> {
+  const parsed = getClassesSchema.safeParse(values)
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Invalid parameters.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    }
+  }
+
+  try {
+    await requireAdminUser()
+
+    // First get the base classes - simplified query for debugging
+    let classList;
+    try {
+      const baseQuery = db
+        .select({
+          id: classes.id,
+          name: classes.name,
+          academicTermId: classes.academicTermId,
+          termStatus: academicTerms.status,
+          academicYear: academicTerms.academicYear,
+          semester: academicTerms.semester,
+        })
+        .from(classes)
+        .innerJoin(academicTerms, eq(classes.academicTermId, academicTerms.id))
+        .where(
+          parsed.data.termId
+            ? eq(classes.academicTermId, parsed.data.termId)
+            : eq(academicTerms.status, 'ACTIVE')
+        )
+        .orderBy(classes.name)
+
+      classList = await baseQuery;
+    } catch (error) {
+      console.error('Error fetching classes with active terms:', error);
+      // Fallback: get all classes without term filter
+      const fallbackQuery = db
+        .select({
+          id: classes.id,
+          name: classes.name,
+          academicTermId: classes.academicTermId,
+          termStatus: sql<string>`'INACTIVE'`.as('termStatus'),
+          academicYear: sql<string>`'Unknown'`.as('academicYear'),
+          semester: sql<string>`'Unknown'`.as('semester'),
+        })
+        .from(classes)
+        .orderBy(classes.name);
+
+      classList = await fallbackQuery;
+    }
+
+    // Get student counts for each class
+    const classesWithCounts = await Promise.all(
+      classList.map(async (cls) => {
+        const studentCount = await db
+          .select({ count: sql<number>`count(*)`.mapWith(Number) })
+          .from(userClassAssignments)
+          .innerJoin(user, eq(userClassAssignments.userId, user.id))
+          .where(
+            and(
+              eq(userClassAssignments.classId, cls.id),
+              eq(user.role, 'STUDENT')
+            )
+          )
+
+        return {
+          ...cls,
+          studentCount: studentCount[0]?.count || 0,
+          status: cls.termStatus === 'ACTIVE' ? 'aktif' : 'tidak aktif',
+          termLabel: `${cls.academicYear} - ${cls.semester}`
+        }
+      })
+    )
+
+    return {
+      success: true,
+      data: classesWithCounts
+    }
+
+  } catch (error) {
+    return handleError(error, "Unable to fetch classes.")
   }
 }

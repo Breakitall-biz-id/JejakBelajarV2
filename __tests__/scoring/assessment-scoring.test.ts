@@ -18,7 +18,7 @@ vi.mock('@/db', () => ({
 
 vi.mock('@/lib/scoring/qualitative-converter', () => ({
   convertToQualitativeScore: vi.fn((score) => ({
-    qualitativeScore: score >= 3.5 ? 'Sangat Baik' : score >= 2.5 ? 'Baik' : 'Cukup'
+    qualitativeScore: score >= 81.25 ? 'Sangat Baik (SB)' : score >= 43.75 ? 'Baik (B)' : score >= 6.25 ? 'Cukup (C)' : 'Kurang (R)'
   }))
 }))
 
@@ -53,7 +53,7 @@ describe('Assessment Scoring Logic', () => {
   })
 
   describe('calculateAssessmentDimensionScores', () => {
-    it('should correctly map answers to questions and calculate dimension scores', async () => {
+    it('should correctly map answers to questions and calculate dimension scores with new formula', async () => {
       const mockSubmission = {
         id: 'sub1',
         templateStageConfigId: 'config1',
@@ -67,20 +67,22 @@ describe('Assessment Scoring Logic', () => {
       expect(result).toHaveLength(2) // 2 dimensions
 
       // Check Kolaborasi dimension (q1=4, q2=3)
+      // Formula: X = ((4+3) / (2 x 4)) x 100 = (7/8) x 100 = 87.5
       const kolaborasi = result.find(r => r.dimensionId === 'dim1')
       expect(kolaborasi).toBeDefined()
       expect(kolaborasi!.dimensionName).toBe('Kolaborasi')
-      expect(kolaborasi!.averageScore).toBe(3.5) // (4+3)/2
+      expect(kolaborasi!.averageScore).toBe(87.5) // New formula: ((4+3)/(2*4))*100 = 87.5
       expect(kolaborasi!.totalSubmissions).toBe(2)
-      expect(kolaborasi!.maxScore).toBe(4)
+      expect(kolaborasi!.maxScore).toBe(100) // Updated to 100 scale
 
       // Check Komunikasi dimension (q3=2)
+      // Formula: X = ((2) / (1 x 4)) x 100 = (2/4) x 100 = 50
       const komunikasi = result.find(r => r.dimensionId === 'dim2')
       expect(komunikasi).toBeDefined()
       expect(komunikasi!.dimensionName).toBe('Komunikasi')
-      expect(komunikasi!.averageScore).toBe(2)
+      expect(komunikasi!.averageScore).toBe(50) // New formula: (2/(1*4))*100 = 50
       expect(komunikasi!.totalSubmissions).toBe(1)
-      expect(komunikasi!.maxScore).toBe(4)
+      expect(komunikasi!.maxScore).toBe(100) // Updated to 100 scale
     })
 
     it('should handle missing answers gracefully', async () => {
@@ -97,14 +99,18 @@ describe('Assessment Scoring Logic', () => {
       expect(result).toHaveLength(2)
 
       // Kolaborasi should only count q1 (4), skip q2 (undefined)
+      // Formula: X = ((4) / (1 x 4)) x 100 = (4/4) x 100 = 100
       const kolaborasi = result.find(r => r.dimensionId === 'dim1')
-      expect(kolaborasi!.averageScore).toBe(4) // Only q1 counted
+      expect(kolaborasi!.averageScore).toBe(100) // Only q1 counted: (4/(1*4))*100 = 100
       expect(kolaborasi!.totalSubmissions).toBe(1)
+      expect(kolaborasi!.maxScore).toBe(100)
 
       // Komunikasi should count q3 (2)
+      // Formula: X = ((2) / (1 x 4)) x 100 = (2/4) x 100 = 50
       const komunikasi = result.find(r => r.dimensionId === 'dim2')
-      expect(komunikasi!.averageScore).toBe(2)
+      expect(komunikasi!.averageScore).toBe(50) // (2/(1*4))*100 = 50
       expect(komunikasi!.totalSubmissions).toBe(1)
+      expect(komunikasi!.maxScore).toBe(100)
     })
 
     it('should handle dimension mismatch and provide default', async () => {
@@ -149,7 +155,8 @@ describe('Assessment Scoring Logic', () => {
       const defaultDimension = result.find(r => r.dimensionId === 'default')
       expect(defaultDimension).toBeDefined()
       expect(defaultDimension!.dimensionName).toBe('Umum')
-      expect(defaultDimension!.averageScore).toBe(1)
+      expect(defaultDimension!.averageScore).toBe(25) // New formula: (1/(1*4))*100 = 25
+      expect(defaultDimension!.maxScore).toBe(100)
     })
 
     it('should warn about answer length mismatch', async () => {
@@ -189,12 +196,14 @@ describe('Assessment Scoring Logic', () => {
       expect(result).toHaveLength(2)
 
       const kolaborasi = result.find(r => r.dimensionId === 'dim1')
-      expect(kolaborasi!.averageScore).toBe(3.5)
+      expect(kolaborasi!.averageScore).toBe(87.5) // ((4+3)/(2*4))*100 = 87.5
       expect(kolaborasi!.totalSubmissions).toBe(2)
+      expect(kolaborasi!.maxScore).toBe(100)
 
       const komunikasi = result.find(r => r.dimensionId === 'dim2')
-      expect(komunikasi!.averageScore).toBe(2)
+      expect(komunikasi!.averageScore).toBe(50) // (2/(1*4))*100 = 50
       expect(komunikasi!.totalSubmissions).toBe(1)
+      expect(komunikasi!.maxScore).toBe(100)
     })
 
     it('should provide default dimension name for observations', async () => {
