@@ -11,6 +11,8 @@ import {
   BookOpen,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   Edit,
   ListChecks,
   Loader2,
@@ -27,6 +29,7 @@ import {
   FileText,
   MessageSquare,
   Eye,
+  Search,
 } from "lucide-react"
 
 import type { CurrentUser } from "@/lib/auth/session"
@@ -2325,7 +2328,38 @@ function EditGroupMembersDialog({
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<Set<string>>(new Set(group.members.map((member) => member.studentId)))
   const [isPending, startTransition] = useTransition()
+  const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [selectAll, setSelectAll] = useState(false)
+  const itemsPerPage = 20
 
+  // Filter students based on search
+  const filteredStudents = students.filter((student) => {
+    if (!searchQuery) return true
+    const query = searchQuery.toLowerCase()
+    return (
+      (student.name?.toLowerCase().includes(query) ||
+       student.email?.toLowerCase().includes(query))
+    )
+  })
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const paginatedStudents = filteredStudents.slice(startIndex, startIndex + itemsPerPage)
+
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1)
+    setSelectAll(false)
+  }, [searchQuery])
+
+  // Calculate selected stats
+  const selectedCount = selected.size
+  const totalCount = filteredStudents.length
+  const availableCount = totalCount - selectedCount
+
+  // Toggle individual student
   const toggleStudent = (studentId: string, checked: boolean) => {
     setSelected((prev) => {
       const next = new Set(prev)
@@ -2336,6 +2370,20 @@ function EditGroupMembersDialog({
       }
       return next
     })
+  }
+
+  // Select all visible students
+  const handleSelectAll = () => {
+    if (selectAll) {
+      // Deselect all
+      setSelected(new Set())
+      setSelectAll(false)
+    } else {
+      // Select all filtered students
+      const newSelected = new Set(paginatedStudents.map(s => s.studentId))
+      setSelected(newSelected)
+      setSelectAll(true)
+    }
   }
 
   const onSubmit = () => {
@@ -2372,49 +2420,156 @@ function EditGroupMembersDialog({
           <Users className="h-3 w-3" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Assign students</DialogTitle>
+          <DialogTitle>Assign students to group</DialogTitle>
           <DialogDescription>
             Select which students are part of this group. Students must belong to the active class.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
-          {students.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No students assigned to this class yet. Ask the administrator to enrol students.
-            </p>
+
+        {/* Search Bar */}
+        <div className="flex gap-4 items-center border-b pb-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Cari nama atau email siswa..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                setCurrentPage(1) // Reset to first page when searching
+              }}
+              className="pl-10"
+            />
+          </div>
+          <div className="text-sm text-muted-foreground whitespace-nowrap">
+            {filteredStudents.length} dari {students.length} siswa
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {filteredStudents.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p>
+                {searchQuery ? "Tidak ada siswa yang cocok dengan pencarian" :
+                 students.length === 0 ? "No students assigned to this class yet. Ask the administrator to enrol students." :
+                 "Semua siswa sudah ditugaskan ke kelompok"}
+              </p>
+            </div>
           ) : (
-            students.map((student) => {
-              const checked = selected.has(student.studentId)
-              return (
-                <div
-                  key={student.studentId}
-                  className="flex items-center space-x-3 rounded-md border px-3 py-2"
-                >
-                  <Checkbox
-                    id={`student-${student.studentId}`}
-                    checked={checked}
-                    onCheckedChange={(value) => toggleStudent(student.studentId, Boolean(value))}
-                  />
-                  <div className="space-y-1">
-                    <Label htmlFor={`student-${student.studentId}`} className="cursor-pointer">
-                      {student.name ?? student.email}
+            <>
+              {/* Selection Controls */}
+              <div className="sticky top-0 bg-background border-b p-3 z-10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="select-all-current"
+                      checked={paginatedStudents.length > 0 && paginatedStudents.every(student => selected.has(student.studentId))}
+                      onCheckedChange={handleSelectAll}
+                    />
+                    <Label htmlFor="select-all-current" className="text-sm cursor-pointer">
+                      Pilih semua ({paginatedStudents.length} siswa di halaman ini)
                     </Label>
-                    <p className="text-xs text-muted-foreground">{student.email}</p>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {selected.size} siswa dipilih total
                   </div>
                 </div>
-              )
-            })
+              </div>
+
+              {/* Student List */}
+              <div className="p-3 pt-0">
+                <div className="grid gap-1">
+                  {paginatedStudents.map((student) => (
+                    <div
+                      key={student.studentId}
+                      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted/50 cursor-pointer border border-transparent hover:border-border transition-colors"
+                      onClick={() => toggleStudent(student.studentId, !selected.has(student.studentId))}
+                    >
+                      <Checkbox
+                        id={`student-${student.studentId}`}
+                        checked={selected.has(student.studentId)}
+                        onCheckedChange={(value) => toggleStudent(student.studentId, Boolean(value))}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{student.name ?? student.email}</p>
+                        <p className="text-sm text-muted-foreground truncate">{student.email}</p>
+                      </div>
+                      <div className="text-xs text-muted-foreground whitespace-nowrap">
+                        {selected.has(student.studentId) && (
+                          <span className="text-green-600 font-medium">✓ Dipilih</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="sticky bottom-0 bg-background border-t p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      Menampilkan {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredStudents.length)} dari {filteredStudents.length} siswa
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Sebelumnya
+                      </Button>
+                      <span className="text-sm px-3 py-1">
+                        Halaman {currentPage} dari {totalPages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                      >
+                        Selanjutnya
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button onClick={onSubmit} disabled={isPending || students.length === 0}>
-            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save members"}
-          </Button>
+
+        <div className="flex justify-between gap-2 pt-4 border-t">
+          <div className="flex-1">
+            {selected.size > 0 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelected(new Set())}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  Hapus Pilihan
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  {selected.size} siswa dipilih
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Batal
+            </Button>
+            <Button onClick={onSubmit} disabled={isPending || filteredStudents.length === 0}>
+              {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Simpan Anggota"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
