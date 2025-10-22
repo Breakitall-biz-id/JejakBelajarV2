@@ -12,6 +12,7 @@ import { DeleteAccountDialog } from "./delete-account-dialog";
 import { ImportStudentsDialog } from "./import-students-dialog";
 import { DownloadTemplateButton } from "./download-template-button";
 import { ExportStudentsDialog } from "./export-students-dialog";
+import { ExportTeachersDialog } from "./export-teachers-dialog";
 import { getAvailableClasses } from "@/app/dashboard/admin/actions";
 import { Upload, Download } from "lucide-react";
 
@@ -21,11 +22,16 @@ export function AccountsTabsClient({ teacherRows, studentRows }: { teacherRows: 
   const [deleteDialog, setDeleteDialog] = useState<{ account: AccountRow; role: "TEACHER" | "STUDENT" } | null>(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [teacherExportDialogOpen, setTeacherExportDialogOpen] = useState(false);
   const [availableClasses, setAvailableClasses] = useState<any[]>([]);
   const [isLoadingClasses, setIsLoadingClasses] = useState(false);
 
   const handleExportSuccess = () => {
     toast.success("Export data siswa berhasil!");
+  };
+
+  const handleTeacherExportSuccess = () => {
+    toast.success("Export data guru berhasil!");
   };
 
   const loadAvailableClasses = async () => {
@@ -76,7 +82,15 @@ export function AccountsTabsClient({ teacherRows, studentRows }: { teacherRows: 
         </TabsList>
         <TabsContent value="guru">
           <div className="mt-4">
-            <div className="flex justify-end mb-2">
+            <div className="flex justify-between items-center mb-2">
+              <Button
+                variant="outline"
+                onClick={() => setTeacherExportDialogOpen(true)}
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Export Excel
+              </Button>
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/60 focus:ring-offset-2"
@@ -150,6 +164,13 @@ export function AccountsTabsClient({ teacherRows, studentRows }: { teacherRows: 
         onOpenChange={setExportDialogOpen}
         availableClasses={availableClasses}
         onSuccess={handleExportSuccess}
+      />
+
+      {/* Export Teachers Dialog */}
+      <ExportTeachersDialog
+        open={teacherExportDialogOpen}
+        onOpenChange={setTeacherExportDialogOpen}
+        onSuccess={handleTeacherExportSuccess}
       />
     </>
   );

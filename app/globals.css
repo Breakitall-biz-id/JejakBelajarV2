@@ -187,6 +187,11 @@
   body {
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html {
+    scroll-behavior: smooth;
   }
 }
 
@@ -202,6 +207,47 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;  /* Chrome, Safari and Opera */
+  }
+
+  /* Mobile-safe text sizes */
+  .mobile-text-lg {
+    font-size: clamp(1.125rem, 4vw, 1.25rem);
+    line-height: 1.5;
+  }
+
+  .mobile-text-xl {
+    font-size: clamp(1.25rem, 5vw, 1.5rem);
+    line-height: 1.4;
+  }
+
+  /* Mobile-first responsive containers */
+  .mobile-container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .mobile-container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  /* Touch-friendly tap targets */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Prevent zoom on input focus (iOS) */
+  input, textarea, select {
+    font-size: 16px;
   }
 }
 

@@ -23,6 +23,21 @@ export const metadata: Metadata = {
   title: "JejakBelajar",
   description:
     "A comprehensive learning management system designed to streamline educational administration and enhance the learning experience.",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#111827" },
+  ],
+  manifest: "/manifest.json",
+  robots: "index, follow",
+  openGraph: {
+    title: "JejakBelajar",
+    description: "Platform pembelajaran interaktif untuk guru dan murid",
+    url: "https://jejakbelajar.sch.id",
+    siteName: "JejakBelajar",
+    locale: "id_ID",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
