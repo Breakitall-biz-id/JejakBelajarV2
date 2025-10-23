@@ -87,7 +87,7 @@ export function ProjectDetail({
     stageId?: string
   }>({ open: false })
   const [journalLoading, setJournalLoading] = React.useState(false)
-    const [selfDialog, setSelfDialog] = React.useState<{
+  const [selfDialog, setSelfDialog] = React.useState<{
     open: boolean
     stageName?: string
     instrumentId?: string
@@ -192,370 +192,376 @@ export function ProjectDetail({
     <>
       <OverlaySpinner show={globalLoading} text="Menyimpan dan memperbarui progres..." />
       <div className="max-w-7xl mx-auto w-full px-2 sm:px-4 py-6">
-      <Card className="mb-6">
-        <CardContent className="p-6 flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground mb-1">{project.title}</h1>
-              <div className="text-base text-muted-foreground font-medium">{project.theme}</div>
+        <Card className="mb-6">
+          <CardContent className="p-6 flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground mb-1">{project.title}</h1>
+                <div className="text-base text-muted-foreground font-medium">{project.theme}</div>
+              </div>
+              <div className="flex items-center gap-2 mt-2 sm:mt-0">
+              </div>
             </div>
-            <div className="flex items-center gap-2 mt-2 sm:mt-0">
-            </div>
+            <ProjectProgressBar project={project} />
+          </CardContent>
+        </Card>
+        <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
+          {/* Mobile: Horizontal scroll, Desktop: Full width */}
+          <div className="mb-4 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="w-auto min-w-max sm:w-full sm:flex">
+              <TabsTrigger value="about" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Tentang</TabsTrigger>
+              <TabsTrigger value="stages" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Tahapan</TabsTrigger>
+              <TabsTrigger value="progress" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Progress</TabsTrigger>
+              <TabsTrigger value="rapor" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Rapor</TabsTrigger>
+              <TabsTrigger value="group" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Kelompok</TabsTrigger>
+            </TabsList>
           </div>
-          <ProjectProgressBar project={project} />
-        </CardContent>
-      </Card>
-      <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
-        {/* Mobile: Horizontal scroll, Desktop: Full width */}
-        <div className="mb-4 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
-          <TabsList className="w-auto min-w-max sm:w-full sm:flex">
-            <TabsTrigger value="about" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Tentang</TabsTrigger>
-            <TabsTrigger value="stages" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Tahapan</TabsTrigger>
-            <TabsTrigger value="progress" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Progress</TabsTrigger>
-            <TabsTrigger value="rapor" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Rapor</TabsTrigger>
-            <TabsTrigger value="group" className="flex-shrink-0 px-4 sm:flex-1 sm:px-2">Kelompok</TabsTrigger>
-          </TabsList>
-        </div>
-        <TabsContent value="stages">
-          <div className="flex flex-col gap-4">
-            {groupedStages.map((stage, idx) => (
-              <Card key={stage.name} className="border-muted">
-                <CardContent className="p-4 flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="w-7 h-7 flex items-center justify-center rounded-full text-background font-bold text-base bg-primary">{idx + 1}</span>
-                    <span className="font-semibold text-foreground text-base">{stage.name}</span>
-                    {stage.status === "LOCKED" && (
-                      <span className="ml-2 text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground border border-muted">Terkunci</span>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1 mt-2 ml-8">
-                    {stage.requiredInstruments.map((ins) => {
-                      // For journals, use unique key with templateStageConfigId to differentiate multiple journals
-                      const submissionKey = ins.instrumentType === 'JOURNAL' && ins.templateStageConfigId
-                        ? `${ins.instrumentType}_${ins.templateStageConfigId}`
-                        : ins.instrumentType
-                      const submission: Submission | undefined = ((stage.submissionsByInstrument[submissionKey] || []) as Submission[])[0]
-                      let status: "done" | "pending" | "waiting" = "pending"
-                      let actionLabel: string | undefined = undefined
-                      let onAction: (() => void) | undefined = undefined
-                      let disabled = stage.status === "LOCKED"
+          <TabsContent value="stages">
+            <div className="flex flex-col gap-4">
+              {groupedStages.map((stage, idx) => (
+                <Card key={stage.name} className="border-muted">
+                  <CardContent className="p-4 flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-7 h-7 flex items-center justify-center rounded-full text-background font-bold text-base bg-primary">{idx + 1}</span>
+                      <span className="font-semibold text-foreground text-base">{stage.name}</span>
+                      {stage.status === "LOCKED" && (
+                        <span className="ml-2 text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground border border-muted">Terkunci</span>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-1 mt-2 ml-8">
+                      {stage.requiredInstruments.map((ins) => {
+                        // For journals, use unique key with templateStageConfigId to differentiate multiple journals
+                        const submissionKey = ins.instrumentType === 'JOURNAL' && ins.templateStageConfigId
+                          ? `${ins.instrumentType}_${ins.templateStageConfigId}`
+                          : ins.instrumentType
+                        const submission: Submission | undefined = ((stage.submissionsByInstrument[submissionKey] || []) as Submission[])[0]
+                        let status: "done" | "pending" | "waiting" = "pending"
+                        let actionLabel: string | undefined = undefined
+                        let onAction: (() => void) | undefined = undefined
+                        let disabled = stage.status === "LOCKED"
 
-                      if (ins.instrumentType === "OBSERVATION") {
-                        status = "waiting"
-                        actionLabel = undefined
-                        onAction = undefined
-                        disabled = true
-                      } else if (submission) {
-                        status = "done"
-                        actionLabel = "Lihat"
-                      } else {
-                        status = disabled ? "pending" : "pending"
-                        actionLabel = disabled ? undefined : "Kerjakan"
-                      }
+                        if (ins.instrumentType === "OBSERVATION") {
+                          status = "waiting"
+                          actionLabel = undefined
+                          onAction = undefined
+                          disabled = true
+                        } else if (submission) {
+                          status = "done"
+                          actionLabel = "Lihat"
+                        } else {
+                          status = disabled ? "pending" : "pending"
+                          actionLabel = disabled ? undefined : "Kerjakan"
+                        }
 
-                      let title = ""
-                      if (ins.instrumentType === "JOURNAL") title = "Refleksi (Journal)"
-                      else if (ins.instrumentType === "SELF_ASSESSMENT") title = "Self Assessment"
-                      else if (ins.instrumentType === "PEER_ASSESSMENT") title = "Peer Assessment"
-                      else if (ins.instrumentType === "OBSERVATION") title = "Observasi (Guru)"
-                      else title = ins.instrumentType
+                        let title = ""
+                        if (ins.instrumentType === "JOURNAL") title = "Refleksi (Journal)"
+                        else if (ins.instrumentType === "SELF_ASSESSMENT") title = "Self Assessment"
+                        else if (ins.instrumentType === "PEER_ASSESSMENT") title = "Peer Assessment"
+                        else if (ins.instrumentType === "OBSERVATION") title = "Observasi (Guru)"
+                        else title = ins.instrumentType
 
-                      if (ins.instrumentType === "JOURNAL" && actionLabel && !submission) {
-                        onAction = async () => {
-                          setJournalDialog({
+                        if (ins.instrumentType === "JOURNAL" && actionLabel && !submission) {
+                          onAction = async () => {
+                            setJournalDialog({
+                              open: true,
+                              stageName: stage.name,
+                              instrumentId: ins.id,
+                              templateStageConfigId: ins.templateStageConfigId,
+                              prompts: ins.questions?.map((q: { questionText: string }) => q.questionText) || [ins.description || "Tulis refleksi kamu di sini..."],
+                              initialValue: (() => {
+                                // For journals, use unique key with templateStageConfigId to differentiate multiple journals
+                                const submissionKey = ins.instrumentType === 'JOURNAL' && ins.templateStageConfigId
+                                  ? `${ins.instrumentType}_${ins.templateStageConfigId}`
+                                  : ins.instrumentType
+                                const submission: Submission | undefined = ((stage.submissionsByInstrument[submissionKey] || []) as Submission[])[0]
+                                if (
+                                  submission?.content &&
+                                  typeof submission.content === "object" &&
+                                  "text" in submission.content &&
+                                  (submission.content as { text?: unknown }).text != null
+                                ) {
+                                  // Handle single text answer for backward compatibility
+                                  return [String((submission.content as { text?: unknown }).text ?? "")]
+                                }
+                                return undefined
+                              })(),
+                              stageId: stage.id
+                            })
+                          }
+                        }
+                        if (ins.instrumentType === "SELF_ASSESSMENT" && actionLabel && !submission) {
+                          onAction = () => setSelfDialog({
                             open: true,
                             stageName: stage.name,
                             instrumentId: ins.id,
                             templateStageConfigId: ins.templateStageConfigId,
-                            prompts: ins.questions?.map((q: { questionText: string }) => q.questionText) || [ins.description || "Tulis refleksi kamu di sini..."],
+                            statements: ins.questions?.map((q: { questionText: string }) => q.questionText) || [], // Pass questions as statements
                             initialValue: (() => {
                               // For journals, use unique key with templateStageConfigId to differentiate multiple journals
-                      const submissionKey = ins.instrumentType === 'JOURNAL' && ins.templateStageConfigId
-                        ? `${ins.instrumentType}_${ins.templateStageConfigId}`
-                        : ins.instrumentType
-                      const submission: Submission | undefined = ((stage.submissionsByInstrument[submissionKey] || []) as Submission[])[0]
+                              const submissionKey = ins.instrumentType === 'JOURNAL' && ins.templateStageConfigId
+                                ? `${ins.instrumentType}_${ins.templateStageConfigId}`
+                                : ins.instrumentType
+                              const submission: Submission | undefined = ((stage.submissionsByInstrument[submissionKey] || []) as Submission[])[0]
                               if (
                                 submission?.content &&
                                 typeof submission.content === "object" &&
-                                "text" in submission.content &&
-                                (submission.content as { text?: unknown }).text != null
+                                Array.isArray((submission.content as { answers: number[] }).answers)
                               ) {
-                                // Handle single text answer for backward compatibility
-                                return [String((submission.content as { text?: unknown }).text ?? "")]
+                                return (submission.content as { answers: number[] }).answers
                               }
                               return undefined
-                            })(),
-                            stageId: stage.id
+                            })()
                           })
                         }
-                      }
-                      if (ins.instrumentType === "SELF_ASSESSMENT" && actionLabel && !submission) {
-                        onAction = () => setSelfDialog({
-                          open: true,
-                          stageName: stage.name,
-                          instrumentId: ins.id,
-                          templateStageConfigId: ins.templateStageConfigId,
-                          statements: ins.questions?.map((q: { questionText: string }) => q.questionText) || [], // Pass questions as statements
-                          initialValue: (() => {
-                            // For journals, use unique key with templateStageConfigId to differentiate multiple journals
-                      const submissionKey = ins.instrumentType === 'JOURNAL' && ins.templateStageConfigId
-                        ? `${ins.instrumentType}_${ins.templateStageConfigId}`
-                        : ins.instrumentType
-                      const submission: Submission | undefined = ((stage.submissionsByInstrument[submissionKey] || []) as Submission[])[0]
-                            if (
-                              submission?.content &&
-                              typeof submission.content === "object" &&
-                              Array.isArray((submission.content as { answers: number[] }).answers)
-                            ) {
-                              return (submission.content as { answers: number[] }).answers
-                            }
-                            return undefined
-                          })()
-                        })
-                      }
-                      if (ins.instrumentType === "PEER_ASSESSMENT" && actionLabel && !submission) {
-                        onAction = () => setPeerDialog({
-                          open: true,
-                          stageName: stage.name,
-                          instrumentId: ins.id,
-                          statements: ins.questions?.map((q: { questionText: string }) => q.questionText) || ["Teman saya menunjukkan sikap menghargai saat mendengarkan pendapat teman kelompok."],
-                          initialValue: (() => {
-                            // For journals, use unique key with templateStageConfigId to differentiate multiple journals
-                      const submissionKey = ins.instrumentType === 'JOURNAL' && ins.templateStageConfigId
-                        ? `${ins.instrumentType}_${ins.templateStageConfigId}`
-                        : ins.instrumentType
-                      const submission: Submission | undefined = ((stage.submissionsByInstrument[submissionKey] || []) as Submission[])[0]
-                            if (
-                              submission?.content &&
-                              typeof submission.content === "object" &&
-                              Array.isArray((submission.content as { answers: number[][] }).answers)
-                            ) {
-                              return (submission.content as { answers: number[][] }).answers
-                            }
-                            return undefined
-                          })()
-                        })
-                      }
+                        if (ins.instrumentType === "PEER_ASSESSMENT" && actionLabel && !submission) {
+                          onAction = () => setPeerDialog({
+                            open: true,
+                            stageName: stage.name,
+                            instrumentId: ins.id,
+                            statements: ins.questions?.map((q: { questionText: string }) => q.questionText) || ["Teman saya menunjukkan sikap menghargai saat mendengarkan pendapat teman kelompok."],
+                            initialValue: (() => {
+                              // For journals, use unique key with templateStageConfigId to differentiate multiple journals
+                              const submissionKey = ins.instrumentType === 'JOURNAL' && ins.templateStageConfigId
+                                ? `${ins.instrumentType}_${ins.templateStageConfigId}`
+                                : ins.instrumentType
+                              const submission: Submission | undefined = ((stage.submissionsByInstrument[submissionKey] || []) as Submission[])[0]
+                              if (
+                                submission?.content &&
+                                typeof submission.content === "object" &&
+                                Array.isArray((submission.content as { answers: number[][] }).answers)
+                              ) {
+                                return (submission.content as { answers: number[][] }).answers
+                              }
+                              return undefined
+                            })()
+                          })
+                        }
 
-                      return (
-                        <InstrumentChecklistItem
-                          key={ins.id}
-                          instrumentType={ins.instrumentType}
-                          title={title}
-                          status={status}
-                          actionLabel={actionLabel}
-                          onAction={onAction}
-                          disabled={disabled}
-                        />
-                      )
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-        <TabsContent value="progress">
-          <StudentDimensionScores student={student} projectId={project.id} />
-        </TabsContent>
-        <TabsContent value="rapor">
-          <StudentRapor student={student} projectId={project.id} />
-        </TabsContent>
-        <TabsContent value="group">
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
-                <h3 className="text-lg font-semibold">Evaluasi Anggota Kelompok</h3>
-                <div className="text-sm text-muted-foreground">
-                  {project.group?.members.filter(member => member.studentId !== project.currentStudentId).length || 0} anggota untuk dievaluasi
-                </div>
-              </div>
-
-              <div className="space-y-4 sm:space-y-6">
-                {/* Section for evaluations I gave to others */}
-                <div>
-                  <h4 className="text-md font-medium text-muted-foreground mb-3">Evaluasi yang saya berikan</h4>
-                  <div className="space-y-3 sm:space-y-4">
-                    {project.group?.members
-                      .filter((member) => member.studentId !== project.currentStudentId) // Filter current user
-                      .map((member) => (
-                  <Card key={member.studentId} className="p-3 sm:p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-primary">
-                            {member.name?.charAt(0).toUpperCase() || member.email.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="font-medium truncate">{member.name || 'Tanpa Nama'}</div>
-                          <div className="text-sm text-muted-foreground truncate">{member.email}</div>
-                        </div>
-                      </div>
-
-                      <div className="w-full sm:w-80 bg-muted/30 rounded-lg border border-border/50">
-                        <div className="p-3 border-b border-border/50">
-                          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Evaluasi Kontribusi</div>
-                        </div>
-                        <div className="p-3">
-                          {editingComment?.memberId === member.studentId ? (
-                            <div className="space-y-3">
-                              <Textarea
-                                value={editingComment.comment}
-                                onChange={(e) => setEditingComment({
-                                  ...editingComment,
-                                  comment: e.target.value
-                                })}
-                                placeholder="Tulis evaluasi tentang kontribusi atau ide dari anggota kelompok ini..."
-                                rows={3}
-                                className="resize-none text-sm border-border/50 focus:border-primary"
-                              />
-                              <div className="flex gap-2 justify-end">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setEditingComment(null)}
-                                  className="text-xs h-7 px-3"
-                                >
-                                  Batal
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  onClick={async () => {
-                                    setGlobalLoading(true)
-                                    const result = await updateGroupMemberComment({
-                                      projectId: project.id,
-                                      targetMemberId: member.studentId,
-                                      comment: editingComment.comment.trim() || undefined,
-                                    })
-                                    if (result.success) {
-                                      // Optimistic update - update local state immediately
-                                      const newComment = editingComment.comment.trim() || undefined
-                                      if (newComment) {
-                                        setLocalComments(prev => ({
-                                          ...prev,
-                                          [member.studentId]: newComment
-                                        }))
-                                      } else {
-                                        setLocalComments(prev => {
-                                          const newState = { ...prev }
-                                          delete newState[member.studentId]
-                                          return newState
-                                        })
-                                      }
-
-                                      toast.success("Evaluasi berhasil disimpan!")
-                                      // Clear editing state
-                                      setEditingComment(null)
-
-                                      // Refresh data to sync with server
-                                      router.refresh()
-                                      setGlobalLoading(false)
-                                    } else {
-                                      setGlobalLoading(false)
-                                      toast.error(result.error || "Gagal menyimpan evaluasi.")
-                                    }
-                                  }}
-                                  className="text-xs h-7 px-3"
-                                >
-                                  Simpan
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="space-y-2">
-                              <div className="text-sm text-muted-foreground min-h-[2.5rem] flex items-center">
-                                {localComments[member.studentId] || member.comment ? (
-                                  <span className="line-clamp-2">{localComments[member.studentId] || member.comment}</span>
-                                ) : (
-                                  <span className="italic text-muted-foreground/60">Belum ada evaluasi</span>
-                                )}
-                              </div>
-                              <div className="flex justify-end">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setEditingComment({
-                                    memberId: member.studentId,
-                                    comment: localComments[member.studentId] || member.comment || ''
-                                  })}
-                                  className="text-xs h-7 px-3 hover:bg-primary/10 hover:text-primary"
-                                >
-                                  {localComments[member.studentId] || member.comment ? 'Edit Evaluasi' : 'Tambah Evaluasi'}
-                                </Button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                        return (
+                          <InstrumentChecklistItem
+                            key={ins.id}
+                            instrumentType={ins.instrumentType}
+                            title={title}
+                            status={status}
+                            actionLabel={actionLabel}
+                            onAction={onAction}
+                            disabled={disabled}
+                          />
+                        )
+                      })}
                     </div>
-                    </Card>
-                    ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+          <TabsContent value="progress">
+            <StudentDimensionScores student={student} projectId={project.id} />
+          </TabsContent>
+          <TabsContent value="rapor">
+            <StudentRapor student={student} projectId={project.id} />
+          </TabsContent>
+          <TabsContent value="group">
+            <Card>
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+                  <h3 className="text-lg font-semibold">Evaluasi Anggota Kelompok</h3>
+                  <div className="text-sm text-muted-foreground">
+                    {project.group?.members.filter(member => member.studentId !== project.currentStudentId).length || 0} anggota untuk dievaluasi
                   </div>
                 </div>
 
-                {/* Section for evaluations I received from others */}
-                <div>
-                  <h4 className="text-md font-medium text-muted-foreground mb-3">Evaluasi dari teman kepada saya</h4>
+                <div className="space-y-4 sm:space-y-6">
+                  {/* Section for evaluations I gave to others */}
+                  <div>
+                    <h4 className="text-md font-medium text-muted-foreground mb-3">Evaluasi yang saya berikan</h4>
+                    <div className="space-y-3 sm:space-y-4">
+                      {project.group?.members
+                        .filter((member) => member.studentId !== project.currentStudentId) // Filter current user
+                        .map((member) => (
+                          <Card key={member.studentId} className="p-3 sm:p-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                                  <span className="text-sm font-medium text-primary">
+                                    {member.name?.charAt(0).toUpperCase() || member.email.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="font-medium truncate">{member.name || 'Tanpa Nama'}</div>
+                                  <div className="text-sm text-muted-foreground truncate">{member.email}</div>
+                                </div>
+                              </div>
 
-                  {/* Collect all feedback and display as anonymous cards */}
-                  {(() => {
-                    const allFeedback = project.group?.members
-                      .filter((member) => member.studentId !== project.currentStudentId)
-                      .map((member) => (member as GroupMember).feedbackToMe)
-                      .filter(feedback => feedback) || []
+                              <div className="w-full sm:w-80 bg-muted/30 rounded-lg border border-border/50">
+                                <div className="p-3 border-b border-border/50">
+                                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Evaluasi Kontribusi</div>
+                                </div>
+                                <div className="p-3">
+                                  {editingComment?.memberId === member.studentId ? (
+                                    <div className="space-y-3">
+                                      <Textarea
+                                        value={editingComment.comment}
+                                        onChange={(e) => setEditingComment({
+                                          ...editingComment,
+                                          comment: e.target.value
+                                        })}
+                                        placeholder="Tuliskan evaluasi"
+                                        rows={3}
+                                        className="resize-none text-sm border-border/50 focus:border-primary"
+                                      />
+                                      <div className="flex gap-2 justify-end">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => setEditingComment(null)}
+                                          className="text-xs h-7 px-3"
+                                        >
+                                          Batal
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          onClick={async () => {
+                                            setGlobalLoading(true)
+                                            const result = await updateGroupMemberComment({
+                                              projectId: project.id,
+                                              targetMemberId: member.studentId,
+                                              comment: editingComment.comment.trim() || undefined,
+                                            })
+                                            if (result.success) {
+                                              // Optimistic update - update local state immediately
+                                              const newComment = editingComment.comment.trim() || undefined
+                                              if (newComment) {
+                                                setLocalComments(prev => ({
+                                                  ...prev,
+                                                  [member.studentId]: newComment
+                                                }))
+                                              } else {
+                                                setLocalComments(prev => {
+                                                  const newState = { ...prev }
+                                                  delete newState[member.studentId]
+                                                  return newState
+                                                })
+                                              }
 
-                    if (allFeedback.length === 0) {
-                      return (
-                        <div className="text-center py-4 sm:py-6">
-                          <div className="text-muted-foreground text-sm">
-                            Belum ada evaluasi dari teman-teman kelompok Anda
-                          </div>
-                        </div>
-                      )
-                    }
+                                              toast.success("Evaluasi berhasil disimpan!")
+                                              // Clear editing state
+                                              setEditingComment(null)
 
-                    return (
-                      <div className="space-y-3 sm:space-y-2">
-                        {allFeedback.map((feedback, index) => (
-                          <div
-                            key={`feedback-${index}`}
-                            className="bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-950/20 dark:to-purple-950/20 border-l-2 border-blue-200 dark:border-blue-800 px-3 sm:px-4 py-2.5 sm:py-3 rounded-r-lg"
-                          >
-                            <div className="flex items-start gap-2 sm:gap-2">
-                              <div className="w-1.5 h-1.5 bg-blue-400 dark:bg-blue-600 rounded-full mt-1.5 sm:mt-2 flex-shrink-0"></div>
-                              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed pr-2 sm:pr-0">
-                                {feedback}
-                              </p>
+                                              // Refresh data to sync with server
+                                              router.refresh()
+                                              setGlobalLoading(false)
+                                            } else {
+                                              setGlobalLoading(false)
+                                              toast.error(result.error || "Gagal menyimpan evaluasi.")
+                                            }
+                                          }}
+                                          className="text-xs h-7 px-3"
+                                        >
+                                          Simpan
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-2">
+                                      <div
+                                        className="text-sm text-muted-foreground min-h-[2.5rem] flex items-center cursor-text hover:bg-muted/30 rounded-md p-2 -m-2 transition-colors"
+                                        onClick={() => setEditingComment({
+                                          memberId: member.studentId,
+                                          comment: localComments[member.studentId] || member.comment || ''
+                                        })}
+                                      >
+                                        {localComments[member.studentId] || member.comment ? (
+                                          <span className="line-clamp-2">{localComments[member.studentId] || member.comment}</span>
+                                        ) : (
+                                          <span className="italic text-muted-foreground/60 hover:text-primary transition-colors">Belum ada evaluasi</span>
+                                        )}
+                                      </div>
+                                      <div className="flex justify-end">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => setEditingComment({
+                                            memberId: member.studentId,
+                                            comment: localComments[member.studentId] || member.comment || ''
+                                          })}
+                                          className="text-xs h-7 px-3 hover:bg-primary/10 hover:text-primary"
+                                        >
+                                          {localComments[member.studentId] || member.comment ? 'Edit Evaluasi' : 'Tambah Evaluasi'}
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                    </div>
+                  </div>
+
+                  {/* Section for evaluations I received from others */}
+                  <div>
+                    <h4 className="text-md font-medium text-muted-foreground mb-3">Evaluasi dari teman kepada saya</h4>
+
+                    {/* Collect all feedback and display as anonymous cards */}
+                    {(() => {
+                      const allFeedback = project.group?.members
+                        .filter((member) => member.studentId !== project.currentStudentId)
+                        .map((member) => (member as GroupMember).feedbackToMe)
+                        .filter(feedback => feedback) || []
+
+                      if (allFeedback.length === 0) {
+                        return (
+                          <div className="text-center py-4 sm:py-6">
+                            <div className="text-muted-foreground text-sm">
+                              Belum ada evaluasi dari teman-teman kelompok Anda
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    )
-                  })()}
-                </div>
-              </div>
+                        )
+                      }
 
-              {!project.group?.members || project.group.members.filter(member => member.studentId !== project.currentStudentId).length === 0 && (
-                <div className="text-center py-6 sm:py-8">
-                  <div className="text-muted-foreground px-4">
-                    {project.group?.members.length === 1
-                      ? "Anda adalah satu-satunya anggota kelompok"
-                      : "Tidak ada anggota kelompok lain yang dapat dievaluasi"}
+                      return (
+                        <div className="space-y-3 sm:space-y-2">
+                          {allFeedback.map((feedback, index) => (
+                            <div
+                              key={`feedback-${index}`}
+                              className="bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-950/20 dark:to-purple-950/20 border-l-2 border-blue-200 dark:border-blue-800 px-3 sm:px-4 py-2.5 sm:py-3 rounded-r-lg"
+                            >
+                              <div className="flex items-start gap-2 sm:gap-2">
+                                <div className="w-1.5 h-1.5 bg-blue-400 dark:bg-blue-600 rounded-full mt-1.5 sm:mt-2 flex-shrink-0"></div>
+                                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed pr-2 sm:pr-0">
+                                  {feedback}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    })()}
                   </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="about">
-          <Card>
-            <CardContent className="p-4">
-              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: project.description || "<i>Tidak ada deskripsi.</i>" }} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+
+                {!project.group?.members || project.group.members.filter(member => member.studentId !== project.currentStudentId).length === 0 && (
+                  <div className="text-center py-6 sm:py-8">
+                    <div className="text-muted-foreground px-4">
+                      {project.group?.members.length === 1
+                        ? "Anda adalah satu-satunya anggota kelompok"
+                        : "Tidak ada anggota kelompok lain yang dapat dievaluasi"}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="about">
+            <Card>
+              <CardContent className="p-4">
+                <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: project.description || "<i>Tidak ada deskripsi.</i>" }} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Journal Assessment Dialog */}
