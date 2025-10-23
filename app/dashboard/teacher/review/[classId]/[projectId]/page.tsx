@@ -779,11 +779,19 @@ export default function ProjectDetailPage({
             members={(() => {
               if (!dialog.student) return [];
               const stageObj = project.stages.find(s => s.id === dialog.stageId);
-              // Use all group members except self
               if (!stageObj) return [];
-              // Ensure name is string (fallback to empty string)
+
+              // Get current student's group
+              const currentStudent = stageObj.students.find(stu => stu.id === dialog.student.id);
+              if (!currentStudent || !currentStudent.groupId) return [];
+
+              // Use only group members from the same group, except self
               return stageObj.students
-                .filter(stu => dialog.student && stu.id !== dialog.student.id)
+                .filter(stu =>
+                  dialog.student &&
+                  stu.id !== dialog.student.id &&
+                  stu.groupId === currentStudent.groupId
+                )
                 .map(stu => ({ id: stu.id, name: stu.name || "" }));
             })()}
             statements={(() => {
@@ -800,7 +808,20 @@ export default function ProjectDetailPage({
             })()}
             loading={false}
             currentUserId={null}
-            title={"Peer Assessment"}
+            title={() => {
+              if (!dialog.student) return "Peer Assessment";
+              const stageObj = project.stages.find(s => s.id === dialog.stageId);
+              if (!stageObj) return "Peer Assessment";
+
+              const currentStudent = stageObj.students.find(stu => stu.id === dialog.student.id);
+              if (!currentStudent) return "Peer Assessment";
+
+              if (!currentStudent.groupId) {
+                return "Peer Assessment - Tidak Ada Kelompok";
+              }
+
+              return `Peer Assessment - ${currentStudent.groupName || 'Kelompok ' + currentStudent.groupId.slice(0, 8)}`;
+            }}
             readOnly={true}
             stageId={dialog.stageId || ''}
             projectId={project.id}

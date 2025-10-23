@@ -144,7 +144,7 @@ export async function getTeacherDashboardData(
       .from(projects)
       .where(
         and(
-          eq(projects.teacherId, teacher.id),
+          // Remove teacherId filter to show all projects in classes assigned to the teacher
           inArray(projects.classId, classIds),
         ),
       )

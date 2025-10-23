@@ -88,7 +88,7 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
     .from(projects)
     .where(
       and(
-        eq(projects.teacherId, teacher.id),
+        // Remove teacherId filter to show all projects in classes assigned to the teacher
         inArray(projects.classId, classIds),
       ),
     )
@@ -366,8 +366,8 @@ export async function getProjectDetail(classId: string, projectId: string, teach
     .where(
       and(
         eq(projects.id, projectId),
-        eq(projects.classId, classId),
-        eq(projects.teacherId, teacher.id)
+        eq(projects.classId, classId)
+        // Remove teacherId filter - teacher already verified to have access to this class
       )
     )
     .limit(1)
