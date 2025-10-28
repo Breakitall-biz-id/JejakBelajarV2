@@ -50,6 +50,7 @@ export type TeacherReviewData = {
           }
           submissions: Array<{
             id: string
+            templateStageConfigId: string | null
             instrumentType: string
             content: unknown
             score: number | null
@@ -167,6 +168,7 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
       id: submissions.id,
       submittedById: submissions.submittedById,
       projectStageId: submissions.projectStageId,
+      templateStageConfigId: submissions.templateStageConfigId,
       instrumentType: sql`COALESCE(${templateStageConfigs.instrumentType}, 'OBSERVATION')`,
       score: submissions.score,
       feedback: submissions.feedback,
@@ -238,6 +240,7 @@ export async function getTeacherReviewData(teacher: CurrentUser): Promise<Teache
           },
           submissions: submissionsForStage.map((submission) => ({
             id: submission.id,
+            templateStageConfigId: submission.templateStageConfigId,
             instrumentType: submission.instrumentType,
             content: submission.content,
             score: submission.score,
@@ -290,6 +293,7 @@ export type ProjectDetailData = {
     status: string
     requiredInstruments: Array<{
       id: string
+      templateStageConfigId: string | null
       instrumentType: string
       isRequired: boolean
       description?: string | null
@@ -315,6 +319,7 @@ export type ProjectDetailData = {
       progress: { status: string }
       submissions: Array<{
         id: string
+        templateStageConfigId: string | null
         instrumentType: string
         content: unknown
         submittedAt: string
@@ -422,9 +427,23 @@ export async function getProjectDetail(classId: string, projectId: string, teach
     .from(templateStageConfigs)
     .where(inArray(templateStageConfigs.stageName, stageRows.map(s => s.name)))
 
+  // Use Map with counters to handle multiple instruments of same type in same stage
   const configKeyToId = new Map<string, string>()
-  for (const row of templateConfigRows) {
-    configKeyToId.set(`${row.stageName}__${row.instrumentType}`, row.id)
+  const instrumentCounters = new Map<string, number>()
+
+  // Sort template configs by stage name and instrument type to ensure consistent ordering
+  const sortedConfigs = templateConfigRows.sort((a, b) => {
+    if (a.stageName !== b.stageName) return a.stageName.localeCompare(b.stageName)
+    if (a.instrumentType !== b.instrumentType) return a.instrumentType.localeCompare(b.instrumentType)
+    return 0
+  })
+
+  for (const row of sortedConfigs) {
+    const key = `${row.stageName}__${row.instrumentType}`
+    const count = instrumentCounters.get(key) || 0
+    const uniqueKey = `${key}__${count}`
+    configKeyToId.set(uniqueKey, row.id)
+    instrumentCounters.set(key, count + 1)
   }
 
   const allConfigIds = Array.from(configKeyToId.values())
@@ -527,6 +546,7 @@ export async function getProjectDetail(classId: string, projectId: string, teach
       submittedById: submissions.submittedById,
       submittedBy: submissions.submittedBy,
       projectStageId: submissions.projectStageId,
+      templateStageConfigId: submissions.templateStageConfigId,
       instrumentType: templateStageConfigs.instrumentType,
       targetStudentId: submissions.targetStudentId,
       score: submissions.score,
@@ -550,6 +570,7 @@ export async function getProjectDetail(classId: string, projectId: string, teach
       submittedById: submissions.submittedById,
       submittedBy: submissions.submittedBy,
       projectStageId: submissions.projectStageId,
+      templateStageConfigId: submissions.templateStageConfigId,
       instrumentType: templateStageConfigs.instrumentType,
       targetStudentId: submissions.targetStudentId,
       score: submissions.score,
@@ -618,15 +639,29 @@ export async function getProjectDetail(classId: string, projectId: string, teach
 
   // Transform data
   const stages = stageRows.map(stage => {
+    // Count instruments by type within this stage for proper indexing
+    const instrumentTypeCounters = new Map<string, number>()
+
     const instruments = instrumentRows
       .filter(instrument => instrument.projectStageId === stage.id)
+      .sort((a, b) => {
+        // Sort instruments consistently to ensure proper indexing
+        if (a.instrumentType !== b.instrumentType) return a.instrumentType.localeCompare(b.instrumentType)
+        return 0
+      })
       .map(instrument => {
-        // Find template config for this stage/instrument
-        const configId = configKeyToId.get(`${stage.name}__${instrument.instrumentType}`)
+        // Calculate index for this instrument type within this stage
+        const typeKey = instrument.instrumentType
+        const index = instrumentTypeCounters.get(typeKey) || 0
+        instrumentTypeCounters.set(typeKey, index + 1)
+
+        // Find template config using indexed key
+        const configId = configKeyToId.get(`${stage.name}__${instrument.instrumentType}__${index}`)
         const questions = configId ? configIdToQuestions.get(configId) || [] : []
         const rubrics = instrument.instrumentType === "JOURNAL" && configId ? configIdToRubrics.get(configId) || [] : []
         return {
           id: instrument.id,
+          templateStageConfigId: configId || null,
           instrumentType: instrument.instrumentType,
           isRequired: instrument.isRequired,
           description: instrument.description,
@@ -714,9 +749,10 @@ export async function getProjectDetail(classId: string, projectId: string, teach
 
           return {
             id: submission.id,
+            templateStageConfigId: submission.templateStageConfigId,
             instrumentType: submission.instrumentType,
             content: processedContent,
-            submittedAt: submission.submittedAt?.toISOString() || new Date().toISOString(),
+            submittedAt: submission.submissionAt?.toISOString() || new Date().toISOString(),
             score: submission.score,
             feedback: submission.feedback,
             teacherGrades,

@@ -20,6 +20,7 @@ type DialogState = {
   instrumentType: string | null;
   instrumentDesc?: string | null;
   stageId?: string;
+  instrumentId?: string; // Add this to track specific instrument
 };
 import * as React from "react"
 import { use } from "react"
@@ -53,6 +54,7 @@ type StudentWithPeerMatrix = {
 
 type InstrumentWithQuestions = {
   id: string;
+  templateStageConfigId: string | null;
   instrumentType: string;
   isRequired: boolean;
   description?: string | null;
@@ -365,23 +367,17 @@ export default function ProjectDetailPage({
                         }
                         submissions = submittedStudents;
                       } else {
-                        // For other instruments (like JOURNAL), distribute submissions evenly across instruments of the same type
-                        // This ensures each instrument gets unique submissions instead of duplicates
+                        // For other instruments (like JOURNAL), match submissions by templateStageConfigId
+                        // This ensures each instrument gets the correct submissions based on the template configuration
                         const studentSubmissions = new Map();
-                        const instrumentsOfSameType = stage.requiredInstruments.filter(i => i.instrumentType === instrument.instrumentType);
-                        const instrumentIndex = instrumentsOfSameType.findIndex(i => i.id === instrument.id);
 
                         stage.students.forEach(student => {
-                          const subs = student.submissions?.filter(sub => sub.instrumentType === instrument.instrumentType) || [];
-                          if (subs.length > 0) {
-                            // Sort submissions by date to ensure consistent ordering
-                            const sortedSubs = subs.sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
+                          // Find submission that matches this instrument's templateStageConfigId
+                          const matchingSubmission = student.submissions?.find(sub =>
+                            sub.templateStageConfigId === instrument.templateStageConfigId
+                          );
 
-                            // Distribute submissions evenly across instruments of the same type
-                            // Using modulo operation to ensure each instrument gets different submissions
-                            const targetIndex = instrumentIndex % sortedSubs.length;
-                            const matchingSubmission = sortedSubs[targetIndex];
-
+                          if (matchingSubmission) {
                             studentSubmissions.set(student.id, { student, submission: matchingSubmission });
                           }
                         });
@@ -469,16 +465,16 @@ export default function ProjectDetailPage({
                                                 })
                                               } else {
                                                 // Fallback to old dialog
-                                                setDialog({ open: true, student: { ...student, submission }, instrumentType: instrument.instrumentType, instrumentDesc: instrument.description || '', stageId: stage.id })
+                                                setDialog({ open: true, student: { ...student, submission }, instrumentType: instrument.instrumentType, instrumentDesc: instrument.description || '', stageId: stage.id, instrumentId: instrument.id })
                                               }
                                             } catch (error) {
                                               console.error("Gagal mengambil pengumpulan jurnal:", error)
                                               // Fallback to old dialog
-                                              setDialog({ open: true, student: { ...student, submission }, instrumentType: instrument.instrumentType, instrumentDesc: instrument.description || '', stageId: stage.id })
+                                              setDialog({ open: true, student: { ...student, submission }, instrumentType: instrument.instrumentType, instrumentDesc: instrument.description || '', stageId: stage.id, instrumentId: instrument.id })
                                             }
                                           } else {
                                             // Use old dialog for backward compatibility
-                                            setDialog({ open: true, student: { ...student, submission }, instrumentType: instrument.instrumentType, instrumentDesc: instrument.description || '', stageId: stage.id })
+                                            setDialog({ open: true, student: { ...student, submission }, instrumentType: instrument.instrumentType, instrumentDesc: instrument.description || '', stageId: stage.id, instrumentId: instrument.id })
                                           }
                                         }}
                                       >
@@ -707,12 +703,18 @@ export default function ProjectDetailPage({
             })()}
             prompts={(() => {
               const stageObj = project.stages.find(s => s.id === dialog.stageId)
-              const instrumentObj = stageObj?.requiredInstruments.find(i => i.instrumentType === "JOURNAL") as InstrumentWithQuestions | undefined;
+              // Find specific instrument by ID, fallback to first JOURNAL if instrumentId not available
+              const instrumentObj = dialog.instrumentId
+                ? stageObj?.requiredInstruments.find(i => i.id === dialog.instrumentId) as InstrumentWithQuestions | undefined
+                : stageObj?.requiredInstruments.find(i => i.instrumentType === "JOURNAL") as InstrumentWithQuestions | undefined;
               return instrumentObj?.questions?.map((q: { questionText: string }) => q.questionText) || [dialog.instrumentDesc || "Tulis refleksi kamu di sini..."];
             })()}
             rubrics={(() => {
               const stageObj = project.stages.find(s => s.id === dialog.stageId)
-              const instrumentObj = stageObj?.requiredInstruments.find(i => i.instrumentType === "JOURNAL") as InstrumentWithQuestions | undefined;
+              // Find specific instrument by ID, fallback to first JOURNAL if instrumentId not available
+              const instrumentObj = dialog.instrumentId
+                ? stageObj?.requiredInstruments.find(i => i.id === dialog.instrumentId) as InstrumentWithQuestions | undefined
+                : stageObj?.requiredInstruments.find(i => i.instrumentType === "JOURNAL") as InstrumentWithQuestions | undefined;
               return instrumentObj?.rubrics?.map((r: { id: string; indicatorText: string; criteria: { [score: string]: string } }) => ({
                 id: r.id,
                 indicatorText: r.indicatorText,
@@ -762,7 +764,10 @@ export default function ProjectDetailPage({
             title="Self Assessment"
             statements={(() => {
               const stageObj = project.stages.find(s => s.id === dialog.stageId)
-              const instrumentObj = stageObj?.requiredInstruments.find(i => i.instrumentType === "SELF_ASSESSMENT") as InstrumentWithQuestions | undefined;
+              // Find specific instrument by ID, fallback to first SELF_ASSESSMENT if instrumentId not available
+              const instrumentObj = dialog.instrumentId
+                ? stageObj?.requiredInstruments.find(i => i.id === dialog.instrumentId) as InstrumentWithQuestions | undefined
+                : stageObj?.requiredInstruments.find(i => i.instrumentType === "SELF_ASSESSMENT") as InstrumentWithQuestions | undefined;
               return instrumentObj?.questions?.map((q: { questionText: string }) => q.questionText) || [];
             })()}
             initialValue={typeof dialog.student?.submission.content === 'object' && dialog.student?.submission.content && 'answers' in dialog.student?.submission.content ? (dialog.student?.submission.content as { answers: number[] }).answers : []}
@@ -796,7 +801,10 @@ export default function ProjectDetailPage({
             })()}
             statements={(() => {
               const stageObj = project.stages.find(s => s.id === dialog.stageId)
-              const instrumentObj = stageObj?.requiredInstruments.find(i => i.instrumentType === "PEER_ASSESSMENT") as InstrumentWithQuestions | undefined;
+              // Find specific instrument by ID, fallback to first PEER_ASSESSMENT if instrumentId not available
+              const instrumentObj = dialog.instrumentId
+                ? stageObj?.requiredInstruments.find(i => i.id === dialog.instrumentId) as InstrumentWithQuestions | undefined
+                : stageObj?.requiredInstruments.find(i => i.instrumentType === "PEER_ASSESSMENT") as InstrumentWithQuestions | undefined;
               return instrumentObj?.questions?.map(q => q.questionText) || [];
             })()}
             initialValue={(() => {
