@@ -186,6 +186,54 @@ export default function ProjectDetailPage({
     isLoading?: boolean
   }>({ open: false, student: null })
 
+  // Export state
+  const [isExporting, setIsExporting] = React.useState(false)
+
+  const handleExportExcel = React.useCallback(async () => {
+    if (isExporting) return
+
+    setIsExporting(true)
+    try {
+      const response = await fetch(`/api/teacher/export/class/${classId}/projectId/${projectId}`)
+
+      if (!response.ok) {
+        throw new Error('Failed to export data')
+      }
+
+      // Get the blob
+      const blob = await response.blob()
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+
+      // Get filename from response headers or create default
+      const contentDisposition = response.headers.get('content-disposition')
+      let filename = 'Rekap_Nilai.xlsx'
+
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/)
+        if (filenameMatch) {
+          filename = filenameMatch[1]
+        }
+      }
+
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+    } catch (error) {
+      console.error('Export error:', error)
+      // You might want to show a toast or alert here
+      alert('Gagal mengekspor data. Silakan coba lagi.')
+    } finally {
+      setIsExporting(false)
+    }
+  }, [classId, projectId, isExporting])
+
   const loadProject = React.useCallback(async () => {
     try {
       setLoading(true)
@@ -311,9 +359,30 @@ export default function ProjectDetailPage({
 
         <Card>
           <CardContent className="p-6">
-            <div className="mb-4">
-              <h1 className="text-2xl font-bold">{project.title}</h1>
-              <p className="text-muted-foreground">{project.title}</p>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-2xl font-bold">{project.title}</h1>
+                <p className="text-muted-foreground">{project.title}</p>
+              </div>
+              <Button
+                onClick={() => handleExportExcel()}
+                className="bg-green-600 hover:bg-green-700 text-white"
+                disabled={isExporting}
+              >
+                {isExporting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Mengekspor...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export Excel
+                  </>
+                )}
+              </Button>
             </div>
             {/* ProjectProgressBar: pastikan props sesuai, jika error bisa dihilangkan sementara */}
             {/* <ProjectProgressBar project={project} /> */}
