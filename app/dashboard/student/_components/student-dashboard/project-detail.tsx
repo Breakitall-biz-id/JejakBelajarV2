@@ -99,6 +99,7 @@ export function ProjectDetail({
     open: boolean
     stageName?: string
     instrumentId?: string
+    templateStageConfigId?: string | null
     statements?: string[]
     initialValue?: number[][]
   }>({ open: false })
@@ -318,6 +319,7 @@ export function ProjectDetail({
                             open: true,
                             stageName: stage.name,
                             instrumentId: ins.id,
+                            templateStageConfigId: ins.templateStageConfigId,
                             statements: ins.questions?.map((q: { questionText: string }) => q.questionText) || ["Teman saya menunjukkan sikap menghargai saat mendengarkan pendapat teman kelompok."],
                             initialValue: (() => {
                               // For journals, use unique key with templateStageConfigId to differentiate multiple journals
@@ -662,6 +664,7 @@ export function ProjectDetail({
           return stage?.id || project.stages[0].id
         })() as string}
         instrumentType="PEER_ASSESSMENT"
+        templateStageConfigId={peerDialog.templateStageConfigId}
         readOnly={(() => {
           const stage = groupedStages.find(s => s.name === peerDialog.stageName)
           const instrument = stage?.requiredInstruments.find(i => i.id === peerDialog.instrumentId)

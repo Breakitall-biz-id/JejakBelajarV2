@@ -116,7 +116,20 @@ export async function GET(
     }
 
     // Get all data needed for export first
+    console.log("🔍 DEBUG: Getting export data for project:", projectId, "class:", classId)
     const exportData = await getProjectExportData(classId, projectId, teacher.id, selectedClassInfo)
+    console.log("🔍 DEBUG: Export data received:", {
+      studentScoresCount: exportData.studentScores?.length || 0,
+      statementsKeys: exportData.statements ? Object.keys(exportData.statements) : [],
+      peerStatementsCount: exportData.statements?.peerAssessmentStatements?.length || 0,
+      statementsType: typeof exportData.statements,
+      hasStatements: !!exportData.statements
+    })
+
+    if (!exportData.statements) {
+      throw new Error("Statements data is missing from export data")
+    }
+
     const { studentScores, statements } = exportData
 
     // Generate Excel file with 3-level headers for journals
@@ -134,11 +147,23 @@ export async function GET(
     const journalStartCol = currentCol
     let journalTotalCols = 0
 
+    // Validate statements.journalQuestions
+    if (!statements.journalQuestions || !Array.isArray(statements.journalQuestions)) {
+      console.log("🔍 DEBUG: Invalid journalQuestions:", statements.journalQuestions)
+      statements.journalQuestions = []
+    }
+
     // Header Row 1: "Jurnal Refleksi" (will span all journal columns)
     headerRow1.push('Jurnal Refleksi')
 
     // For each journal question, add: question text (level 2) + its rubrics (level 3)
-    statements.journalQuestions.forEach(question => {
+    if (statements.journalQuestions && Array.isArray(statements.journalQuestions)) {
+      statements.journalQuestions.forEach(question => {
+      // Validate question and rubrics
+      if (!question || !question.rubrics || !Array.isArray(question.rubrics)) {
+        console.log("🔍 DEBUG: Invalid question or rubrics:", question)
+        return
+      }
       // Level 2: Question text
       headerRow2.push(question.text.length > 50 ? question.text.substring(0, 50) + '...' : question.text)
 
@@ -154,15 +179,16 @@ export async function GET(
         }
         currentCol += 1
         journalTotalCols += 1
-      })
+          })
     })
+    }
 
     const journalEndCol = journalStartCol + journalTotalCols - 1
 
     // Add Penilaian Diri section (2-level headers only)
     const selfStartCol = currentCol
-    const selfEndCol = currentCol + statements.selfAssessmentStatements.length - 1
-    if (statements.selfAssessmentStatements.length > 0) {
+    const selfEndCol = currentCol + (statements.selfAssessmentStatements?.length || 0) - 1
+    if (statements.selfAssessmentStatements && statements.selfAssessmentStatements.length > 0) {
       headerRow1.push('Penilaian Diri')
       headerRow1.push(...Array(statements.selfAssessmentStatements.length - 1).fill(null))
       statements.selfAssessmentStatements.forEach(stmt => {
@@ -174,8 +200,8 @@ export async function GET(
 
     // Add Penilaian Teman Sebaya section (simplified for current data structure)
     const peerStartCol = currentCol
-    const peerEndCol = currentCol + statements.peerAssessmentStatements.length - 1
-    if (statements.peerAssessmentStatements.length > 0) {
+    const peerEndCol = currentCol + (statements.peerAssessmentStatements?.length || 0) - 1
+    if (statements.peerAssessmentStatements && statements.peerAssessmentStatements.length > 0) {
       headerRow1.push('Penilaian Teman Sebaya')
       headerRow1.push(...Array(statements.peerAssessmentStatements.length - 1).fill(null))
       statements.peerAssessmentStatements.forEach(stmt => {
@@ -187,8 +213,8 @@ export async function GET(
 
     // Add Lembar Observasi section (2-level headers only)
     const obsStartCol = currentCol
-    const obsEndCol = currentCol + statements.observationStatements.length - 1
-    if (statements.observationStatements.length > 0) {
+    const obsEndCol = currentCol + (statements.observationStatements?.length || 0) - 1
+    if (statements.observationStatements && statements.observationStatements.length > 0) {
       headerRow1.push('Lembar Observasi')
       headerRow1.push(...Array(statements.observationStatements.length - 1).fill(null))
       statements.observationStatements.forEach(stmt => {
@@ -204,24 +230,26 @@ export async function GET(
     if (journalTotalCols > 0) {
       merges.push({ s: { r: 0, c: journalStartCol }, e: { r: 0, c: journalEndCol } })
     }
-    if (statements.selfAssessmentStatements.length > 1) {
+    if (statements.selfAssessmentStatements && statements.selfAssessmentStatements.length > 1) {
       merges.push({ s: { r: 0, c: selfStartCol }, e: { r: 0, c: selfEndCol } })
     }
-    if (statements.peerAssessmentStatements.length > 1) {
+    if (statements.peerAssessmentStatements && statements.peerAssessmentStatements.length > 1) {
       merges.push({ s: { r: 0, c: peerStartCol }, e: { r: 0, c: peerEndCol } })
     }
-    if (statements.observationStatements.length > 1) {
+    if (statements.observationStatements && statements.observationStatements.length > 1) {
       merges.push({ s: { r: 0, c: obsStartCol }, e: { r: 0, c: obsEndCol } })
     }
 
     // Row 2 merges for journal questions
     let colIndex = journalStartCol
-    statements.journalQuestions.forEach(question => {
-      const questionColCount = question.rubrics.length // only rubrics now
-      // Merge question text across its rubric columns
-      merges.push({ s: { r: 1, c: colIndex }, e: { r: 1, c: colIndex + questionColCount - 1 } })
-      colIndex += questionColCount
-    })
+    if (statements.journalQuestions && Array.isArray(statements.journalQuestions)) {
+      statements.journalQuestions.forEach(question => {
+        const questionColCount = question.rubrics.length // only rubrics now
+        // Merge question text across its rubric columns
+        merges.push({ s: { r: 1, c: colIndex }, e: { r: 1, c: colIndex + questionColCount - 1 } })
+        colIndex += questionColCount
+      })
+    }
 
     
     // Build student data rows
@@ -229,27 +257,37 @@ export async function GET(
       const row = [student['Kelas'], student['Nama']]
 
       // Add journal rubric scores for each question (no student answers)
-      statements.journalQuestions.forEach(question => {
-        // Add rubric scores for this question only
-        question.rubrics.forEach(rubric => {
-          row.push(student[`Rubric_${rubric.id}`] || 0)
+      if (statements.journalQuestions && Array.isArray(statements.journalQuestions)) {
+        statements.journalQuestions.forEach(question => {
+          // Add rubric scores for this question only
+          if (question.rubrics && Array.isArray(question.rubrics)) {
+            question.rubrics.forEach(rubric => {
+              row.push(student[`Rubric_${rubric.id}`] || 0)
+            })
+          }
         })
-      })
+      }
 
       // Add self assessment scores
-      statements.selfAssessmentStatements.forEach((_, index) => {
-        row.push(student[`Self_${index + 1}`] || 0)
-      })
+      if (statements.selfAssessmentStatements && Array.isArray(statements.selfAssessmentStatements)) {
+        statements.selfAssessmentStatements.forEach((_, index) => {
+          row.push(student[`Self_${index + 1}`] || 0)
+        })
+      }
 
       // Add peer assessment scores (averaged per question)
-      statements.peerAssessmentStatements.forEach((_, index) => {
-        row.push(student[`Peer_${index + 1}`] || 0)
-      })
+      if (statements.peerAssessmentStatements && Array.isArray(statements.peerAssessmentStatements)) {
+        statements.peerAssessmentStatements.forEach((_, index) => {
+          row.push(student[`Peer_${index + 1}`] || 0)
+        })
+      }
 
       // Add observation scores
-      statements.observationStatements.forEach((_, index) => {
-        row.push(student[`Obs_${index + 1}`] || 0)
-      })
+      if (statements.observationStatements && Array.isArray(statements.observationStatements)) {
+        statements.observationStatements.forEach((_, index) => {
+          row.push(student[`Obs_${index + 1}`] || 0)
+        })
+      }
 
       return row
     })
@@ -275,15 +313,23 @@ export async function GET(
     colWidths.push({ wch: 30 }) // Jawaban Murid column
 
     // Add widths for individual rubric columns
-    const allRubricIds = Array.from(new Set(
-      statements.journalQuestions.flatMap(q => q.rubrics.map(r => r.id))
-    ))
+    const allRubricIds = statements.journalQuestions && Array.isArray(statements.journalQuestions)
+      ? Array.from(new Set(
+          statements.journalQuestions.flatMap(q => q.rubrics ? q.rubrics.map(r => r.id) : [])
+        ))
+      : []
     allRubricIds.forEach(() => colWidths.push({ wch: 12 })) // Rubric columns
 
     // Add dynamic column widths for other assessments
-    statements.selfAssessmentStatements.forEach(() => colWidths.push({ wch: 15 }))
-    statements.peerAssessmentStatements.forEach(() => colWidths.push({ wch: 15 }))
-    statements.observationStatements.forEach(() => colWidths.push({ wch: 15 }))
+    if (statements.selfAssessmentStatements && Array.isArray(statements.selfAssessmentStatements)) {
+      statements.selfAssessmentStatements.forEach(() => colWidths.push({ wch: 15 }))
+    }
+    if (statements.peerAssessmentStatements && Array.isArray(statements.peerAssessmentStatements)) {
+      statements.peerAssessmentStatements.forEach(() => colWidths.push({ wch: 15 }))
+    }
+    if (statements.observationStatements && Array.isArray(statements.observationStatements)) {
+      statements.observationStatements.forEach(() => colWidths.push({ wch: 15 }))
+    }
 
     worksheet['!cols'] = colWidths
 
@@ -315,18 +361,25 @@ export async function GET(
 }
 
 async function getProjectExportData(classId: string, projectId: string, teacherId: string, selectedClassInfo: { name: string }) {
-  // Get project stages
-  const stages = await db
-    .select({
-      id: projectStages.id,
-      name: projectStages.name,
-      order: projectStages.order,
-    })
-    .from(projectStages)
-    .where(eq(projectStages.projectId, projectId))
-    .orderBy(projectStages.order)
+  try {
+    console.log("🔍 DEBUG: getProjectExportData called with:", { classId, projectId, teacherId })
+
+    // Get project stages
+    const stages = await db
+      .select({
+        id: projectStages.id,
+        name: projectStages.name,
+        order: projectStages.order,
+      })
+      .from(projectStages)
+      .where(eq(projectStages.projectId, projectId))
+      .orderBy(projectStages.order)
+
+    console.log("🔍 DEBUG: Found stages:", stages.length, stages.map(s => ({ id: s.id, name: s.name, order: s.order })))
 
   const stageIds = stages.map(s => s.id)
+
+    console.log("🔍 DEBUG: Stage IDs:", stageIds)
 
   // Get stage instruments
   const instruments = await db
@@ -403,8 +456,8 @@ async function getProjectExportData(classId: string, projectId: string, teacherI
 
   // Build statements object for header generation and student processing
   const selfAssessmentStatements: Array<{ id: string; text: string }> = []
-  const peerAssessmentStatements: Array<{ id: string; text: string }> = []
-  const observationStatements: Array<{ id: string; text: string }> = []
+  const peerAssessmentStatements: Array<{ id: string; text: string; stageName?: string; stageOrder?: number; configId?: string }> = []
+  const observationStatements: Array<{ id: string; text: string; stageName?: string; stageOrder?: number; configId?: string }> = []
 
   // Get journal questions/prompts with their rubrics
   const journalQuestionsMap = new Map<string, Array<{ id: string; text: string; rubrics: Array<{ id: string; text: string }> }>>()
@@ -446,7 +499,11 @@ async function getProjectExportData(classId: string, projectId: string, teacherI
   // Flatten the questions for easier processing
   const journalQuestions = Array.from(journalQuestionsMap.values()).flat()
 
-  // Get self assessment questions
+  // 🔍 DEBUG: Log what we found so far
+  console.log('🔍 DEBUG: journalQuestions count:', journalQuestions.length)
+  console.log('🔍 DEBUG: configKeyToId values count:', Array.from(configKeyToId.values()).length)
+
+  // Get self assessment questions (only for stages in this project)
   const selfAssessmentQuestions = await db
     .select({
       id: templateQuestions.id,
@@ -454,7 +511,12 @@ async function getProjectExportData(classId: string, projectId: string, teacherI
     })
     .from(templateQuestions)
     .leftJoin(templateStageConfigs, eq(templateQuestions.configId, templateStageConfigs.id))
-    .where(eq(templateStageConfigs.instrumentType, 'SELF_ASSESSMENT'))
+    .where(
+      and(
+        eq(templateStageConfigs.instrumentType, 'SELF_ASSESSMENT'),
+        inArray(templateStageConfigs.stageName, stages.map(s => s.name))
+      )
+    )
 
   selfAssessmentQuestions.forEach(q => {
     selfAssessmentStatements.push({
@@ -463,45 +525,96 @@ async function getProjectExportData(classId: string, projectId: string, teacherI
     })
   })
 
-  // Get peer assessment questions
+  // Get peer assessment questions (only for configs that have actual submissions)
+  const configIdsWithSubmissions = await db
+    .select({ configId: submissions.templateStageConfigId })
+    .from(submissions)
+    .leftJoin(templateStageConfigs, eq(submissions.templateStageConfigId, templateStageConfigs.id))
+    .where(
+      and(
+        eq(submissions.projectId, projectId),
+        eq(templateStageConfigs.instrumentType, 'PEER_ASSESSMENT')
+      )
+    )
+    .groupBy(submissions.templateStageConfigId)
+
+  const configIds = configIdsWithSubmissions.map(row => row.configId)
+
   const peerAssessmentQuestions = await db
     .select({
       id: templateQuestions.id,
       questionText: templateQuestions.questionText,
+      stageName: templateStageConfigs.stageName,
+      displayOrder: templateStageConfigs.displayOrder,
+      configId: templateQuestions.configId,
     })
     .from(templateQuestions)
     .leftJoin(templateStageConfigs, eq(templateQuestions.configId, templateStageConfigs.id))
-    .where(eq(templateStageConfigs.instrumentType, 'PEER_ASSESSMENT'))
+    .where(inArray(templateQuestions.configId, configIds.filter((id): id is string => id !== null)))
+    .orderBy(templateStageConfigs.displayOrder, templateQuestions.id)
 
   peerAssessmentQuestions.forEach(q => {
     peerAssessmentStatements.push({
       id: q.id,
-      text: q.questionText
+      text: q.questionText,
+      stageName: q.stageName,
+      stageOrder: q.displayOrder,
+      configId: q.configId,
     })
   })
 
-  // Get observation questions
+  // Get observation questions (only for stages in this project)
   const observationQuestions = await db
     .select({
       id: templateQuestions.id,
       questionText: templateQuestions.questionText,
+      stageName: templateStageConfigs.stageName,
+      displayOrder: templateStageConfigs.displayOrder,
+      configId: templateQuestions.configId,
     })
     .from(templateQuestions)
     .leftJoin(templateStageConfigs, eq(templateQuestions.configId, templateStageConfigs.id))
-    .where(eq(templateStageConfigs.instrumentType, 'OBSERVATION'))
+    .where(
+      and(
+        eq(templateStageConfigs.instrumentType, 'OBSERVATION'),
+        inArray(templateStageConfigs.stageName, stages.map(s => s.name))
+      )
+    )
+    .orderBy(templateStageConfigs.displayOrder, templateQuestions.id)
 
   observationQuestions.forEach(q => {
     observationStatements.push({
       id: q.id,
-      text: q.questionText
+      text: q.questionText,
+      stageName: q.stageName,
+      stageOrder: q.displayOrder,
+      configId: q.configId,
     })
   })
 
+  // 🔍 DEBUG: Validate all arrays before creating statements object
+  console.log('🔍 DEBUG: Creating statements object with:', {
+    journalQuestions: journalQuestions?.length || 0,
+    selfAssessmentStatements: selfAssessmentStatements?.length || 0,
+    peerAssessmentStatements: peerAssessmentStatements?.length || 0,
+    observationStatements: observationStatements?.length || 0
+  })
+
+  // 🔍 DEBUG: Log observation statements with configIds
+  console.log('🔍 DEBUG: Observation statements with configIds:', observationStatements.map((obs, idx) => ({
+    index: idx,
+    id: obs.id,
+    text: obs.text?.substring(0, 50),
+    configId: obs.configId,
+    stageName: obs.stageName,
+    stageOrder: obs.stageOrder
+  })))
+
   const statements = {
-    journalQuestions,
-    selfAssessmentStatements,
-    peerAssessmentStatements,
-    observationStatements
+    journalQuestions: journalQuestions || [],
+    selfAssessmentStatements: selfAssessmentStatements || [],
+    peerAssessmentStatements: peerAssessmentStatements || [],
+    observationStatements: observationStatements || []
   }
 
   // Get group information
@@ -526,6 +639,7 @@ async function getProjectExportData(classId: string, projectId: string, teacherI
       id: submissions.id,
       submittedById: submissions.submittedById,
       submittedBy: submissions.submittedBy,
+      projectStageId: submissions.projectStageId,
       templateStageConfigId: submissions.templateStageConfigId,
       targetStudentId: submissions.targetStudentId,
       content: submissions.content,
@@ -545,6 +659,18 @@ async function getProjectExportData(classId: string, projectId: string, teacherI
         )
       )
     )
+
+  // 🔍 DEBUG: Log observation submissions found
+  const observationSubmissions = allSubmissions.filter(s => s.instrumentType === 'OBSERVATION')
+  console.log('🔍 DEBUG: Found observation submissions:', observationSubmissions.length)
+  console.log('🔍 DEBUG: Observation submissions details:', observationSubmissions.map(sub => ({
+    id: sub.id,
+    targetStudentId: sub.targetStudentId,
+    templateStageConfigId: sub.templateStageConfigId,
+    instrumentType: sub.instrumentType,
+    submittedBy: sub.submittedBy,
+    content: sub.content
+  })))
 
   
   // Process student scores with detailed data
@@ -566,9 +692,11 @@ async function getProjectExportData(classId: string, projectId: string, teacherI
     }
 
     // Get all unique rubric IDs
-    const allRubricIds = Array.from(new Set(
-      statements.journalQuestions.flatMap(q => q.rubrics.map(r => r.id))
-    ))
+    const allRubricIds = statements.journalQuestions && Array.isArray(statements.journalQuestions)
+      ? Array.from(new Set(
+          statements.journalQuestions.flatMap(q => q.rubrics ? q.rubrics.map(r => r.id) : [])
+        ))
+      : []
 
     // Initialize journal columns
     studentRow['Jawaban_Murid'] = '' // Default empty
@@ -580,14 +708,18 @@ async function getProjectExportData(classId: string, projectId: string, teacherI
     const selfAssessmentAnswers: number[] = []
 
     // Process peer assessment scores (from each peer)
-    statements.peerAssessmentStatements.forEach((statement, index) => {
-      studentRow[`Peer_${index + 1}`] = 0 // Default score
-    })
+    if (statements.peerAssessmentStatements && Array.isArray(statements.peerAssessmentStatements)) {
+      statements.peerAssessmentStatements.forEach((statement, index) => {
+        studentRow[`Peer_${index + 1}`] = 0 // Default score
+      })
+    }
 
     // Process observation scores
-    statements.observationStatements.forEach((statement, index) => {
-      studentRow[`Obs_${index + 1}`] = 0 // Default score
-    })
+    if (statements.observationStatements && Array.isArray(statements.observationStatements)) {
+      statements.observationStatements.forEach((statement, index) => {
+        studentRow[`Obs_${index + 1}`] = 0 // Default score
+      })
+    }
 
     // Get actual scores from student submissions, sorted by stage order
     const studentSubmissions = allSubmissions.filter(s => s.submittedById === student.id)
@@ -600,7 +732,14 @@ async function getProjectExportData(classId: string, projectId: string, teacherI
     })
 
     studentSubmissions.forEach(submission => {
-      if (submission.instrumentType === 'JOURNAL' && typeof submission.content === 'object' && submission.content) {
+      console.log('🔍 DEBUG: Processing submission:', {
+        id: submission.id,
+        instrumentType: submission.instrumentType,
+        contentType: typeof submission.content,
+        hasContent: !!submission.content
+      })
+
+      if (submission.instrumentType === 'JOURNAL' && submission.content && typeof submission.content === 'object') {
         const content = submission.content as any
 
         // Extract student text/jawaban
@@ -627,8 +766,9 @@ async function getProjectExportData(classId: string, projectId: string, teacherI
             }
           })
         }
-      } else if (submission.instrumentType === 'SELF_ASSESSMENT' && typeof submission.content === 'object' && submission.content && 'answers' in submission.content) {
-        const answers = (submission.content as any).answers || []
+      } else if (submission.instrumentType === 'SELF_ASSESSMENT' && submission.content && typeof submission.content === 'object') {
+        const content = submission.content as any
+        const answers = content.answers && Array.isArray(content.answers) ? content.answers : []
         // Append all answers to the continuous array
         selfAssessmentAnswers.push(...answers)
       }
@@ -646,22 +786,55 @@ async function getProjectExportData(classId: string, projectId: string, teacherI
     )
 
     // Calculate average score for each peer assessment question
-    statements.peerAssessmentStatements.forEach((statement, index) => {
-      const scores: number[] = []
+    console.log('🔍 DEBUG: Processing peer assessments, found:', peerAssessments.length, 'peer submissions for', student.name)
+    console.log('🔍 DEBUG: Peer assessment statements to process:', statements.peerAssessmentStatements?.length || 0)
 
-      peerAssessments.forEach(peerSubmission => {
-        if (typeof peerSubmission.content === 'object' && peerSubmission.content && 'answers' in peerSubmission.content) {
-          const answers = (peerSubmission.content as any).answers || []
-          if (answers[index] !== undefined) {
-            scores.push(answers[index])
+    if (statements.peerAssessmentStatements && Array.isArray(statements.peerAssessmentStatements)) {
+      statements.peerAssessmentStatements.forEach((statement, index) => {
+        console.log('🔍 DEBUG: Processing peer statement:', {
+          index,
+          statementId: statement.id,
+          configId: statement.configId,
+          statementText: statement.text?.substring(0, 50)
+        })
+        const scores: number[] = []
+
+        peerAssessments.forEach(peerSubmission => {
+          console.log('🔍 DEBUG: Checking peer submission:', {
+            submissionId: peerSubmission.id,
+            submissionConfigId: peerSubmission.templateStageConfigId,
+            statementConfigId: statement.configId,
+            match: peerSubmission.templateStageConfigId === statement.configId
+          })
+          // Only use submissions from the same stage/config as this question
+          if (peerSubmission.templateStageConfigId === statement.configId) {
+            console.log('🔍 DEBUG: Processing matching peer submission content')
+            if (peerSubmission.content && typeof peerSubmission.content === 'object') {
+              const content = peerSubmission.content as any
+              if (content.answers) {
+                const answers = Array.isArray(content.answers) ? content.answers : []
+                // For this specific question, find the index in the answers array
+                // Since we're grouping by config, the question index should match the array index
+                const questionIndex = statements.peerAssessmentStatements
+                  .filter(s => s.configId === statement.configId)
+                  .findIndex(s => s.id === statement.id)
+
+                if (questionIndex >= 0 && answers[questionIndex] !== undefined) {
+                  scores.push(answers[questionIndex])
+                }
+              }
+            }
           }
-        }
-      })
+        })
 
       if (scores.length > 0) {
         studentRow[`Peer_${index + 1}`] = Math.round((scores.reduce((sum, score) => sum + score, 0) / scores.length) * 100) / 100
+      } else {
+        // If no scores found for this question, it means no submissions for this specific question
+        studentRow[`Peer_${index + 1}`] = 0
       }
     })
+    }
 
     // Get observation scores from teacher
     const observations = allSubmissions.filter(s =>
@@ -670,31 +843,80 @@ async function getProjectExportData(classId: string, projectId: string, teacherI
       s.submittedBy === 'TEACHER'
     )
 
-    statements.observationStatements.forEach((statement, index) => {
-      const obsScores: number[] = []
+    // Calculate average score for each observation question using same logic as peer assessment
+    console.log('🔍 DEBUG: Processing observations, found:', observations.length, 'observation submissions for', student.name)
+    console.log('🔍 DEBUG: Observation statements to process:', statements.observationStatements?.length || 0)
 
-      observations.forEach(obs => {
-        if (typeof obs.content === 'object' && obs.content && 'answers' in obs.content) {
-          const answers = (obs.content as any).answers || []
-          if (answers[index] !== undefined) {
-            obsScores.push(answers[index])
+    if (statements.observationStatements && Array.isArray(statements.observationStatements)) {
+      statements.observationStatements.forEach((statement, index) => {
+        console.log('🔍 DEBUG: Processing observation statement:', {
+          index,
+          statementId: statement.id,
+          configId: statement.configId,
+          statementText: statement.text?.substring(0, 50)
+        })
+        const obsScores: number[] = []
+
+        observations.forEach(obsSubmission => {
+          console.log('🔍 DEBUG: Checking observation submission:', {
+            submissionId: obsSubmission.id,
+            submissionConfigId: obsSubmission.templateStageConfigId,
+            statementConfigId: statement.configId,
+            match: obsSubmission.templateStageConfigId === statement.configId
+          })
+          // Only use submissions from the same stage/config as this question (same as peer assessment)
+          if (obsSubmission.templateStageConfigId === statement.configId) {
+            console.log('🔍 DEBUG: Processing matching observation submission content')
+            if (obsSubmission.content && typeof obsSubmission.content === 'object') {
+              const content = obsSubmission.content as any
+              if (content.answers) {
+                const answers = Array.isArray(content.answers) ? content.answers : []
+                // For this specific question, find the index in the answers array
+                // Since we're grouping by config, the question index should match the array index
+                const questionIndex = statements.observationStatements
+                  .filter(s => s.configId === statement.configId)
+                  .findIndex(s => s.id === statement.id)
+
+                console.log('🔍 DEBUG: Observation question index:', questionIndex, 'answers length:', answers.length)
+
+                if (questionIndex >= 0 && answers[questionIndex] !== undefined) {
+                  obsScores.push(answers[questionIndex])
+                  console.log('🔍 DEBUG: Added observation score:', answers[questionIndex])
+                }
+              }
+            }
           }
+        })
+
+        if (obsScores.length > 0) {
+          const avgScore = Math.round((obsScores.reduce((sum, score) => sum + score, 0) / obsScores.length) * 100) / 100
+          studentRow[`Obs_${index + 1}`] = avgScore
+          console.log('🔍 DEBUG: Set Obs_${index + 1} =', avgScore, 'from', obsScores.length, 'scores')
+        } else {
+          console.log('🔍 DEBUG: No observation scores found for Obs_${index + 1}')
         }
       })
-
-      if (obsScores.length > 0) {
-        studentRow[`Obs_${index + 1}`] = Math.round((obsScores.reduce((sum, score) => sum + score, 0) / obsScores.length) * 100) / 100
-      }
-    })
+    }
 
     studentScores.push(studentRow)
   }
 
   // Clean up unused variables
-  console.log('Processing export data...')
+  console.log('🔍 DEBUG: Processing export data completed, studentScores:', studentScores.length, 'statements keys:', statements ? Object.keys(statements) : 'statements is null/undefined')
+
+  // 🔍 DEBUG: Final validation before returning
+  if (!statements) {
+    console.log('🔍 DEBUG: ERROR - statements is null at return time!')
+    throw new Error('Statements object became null before returning')
+  }
 
   return {
     studentScores,
     statements,
+  }
+
+  } catch (error) {
+    console.error('🔍 DEBUG: Error in getProjectExportData:', error)
+    throw error
   }
 }

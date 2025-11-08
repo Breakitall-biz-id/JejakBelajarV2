@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "JejakBelajar",
     description: "Platform pembelajaran interaktif untuk guru dan murid",
-    url: "https://jejakbelajar.sch.id",
+    url: "https://jejakbelajar.online",
     siteName: "JejakBelajar",
     locale: "id_ID",
     type: "website",

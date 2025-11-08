@@ -1,0 +1,6050 @@
+[
+    {
+  "id": "5e988cab-919e-4393-9d99-6d5ca8dfd4ef",
+  "name": "Design a plan for the project",
+  "description": "mendesain peluang2 pengembangan keunggulan produk\n",
+  "order": 2,
+  "unlocksAt": null,
+  "dueAt": null,
+  "status": "IN_PROGRESS",
+  "requiredInstruments": [
+    {
+      "id": "37ebc28d-274f-4a66-8336-ae9d099cc4b0",
+      "templateStageConfigId": "f3bb6068-e563-4079-a149-112a7f67d26d",
+      "instrumentType": "OBSERVATION",
+      "isRequired": true,
+      "description": "mendesain peluang2 pengembangan keunggulan produk\n",
+      "questions": [
+        {
+          "id": "a74cdc48-6d06-4277-a2e5-00931f646d57",
+          "questionText": "<p>Murid menyampaikan data, fakta, atau informasi yang berkaitan dengan proyek.</p>",
+          "questionType": "STATEMENT",
+          "scoringGuide": null,
+          "rubricCriteria": [
+            {
+              "score": 4,
+              "description": "Konsisten menunjukkan perilaku"
+            },
+            {
+              "score": 3,
+              "description": "Sering menunjukkan perilaku"
+            },
+            {
+              "score": 2,
+              "description": "Kadang-kadang menunjukkan perilaku"
+            },
+            {
+              "score": 1,
+              "description": "Tidak menunjukkan perilaku"
+            }
+          ]
+        },
+        {
+          "id": "5db7aea2-a0d8-4c3a-a1cf-e84fec6149b7",
+          "questionText": "<p>Murid mengajukan pertanyaan kepada guru atau teman untuk memperjelas informasi.</p>",
+          "questionType": "STATEMENT",
+          "scoringGuide": null,
+          "rubricCriteria": [
+            {
+              "score": 4,
+              "description": "Konsisten menunjukkan perilaku"
+            },
+            {
+              "score": 3,
+              "description": "Sering menunjukkan perilaku"
+            },
+            {
+              "score": 2,
+              "description": "Kadang-kadang menunjukkan perilaku"
+            },
+            {
+              "score": 1,
+              "description": "Tidak menunjukkan perilaku"
+            }
+          ]
+        }
+      ],
+      "rubrics": []
+    },
+    {
+      "id": "46fe99fe-19bc-4588-a873-166ef34ae241",
+      "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+      "instrumentType": "PEER_ASSESSMENT",
+      "isRequired": true,
+      "description": "mendesain peluang2 pengembangan keunggulan produk\n",
+      "questions": [
+        {
+          "id": "2ed041d4-c410-4055-aaef-38bf953deb6a",
+          "questionText": "<p>Teman saya menunjukkan sikap menghargai saat mendengarkan pendapat teman kelompok.</p>",
+          "questionType": "STATEMENT",
+          "scoringGuide": null,
+          "rubricCriteria": {}
+        },
+        {
+          "id": "3be75cfc-e318-4dfd-aef9-1fd7f9e5136b",
+          "questionText": "<p>Teman saya memberikan tanggapan yang membangun terhadap ide anggota kelompok untuk memperkuat hasil diskusi kelompok.</p>",
+          "questionType": "STATEMENT",
+          "scoringGuide": null,
+          "rubricCriteria": {}
+        }
+      ],
+      "rubrics": []
+    },
+    {
+      "id": "095788ed-58ce-4852-9a78-349e186b0dcd",
+      "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+      "instrumentType": "SELF_ASSESSMENT",
+      "isRequired": true,
+      "description": "mendesain peluang2 pengembangan keunggulan produk\n",
+      "questions": [
+        {
+          "id": "5beb7380-dddf-47e6-ad91-1d5752c608f7",
+          "questionText": "<p>Saya menyampaikan pendapat tanpa menyalahkan atau meremehkan pendapat teman. Jika ada ide yang menurut saya kurang tepat, saya mengungkapkan pendapat dengan cara yang tidak membuat teman merasa malu atau disalahkan.</p>",
+          "questionType": "STATEMENT",
+          "scoringGuide": null,
+          "rubricCriteria": {}
+        },
+        {
+          "id": "82ef60e3-5101-4e06-a96e-92f2283f2eaf",
+          "questionText": "<p>Saat berdiskusi, saya berusaha menghindari perdebatan yang tidak perlu agar target pembuatan rencana proyek tercapai.</p>",
+          "questionType": "STATEMENT",
+          "scoringGuide": null,
+          "rubricCriteria": {}
+        },
+        {
+          "id": "2fa1bac3-6c37-4934-aaa0-c8b70b687605",
+          "questionText": "<p>Saya mengarahkan diskusi agar tetap fokus pada topik pembuatan rencana proyek.</p>",
+          "questionType": "STATEMENT",
+          "scoringGuide": null,
+          "rubricCriteria": {}
+        },
+        {
+          "id": "4fa24d37-7e5c-4513-8b4d-c308a190938b",
+          "questionText": "<p>Saat berdiskusi tentang rencana proyek, saya menyampaikan ide-ide yang muncul dari pemikiran sendiri, bukan meniru ide teman.</p>",
+          "questionType": "STATEMENT",
+          "scoringGuide": null,
+          "rubricCriteria": {}
+        },
+        {
+          "id": "bfdf93be-02c1-4218-895b-0f249e10f498",
+          "questionText": "<p>Saat membuat rencana proyek, saya berusaha memikirkan ide dari sudut pandang yang berbeda.</p>",
+          "questionType": "STATEMENT",
+          "scoringGuide": null,
+          "rubricCriteria": {}
+        },
+        {
+          "id": "62a3554f-2a05-4cd6-be3a-f485949cd92f",
+          "questionText": "<p>Saya menyampaikan ide kreatif, tetapi tetap mempertimbangkan kemungkinan diterapkan</p>",
+          "questionType": "STATEMENT",
+          "scoringGuide": null,
+          "rubricCriteria": {}
+        },
+        {
+          "id": "01ca8a9b-42ae-4921-94a1-553ee32a425e",
+          "questionText": "<p>Saya berusaha menyampaikan ide yang masuk akal dan dapat dikerjakan</p>",
+          "questionType": "STATEMENT",
+          "scoringGuide": null,
+          "rubricCriteria": {}
+        }
+      ],
+      "rubrics": []
+    }
+  ],
+  "submissionsByInstrument": {
+    "PEER_ASSESSMENT": [
+      {
+        "id": "953551c0-1fc4-4434-a441-71220d154518",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "b534393c-49e7-43e8-969c-7b0d9cdbc8f1",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "fbcc3d00-524c-4221-bed6-7ef6900b306c",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "2d98aa23-8e56-44bd-87b6-168166a47305",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "3a31ad23-a8e5-473a-ace1-bc4f02831478",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "eb8265d2-a2dd-4cdc-a490-a4f7076b08c1",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "5447cda6-739e-4197-aa8d-8413a82178c0",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "c4e208db-0769-407b-944a-f8b9fe63cf5c",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "ca1e197c-ce86-46e7-962a-05666bb59fbd",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "2fb23357-c681-4afd-8dbb-f06d87a61c92",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "642ed9b4-d3d2-4749-b879-702300362349",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "f4293f5b-148f-494f-8d68-8513f2c734d2",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e284f863-5851-43b6-b8e6-b4c3b0ad828f",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "b81815b4-3de7-4d49-bdc2-8a46057532ac",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "b4f48287-0e72-4c43-a187-35676c655bc8",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "ed49e79f-43c0-4325-bbc8-7f3a72df9792",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "78a543c8-8747-4d2a-b55a-db030b815b06",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e4b0562a-a6da-4216-b6c6-1d72dbe2646f",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "5051f6b1-bb49-495c-a3c8-ae9229690ec0",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "fba0479b-fbb3-4772-8359-f42cc6d732e9",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e8d540f3-4a83-4386-91dd-130b678567b3",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "427eaec7-2346-483e-9aa9-8851e236b53e",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "636251ba-634f-4a0e-9878-67cb5a28e4e6",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "dcc300a2-76e8-414a-a6c6-f2614d04dcd2",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "cb803d2c-f0f8-4072-926b-a78bcf850bea",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "c15eb35c-d9c0-4437-8ca6-65dc66f2b5f3",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "c3a64587-8e03-4c17-815d-6a22a3d05ce0",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "27569e01-e455-4750-85aa-893153830e56",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "eb46425d-9c44-423b-a657-6c91588f51fc",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "832a34d1-f73c-4473-b8d2-5c6324a2e11d",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "052ef042-32da-4d02-a84e-294af1a3c6f1",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "6f1a9df3-4975-46c0-bc72-84ed330bb084",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "3160861e-5f17-4cac-9067-07d5fe081f09",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "24753542-f581-42a3-a572-1b4f2c773424",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "4a804e65-afd4-4153-9e7b-d105397db1fa",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "c82fe639-242b-4027-95f5-f7808d501377",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "4d339597-0832-4887-9239-d5928d8d06b0",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "2dfd7b77-20f5-4bae-8279-43f7240b7e40",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "f2cf7da5-3bc6-4dd5-bbe7-e2ce8bd4a1bf",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "d9199661-22d3-4a01-93bf-624a9851fbc3",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "a1da46dd-ab94-45f3-83f8-ddc122176b3c",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "c8a92092-c0c5-4bcb-adc5-994f410b9e74",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e006855d-cbf6-4460-80af-103e3b4ad8b1",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e7721c09-5c93-4d6e-a7d1-b56052b1a491",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "16f57765-32e5-4f75-b683-4cf79db87215",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "d716738d-9d93-458d-8227-3f42b5fe4e42",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "d06880bd-ddc3-402a-84cb-2221ba5eca59",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "400fca13-a6f3-4959-b333-0a082844b881",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "13489681-cdc1-4623-803f-93a09cc779e4",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "5c61e582-eba7-4218-81f2-c01e0a49f553",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "64ec8e64-931a-4a7f-b24f-1fcc7df7a102",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            1
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "7cf7baf9-fa5d-4b13-a4eb-2b45a86f2bb0",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "3fa6ca17-4f38-4078-aef5-3f65ac537493",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "36a01f3b-1954-4a12-8682-24ee1ca02319",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "a71d9776-b478-4778-a670-cad4aea2660f",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "ee50fedf-da5c-4b45-9335-bf467f89b1a3",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "d8d8ebd3-f222-4fcd-9407-d7e5b8b484db",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "65ed6e42-311b-4ecd-9fed-e897feead1c8",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "88b94bdf-0d3c-4121-83a1-31a384db1bbe",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "bf2ed335-ca46-4cb8-b754-4192d52e6b59",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "f6124aad-ef77-47f6-90f5-220e9032caa9",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "facbeafe-cf9f-40f2-9e62-2404bb3056bb",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "36713f5a-2d81-4bd1-a386-86a8b90f660f",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "fa05526a-34b8-47ac-a3af-1db7c7cb374f",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e437e9be-6dfe-44cd-bec7-5d6e22a3f0b8",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "a6783107-f32c-4c04-8999-0533f2c17cd4",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "49fda842-3567-44c1-95eb-599b056fc94f",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "a59c9e25-fb28-4bad-b92f-42fd200c60eb",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            1
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "d5fd76de-0708-49e0-acea-7f5f484a4587",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "94167878-5a6a-4808-bd93-b2ff36af3803",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "45d3584b-13d4-4f42-a76c-715ec405cf91",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "310f5532-deea-49f9-b6ec-11bb5c420bdb",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "c79ce8c1-07dc-4347-8561-02e630350830",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "503dc420-b678-4abf-a9a7-e62a07e0e9fd",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "b9cbba6b-ec83-4ae5-ac0c-c7808e753398",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            1
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "33dd58ff-2d17-414a-9cfd-1c41f42a2f58",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "09080bd7-647e-41a4-bffa-1d3813cf9f77",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "b852a5ba-fff8-4d54-b895-b166a6f22cdd",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "928dbfe4-2829-4331-8fbf-b91c8b9caa27",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "46a40e54-a8b4-4036-a3ca-db5f6eb8d15d",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "f6bd3023-f03a-43ed-b143-c02b9af9b710",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "b5c894a9-e24c-460e-bb16-0daf64fe8e4c",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "4f925bab-18a2-4726-b2b5-bb545ca28ef5",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "5dff183e-dcd5-4d5c-b5ca-7c5bf0dca346",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "0fda5d16-6e8f-443d-8ecc-f5c0d4a06758",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "58b01ea0-c851-4552-b864-4681b3a94ffd",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "9ef1db4e-8085-431a-84a3-476886766f41",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "7b549c50-62ca-43ef-b6f7-e7ddca6b85d1",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "43421543-2122-4229-a9a4-93af21b428a6",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "54b5c411-da31-4572-bacd-1bcca26104c0",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "c84dc316-f6c2-43e5-941d-b07f0aea35fd",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "16fca5e7-3361-458e-899d-59c3b8a9710e",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "bd00b617-173a-4a4d-99e7-a23277a279d7",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "03ef5df0-6c46-4d1b-bfcd-fbe2ae2d852f",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e9509aeb-5f6d-4311-82e0-3525bf18f89d",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "d876dd72-a9ed-433d-bdec-11bbd1a35aa4",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "cbc600c5-3404-4e1a-b855-992ad6a1e861",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "a1dbf51e-8e48-469b-ba78-4b32560cc55c",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "0d5ab975-d14e-4210-a503-979712aabaf2",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "300dfa06-76e6-4e6f-9d41-873de68639a5",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "8c50b8ed-66e7-4bd9-8da0-6e25318e058d",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "0eb1c398-3e99-41b2-9f9c-87a6352d519c",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "ff4165b8-1908-4200-a1a3-61c77e802cdf",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            1,
+            1
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "d694cc73-de0a-40d3-aa9f-7ae02cb95f22",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "dd448f6f-08b5-4405-90ea-1c8394c70d95",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "18b29c7c-636b-43a9-b02f-6fe0a4a992b7",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "5d3ab4ea-dd7d-4c75-ad15-d85f3d4848de",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            1,
+            1
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "a452426a-7c0e-4691-b6ab-b3e5e6fa964a",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e9c24cc5-c408-477d-a19f-cddee6eac3dc",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e857d1aa-a393-475f-927a-3bfa4ff25beb",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "4137d3a4-5d35-49d4-b309-6ef189514853",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "a17da823-99f1-4c77-9899-46142bd84e50",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "d5e20fdc-614b-49e7-9ad5-ffc497192a76",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "65ea6163-7968-4a17-ab13-382568c27b1a",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            1,
+            1
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "3d7ebdd7-9880-4196-9ba3-184cff86dcde",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "a6d500f9-33f1-4134-ac74-b2951c692193",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            1,
+            1
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "b25c8d17-d5b6-47dd-8fd6-eb35007da278",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "1f4d2e54-4bbe-4f09-9bf6-a73fcacafd54",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "2a6408f8-e0fc-4655-858d-a15860f951bd",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "db785adf-998e-43a4-94b6-c2db46361703",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "78790213-77e1-41ee-b87c-2bce8bfe04f3",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e5266ad2-76c0-4a02-8d7b-09881d26b80a",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "48867441-43cc-4dd4-8e5f-78e4bd524a59",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "25011f4c-f1db-4ae0-8f60-662a21deaf7c",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "9a3fb215-f5ce-4664-851e-a3bc9b5fe831",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "34bf8c0d-e6f7-456e-b07c-d6b8ebe3a8d3",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "fda80476-0c71-4b38-b870-53293fd2cb09",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "67b95ee6-3f9a-4f0b-9b29-b39743a227f3",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "52ab7ec9-6277-44f4-b05c-27b4b1038066",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "942ee90f-bae4-44c2-b6a0-376454096f8c",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "f220b130-2979-4030-9fad-d73cd4c7d40f",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "3f4d3939-5c9f-4dfc-9766-35b91ff6318a",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "3805c108-4b88-420f-af10-3135c5fb9a5e",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "7721c4b1-926c-4fab-b86e-69141af52321",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "bb938a7d-84d6-4e7a-a292-8198f600a359",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "ebbcde86-c8ea-4ded-b814-e617b3693c63",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "19a99fd0-75e0-4ba8-99b4-e506defb64d4",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "7717b3fd-eb1a-4ff2-ba6e-79e8648b111d",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "69df3870-3cc0-4674-aed0-7eeb60710b41",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "43bda888-12cc-4857-b279-40c1ee00cd24",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "f0088de0-2d41-4fa9-a6d8-69a5a9b0de22",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "2dcb6362-b53b-4f38-84e2-5c6faaf5ff7a",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "46d23477-0cad-4ae7-b2c1-fc76f3901ba1",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e3eee008-881c-49a3-ae87-ff91e767de54",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "041069e7-de2a-46e6-a597-30c1acc3d52b",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "fc62a875-8be7-4e09-879c-6f865fec6895",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "2b6c61f5-8a8a-4834-80e0-3c0884ea8c47",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "681995a9-0319-4477-bca7-254bde43e448",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "61770632-c416-4689-89a8-c91bd51fe27b",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "4fdc0f6f-5170-49a4-9ce7-e586b83f2d8b",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "8c370be7-f87c-4aee-ad93-ff4e11724538",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "47d95d0b-bb3a-4296-a7f0-e0a170c91b95",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "45dad347-8416-4836-a149-1d672863304b",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "3a6c0541-9a39-4e73-b30b-88fd5f627d04",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "876f9b5c-12cd-4d38-9f79-6efa886a8c82",
+        "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+        "instrumentType": "PEER_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      }
+    ],
+    "SELF_ASSESSMENT": [
+      {
+        "id": "f6378642-ff2d-42f7-951a-c71558eeba5a",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            4,
+            4,
+            3,
+            2,
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "a8094956-524b-4e72-bff0-0805cffc600c",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "2f6f7d48-af60-4370-b0de-fec95f8b72b1",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            4,
+            3,
+            4,
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "312bf82f-9f38-4aa5-ba06-73b9710125d2",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            4,
+            4,
+            2,
+            2,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "40085f8b-3f1d-4a16-a8ec-d12fe5f637fb",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            4,
+            4,
+            3,
+            4,
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "bd40ac44-2435-48de-8260-d53351470edc",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            2,
+            2,
+            4,
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "569dad61-624b-4816-a776-8b93b5685957",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            3,
+            4,
+            4,
+            3,
+            3,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "25b88ecb-61f2-46cc-b8e3-54ffa5daad5a",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            4,
+            3,
+            3,
+            2,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "783b8af1-08ee-469e-b824-e33f42f40e5e",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            3,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "9634d8f4-46c7-48f1-8c7d-246aaad9addf",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            3,
+            4,
+            4,
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.598Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "9845a072-09a4-4bf9-b5d5-b16e4156a750",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            2,
+            2,
+            4,
+            3,
+            2,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "368b33e8-eede-4d58-b663-7f8966966437",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            4,
+            3,
+            2,
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "5871c276-7b25-40d3-afa0-8a569051331d",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            2,
+            4,
+            2,
+            3,
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "05f4731b-964f-48e0-89ca-ddd689eb3534",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            1,
+            4,
+            4,
+            3,
+            2,
+            3,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "3e5426b9-5fc2-4190-88d8-b453e2d10782",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            4,
+            4,
+            3,
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "ac801a50-7316-4520-9fb1-5315135ae05e",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            4,
+            3,
+            4,
+            3,
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "2f35a6af-3516-4629-8e47-123bd065ea85",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            4,
+            4,
+            3,
+            2,
+            1,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "fab4c08e-c359-4765-a1ce-8fc63cb94d9c",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            4,
+            3,
+            3,
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "9084d13b-8901-4071-bd10-efe556c43d7e",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            4,
+            4,
+            3,
+            3,
+            3,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "d037b872-b598-4080-8f02-22bbfe303d42",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            4,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "5481e16b-56e7-4c5d-b21a-eee696645cd1",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            4,
+            3,
+            3,
+            2,
+            2,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "8ea7dbeb-f0d0-4527-a1eb-3e4ef1de6da8",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            3,
+            2,
+            2,
+            3,
+            4,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "c22f87d5-e0d9-47c2-a3de-2e77611cb4fd",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            2,
+            3,
+            3,
+            3,
+            4,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "8860e7e0-6263-4741-afe5-725e8f733a6b",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            4,
+            2,
+            2,
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "3f099d86-9842-4359-8d1a-2fceec46ff06",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            4,
+            2,
+            4,
+            2,
+            3,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "9735b8a8-ed0d-429f-b3f5-5360ef3902b4",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            2,
+            3,
+            3,
+            3,
+            4,
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "24af9161-1583-4857-aa95-9cbf9440f349",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            3,
+            4,
+            4,
+            4,
+            4,
+            3,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "c479e290-ea87-4b8e-8e67-5ba8b1834a39",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "26197a4a-5309-4b1f-aa80-a38f521c1e81",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "9a1c182a-f8e2-4ed1-b56e-b13f7df275ce",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            4,
+            3,
+            4,
+            4,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "122db6c3-e0b9-4d9e-8db3-d6cea78d2167",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "5d3c92a4-baa8-48f8-b60f-cf52bb34280d",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "be85fa6c-b15e-4702-9349-6382c07f353c",
+        "templateStageConfigId": "095fcf1d-aee4-49fb-a5c8-70e9b39703d7",
+        "instrumentType": "SELF_ASSESSMENT",
+        "content": {
+          "answers": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-28T18:48:05.599Z",
+        "score": null,
+        "feedback": null
+      }
+    ],
+    "OBSERVATION": [
+      {
+        "id": "87a6851e-0e61-4747-87b4-d507f3b8ad6b",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "47ee8b82-8a9a-4ac6-9ed2-35c633c8c4fb",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:42.395Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "a0495782-d03e-44ba-a047-1415e891f6ad",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "531e8016-e939-4b01-a14f-bb03a13dbe55",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:42.988Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "dfdb7b67-db0a-4a02-a863-3fa3270bfb3f",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "7dab2c59-d6c8-4cf3-953c-89c9bbf34639",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:43.399Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "ae94344e-8570-4760-87d7-0d113fe0fce9",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "ef36697f-1349-44d3-95f5-41dd8b6dfe90",
+        "content": {
+          "answers": [
+            2,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:43.809Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "95d5638f-e3fe-4e2a-81ea-8ca764377667",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "b7b39be8-c390-450d-927e-3921025b2a49",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:44.219Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "9b6ce98d-d6ad-4287-bcab-4b5d90f6e293",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "01f5a674-b2e7-4b2f-a28a-aef5b33c5e73",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:45.056Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "2d4ba0b6-f279-41c9-8019-3c7d8541dfeb",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "eddbee9b-d366-455e-b368-2e06e9eacd03",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:46.724Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "4c937b09-f44f-4597-b673-025ae5beafc1",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "77b5e51c-f7e6-4030-b6e7-f7b8bb001c72",
+        "content": {
+          "answers": [
+            4,
+            4
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:47.147Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "5df0e133-4c83-45e9-8f76-ad62da5a35d7",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "fc7c87f4-4dc0-47e8-8264-36b8a4af1394",
+        "content": {
+          "answers": [
+            2,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:47.586Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e4963454-7493-49a7-9fbc-818e05697c88",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "d82d2a9b-cf9b-420b-96de-863a5c8144ee",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:48.047Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "dd9e500c-9c05-4a09-a981-b07ad8e45e71",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "0b73b9b2-6c4f-47bf-99e7-3b056919ea63",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:48.464Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "7874693d-3e9f-4452-b767-87eaf8926347",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "510ea8f6-742b-4976-8ef2-8cf67e45dfa0",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:48.872Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "326efd26-7651-4434-9caa-a80ba4e93e03",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "9ce19d3b-a247-43f0-bba9-06dcf7e4c456",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:49.282Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "4773a473-82ec-4325-bb37-5425a7ea3083",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "3f9af015-1e96-4a9f-9c83-b9652d273b0a",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:49.693Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "d4fd7189-c033-46d0-8fcc-a9c966b3031c",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "e8614dd7-1fc3-4664-bc36-2d6a32f8b426",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:50.105Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "18fb5888-8653-4e54-af5e-4f6e26f034f9",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "bd63451b-a2ce-4cef-a1c4-ad45d8e96f31",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:50.532Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e9e823a1-aedb-433d-81c9-6a2902791194",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "c4116790-1ec2-40f1-9674-35949b3a19f5",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:51.010Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "6d0b54b4-4ed0-46d6-bceb-97a3ce4e8615",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "a237188f-9bbb-4bc9-8f3d-a2636906f322",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:51.428Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "f72e88d5-cdd5-4baf-b4ad-24c1dce578af",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "4a540bd2-e740-47bc-b761-c77d26a1cfe1",
+        "content": {
+          "answers": [
+            2,
+            2
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:51.836Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "aaad9fec-e537-4c4e-baa0-e1ee14db6169",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "d119cc5c-006f-4860-a19c-17547932db43",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:52.246Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "1c0de22a-f19c-43fe-ba41-306ff87b55a3",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "60df6ae0-2a05-4056-aa85-170bc01ee056",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:52.663Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "f842e5b7-f071-42b4-a453-2e1c95a4d83e",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "0fbc305f-dbaa-462b-991d-101f9a528344",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:53.073Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "97f3a933-a91c-4fa0-8f01-205009a5457f",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "91bc21e3-8092-49ce-9c2b-ec49c41cfb6f",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:53.486Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "d26c1637-acc8-4e3c-bcd6-fc99792dd525",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "61a02c99-6ff0-4072-bf08-ae10b32ab9a1",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:53.897Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "35c39994-af63-48aa-9b77-1a66034ba611",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "9a4d6699-f88b-49ec-89ff-0172c58f4b9c",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:54.316Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "0dd71a52-53bf-4d4d-8f25-0751fc07acd1",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "991263cb-2c9f-4899-89f6-ddd4d65423fa",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:54.896Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "f56c61a7-feee-4c69-828d-e2380ef72bad",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "62107019-c8d2-412c-b61b-e94cd776845a",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:55.335Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "fb7b2e9f-3187-4aff-8279-1991f1d37a3d",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "bf315f74-0d68-4906-929b-f6928f264918",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:55.892Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e37725cf-ad3a-4936-b1c1-a670a9892d5f",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "f52d0a54-4edb-4161-9fe7-375b8f4b12c4",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:56.296Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "ebd3858f-85de-45dc-91c6-4d77b5302414",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "aff2311f-2847-4ba5-9465-3aab4bab6122",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:56.764Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "b2379708-bf8a-47ec-954d-1c04ce2086ea",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "93fe229e-6dcf-4163-b69a-ddd49924a5ad",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:44.628Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "e4c36a5f-2f1b-46e6-b560-b9035c502616",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "0cca0495-87ea-4708-9bc5-f72614bfd777",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:45.474Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "af087df3-3a3e-437a-bb73-14faaa832c57",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "d1f01237-70f1-499b-93ef-fe8c99e1d9d3",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:45.886Z",
+        "score": null,
+        "feedback": null
+      },
+      {
+        "id": "195edc39-871d-49f3-8a45-0ed22bc9d1e6",
+        "instrumentType": "OBSERVATION",
+        "targetStudentId": "9ed5224a-682c-4948-8d30-b3c8720c0f05",
+        "content": {
+          "answers": [
+            3,
+            3
+          ]
+        },
+        "submittedAt": "2025-10-27T14:56:46.302Z",
+        "score": null,
+        "feedback": null
+      }
+    ]
+  }
+},
+  {
+    "id": "e15f3a4f-6f52-46fb-876d-291b0c9db130",
+    "name": "Create a schedule",
+    "description": "-",
+    "order": 3,
+    "unlocksAt": null,
+    "dueAt": null,
+    "status": "IN_PROGRESS",
+    "requiredInstruments": [
+      {
+        "id": "5e713006-76ec-4c38-9771-c787a5c6d975",
+        "templateStageConfigId": "b96f81dc-f8ac-42db-ab36-2dea79e6e780",
+        "instrumentType": "PEER_ASSESSMENT",
+        "isRequired": true,
+        "description": "-",
+        "questions": [
+          {
+            "id": "6b4a2e46-01de-4d78-942d-217643d96135",
+            "questionText": "<p>Teman saya aktif terlibat dalam diskusi dan ikut memberikan pendapat.</p>",
+            "questionType": "STATEMENT",
+            "scoringGuide": null,
+            "rubricCriteria": {}
+          }
+        ],
+        "rubrics": []
+      },
+      {
+        "id": "4849aebc-a57e-470e-a4f9-8e29c555c646",
+        "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+        "instrumentType": "SELF_ASSESSMENT",
+        "isRequired": true,
+        "description": "-",
+        "questions": [
+          {
+            "id": "b4439e44-8041-4b00-8ba6-776d6ec6b97f",
+            "questionText": "<p>Saya menyampaikan usul&nbsp; secara jelas agar mudah dipahami teman.</p>",
+            "questionType": "STATEMENT",
+            "scoringGuide": null,
+            "rubricCriteria": {}
+          },
+          {
+            "id": "3fec942c-59cd-4d6d-9d1e-a68b6ada731a",
+            "questionText": "<p>Saat tidak setuju dengan usul teman, saya menyampaikan dengan cara yang santun.</p>",
+            "questionType": "STATEMENT",
+            "scoringGuide": null,
+            "rubricCriteria": {}
+          },
+          {
+            "id": "5a90f1a4-00aa-4a37-9dfa-628e59db4315",
+            "questionText": "<p>Saya tidak memaksakan pendapat</p>",
+            "questionType": "STATEMENT",
+            "scoringGuide": null,
+            "rubricCriteria": {}
+          },
+          {
+            "id": "93852818-467c-41c3-b79a-32c89af8273e",
+            "questionText": "<p>Saya tetap terlibat dan tidak diam saja saat kelompok merancang  proyek.</p>",
+            "questionType": "STATEMENT",
+            "scoringGuide": null,
+            "rubricCriteria": {}
+          }
+        ],
+        "rubrics": []
+      }
+    ],
+    "submissionsByInstrument": {
+      "SELF_ASSESSMENT": [
+        {
+          "id": "43571045-38c9-44ba-aee1-37de17e1333f",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              2,
+              2,
+              2
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "de6f20f6-a1a0-4172-9a09-8dea94072358",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              4,
+              2,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "5f6f57a4-6c1b-463e-b4c2-1ce0115f64b5",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              3,
+              4,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "c98c6982-8e27-4a62-80ca-0aba5cea5212",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              3,
+              3,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "42438b3c-1952-4749-a095-16a0e3ffde1d",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              2,
+              3,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "0be02cc2-00aa-4202-a480-f98f031a2957",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              3,
+              3,
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "cd049a18-6127-46a2-882a-7c93857d3bb2",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              3,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "f9e6ce76-ccdb-439e-9f88-44d9fbec122f",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              4,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "371ed6e2-d8ff-4fac-ac8a-5e3c8126b019",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              3,
+              1,
+              4,
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "ea3efb55-ce9f-4cee-893f-f15c80800578",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              4,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "43365e3b-af28-4ffa-89ed-8e2c7db75da1",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              2,
+              1,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "5f4318a9-3167-443a-a586-2f481d848fb9",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              4,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "bb477362-b33b-46ab-a281-a15c84fc7a4f",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              2,
+              3,
+              4,
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "770509f6-91dc-43b4-b8a2-b5aa69611f10",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              3,
+              3,
+              3,
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "d3f71f39-1046-4753-938e-5a86bd8c07b1",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              4,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "80562f3c-730b-45bd-933b-138bcca7c70c",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              3,
+              3,
+              3,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "8baf7119-c481-4415-a7b9-0129a4b8d1cd",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              2,
+              3,
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "e367b979-c03d-453f-9b85-d30e3ab5bc1c",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              3,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "dbe8e6af-c959-4ec1-88dd-3643c7e473dd",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              3,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "b1227815-6350-45b7-a665-d89a646e88cf",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              3,
+              3,
+              3,
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "42a7457f-4c9d-4510-8553-fe62c3e15486",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              2,
+              4,
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "f2b9e7ee-a2f3-4d97-b43b-a2dec76bb94f",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              2,
+              2,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "47682545-f2bb-465f-80c2-ede6ecb34281",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              3,
+              3,
+              1,
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "49bf00c6-e2a2-48e2-82c9-885ec44442f1",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              2,
+              2,
+              2,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "07219b00-f751-478c-a5aa-a494a4d444ad",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              1,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "df691eef-6c11-41e3-bb81-659af74569e7",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              3,
+              4,
+              3,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "4b6f04fe-201e-4cac-a37a-734b387d5442",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              3,
+              4,
+              1,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "d8cd4c8f-195b-4649-b6db-3345877803b6",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              4,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "fb7940f5-e94f-45f2-9631-91018a31cb58",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              4,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "776f8bbe-dc56-4a73-8132-4ed9c73cc9cd",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              4,
+              4,
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "8e491011-6a49-4a5f-9970-48e032bf357c",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              4,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "af85a952-f03f-43f8-b06b-03022d3edd6c",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              4,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "3b934c4b-90df-4382-ba07-5f50ab37d591",
+          "templateStageConfigId": "6241ccf2-8589-4be3-9a18-f6ea3f174ddd",
+          "instrumentType": "SELF_ASSESSMENT",
+          "content": {
+            "answers": [
+              4,
+              4,
+              4,
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        }
+      ],
+      "PEER_ASSESSMENT": [
+        {
+          "id": "00499b59-04c2-4c0d-ba6a-78f21406fe73",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "d1eeacde-064a-4828-aebd-091856f88ce1",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "cfaf325d-45fa-48a4-88a3-6829c4e78bac",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "18a4c5e8-0c7e-4945-8b1f-fdab7d0e40c9",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "6ca287aa-048e-46ad-a48a-7beffbad36ba",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "7aa83273-a3c4-4074-9201-89557d3bda56",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "fc4aa421-4ef7-4f5d-8dfd-9cbf9ccdfd7c",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "4142a7d2-fd42-4dcb-b072-f6f9fe5a78f0",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "6e08ec83-f25a-4154-b447-43faffe583e3",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "9262a5a5-c9c2-479e-b964-a1d1411a937b",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "65ff0e1f-7717-4540-a581-0827dfc69238",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              2
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "954fbf27-5aaf-455f-943e-7faaabeb63e5",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "246034e4-9a50-4377-9b0f-4d6885a7c328",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "c9df274d-1564-4a74-bc3f-5abec5083666",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "b890dccf-19b3-41cf-8ea0-4dc7352df31c",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "76136331-5686-4573-889b-f67e53a40d4a",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "4a6b343d-fc84-45a9-935a-f2d4be7814bf",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "23069624-230f-4093-a580-c8d1589ecc18",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "eceec946-f7ef-42a0-85fc-c2c83e904d04",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "f03bfb41-fea9-4045-970f-ec6656c243c5",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "f5b7b525-431a-495b-83de-47ebf9281460",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "377377d6-65b8-4018-9759-c8d4a96a6622",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "c66ed655-917b-446d-a18b-02f480d27c11",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "6790efb3-19f6-479b-bc14-b064688a3882",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "bfb0fa8c-502c-4da4-98aa-058c0e85f379",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.601Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "7c64fb26-2d69-4349-8a9f-21ef2018e566",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "4fe3e457-3eeb-4841-aace-423974ec3805",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "2a049e8b-45d3-4ded-9e70-6b5ae62d3b26",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "360dfe66-6a69-445f-a977-044151765db5",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "6a630f5c-2c0d-4001-a7ac-809acffdd233",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "8695c835-8af6-4816-995a-fa9ffdaf8bee",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "e92de034-9b15-492b-b58d-77c82c7e2fb4",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "9081b08d-d94a-4fe3-9c6b-ad3ab464e1c4",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "3cb8271c-e72a-44ba-bc9b-a60fc50b207f",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "eda6f756-0af6-4e4c-808a-34b45fbf62ff",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "6d0642ae-083b-421b-bb75-fe37451c98c2",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "614a2f9c-cd73-4b8a-bba7-9a65f6135a1e",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "0f252551-da02-462d-b802-9e47a206704a",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "57933909-f96e-44d9-bfff-16190b31ebae",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "3d3c3dfa-7379-479b-ac68-1f8f80d13548",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "36781601-aa22-4478-bb8c-1b8ee290d96b",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "87afaf52-d31d-474f-8b08-55fb2a1022be",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "eedada69-9d74-4324-b2cb-7f86649fe699",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "365bb1e5-04c0-4ab4-bffa-d6879afdf667",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "1edcdd4c-f5fe-45e3-9749-93ceac645c16",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "38fe623a-f586-4e73-bae4-e1ead75302be",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "9b032657-d5aa-4c7d-a115-85daea3877da",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "a882ed3a-8ad2-4daf-93b8-d91539f44091",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "c934ecb7-d5c9-4e8f-bde1-d43d32bdb896",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "b5f3638d-c8fb-4594-8c47-2485101ae8bd",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "406c359f-7a07-418e-97ec-aec0549c8cce",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              1
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "c7ac7bd4-75dd-401f-8d9b-a08c625975a8",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "b6fb5806-316c-45cd-be50-ff2958ecc21f",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "d631e07c-e991-4659-a441-9bd8593cf6b1",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "30568db5-bbd3-440e-9283-c39cba3dc366",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "df061ce6-eaef-4563-8f69-a4553a18dc8c",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              2
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "365ad73f-5b28-4957-bd18-c71e8b4fb4e3",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "30dfa12b-aace-473b-986c-e3f9098e8872",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "838713a5-176a-4762-9682-b0fd3f81c61f",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "356054d0-c46b-49a1-8614-e16392ae0227",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "daf3a2cd-4efc-46c5-baa5-a9b162cb7a37",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "cb90348a-f8db-4bc9-9f8a-e21e7cb8fc8f",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              2
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "b2da79c8-19b9-4631-805a-4b10f332154b",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "61e4e076-f181-4117-8a89-b97eb39030c8",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "bfadb0cd-b653-4a03-a3f4-4fd80a9ea4fb",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "e98e5afc-cb32-4c7c-87df-ff69f71687db",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "5b9bd446-2a80-447b-a798-601de9d6ce04",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              1
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "fc8e4e7c-8e74-43be-9a8d-e0e62f14513d",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "6317d396-b73a-4c47-bbd2-e4cb14948a3d",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "a4b90df8-7c6d-40da-93c2-aa4926cff1eb",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "ba92a8c0-b84b-4262-bb96-fc9148f2cccb",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "4d966313-8c1c-4182-a52e-84b5338f207b",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "64421643-f474-48f8-bef3-92e020f8cbdb",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "2efd12c0-7ebf-47c8-b35b-ce2aa7278856",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "499171b1-15a0-497d-893b-33b51012bad2",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              1
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.602Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "6e6624cd-258e-446c-9189-3093552f5fde",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "844d6145-57d5-4957-bb37-d13b3bbcc739",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              2
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "fbc3cae9-92df-4579-92e2-22f61b4d712d",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "84e90e36-b4b8-43e7-bc7b-a9d5e6bc5be9",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "8a9f22b4-f492-4bac-8a0f-3b1bf20a0235",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "866a43aa-b8e3-4be0-bd48-f9b0a2bb9c29",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "bf1757db-d3cb-4a3e-8628-041d6e7f3516",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              2
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "b66db9d6-a1c4-42fb-a5ff-073a725cdc31",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              1
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "ae8c9cb0-3955-4c94-b8c8-b96ae2a5ab00",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              2
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "831702f6-585e-4039-a9ae-c5a1132a5c10",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "bc858058-c362-48ea-8d6d-2f452b761d6b",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "b77dff28-5083-42da-ae7e-044f831cd920",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "9c67344b-8a38-4266-8139-2f44d9a7e90e",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "c1827e40-d4cb-4905-8db9-75045494edca",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "ace4f90e-dd16-4dad-81c7-c5841a685415",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "12ffb8bb-5bbc-4c9e-bc1b-c99a25b06117",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "d97cf041-17fa-4904-bddc-21c29bca41ae",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "2538fab3-3a2b-40f0-96f5-78718969a44d",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "819f761c-cf94-4995-8724-30783d01b683",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "98e0183f-8205-4102-a3dc-55c35d9226a6",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "f015953f-c79a-4b70-80a4-2eb96814f2d1",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "ef1daacf-9a4f-4930-a288-0cc1cfe4bc49",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              2
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "401112e8-5d36-4f42-b316-b210ba0a09fb",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "7df09436-747e-4430-84ca-6e9348a9cd73",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "78f5a02d-b652-4167-94f6-fd89ab0d275c",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "3d97c051-340c-46f5-80c5-2af3cfd635f2",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              1
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "68a31f71-ccf2-46db-926a-96c10536ee72",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "90b99878-7245-48ee-9e04-d37318a5a369",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "5b319eaa-ef3a-4c59-9794-45b6244732f2",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "9096cc60-b2e1-494a-8c33-b70a80cb89eb",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "cbc04d74-75cf-4c4d-9bdc-5b5aa81c6b01",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "cdb742d4-d9ec-491b-a8ed-055586dd551f",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              1
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "e26bf4f2-c3c6-4499-9a80-4312d6472590",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "626f8569-5a26-41d5-b7f0-bf92023aabfa",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "a809569a-0793-4915-bb72-690d8b59acb9",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.603Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "5b74007b-14a1-4fdc-b254-0130c3b21e1b",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "4f9161fa-2a34-4f75-9821-b5b53856978b",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "58df51a3-9441-418f-94cf-7415a2b28be2",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              1
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "e01138a5-fac3-4d27-a5b6-dd556de9c715",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "9862d230-1c7e-49c4-a758-94cd4028c95d",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "55d6a35a-9f25-43f3-bebd-40c2d0df05e4",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "39babe9e-0e43-407c-9af6-73e0cce0a658",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "5b053613-5e5a-4ab1-98f7-6137c9e59df3",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              1
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "a73ec640-ba41-4d50-b760-f68e2babd6fc",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "4523c161-5607-40c2-a1be-9f783ff9e512",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "62e14941-73d4-43b0-b64b-a76898bedb11",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "e489d305-2732-4728-85f6-42067bd390d2",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "24d3afca-deb5-4bbe-8d77-d28c72e6c41f",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              1
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "67107072-d3cd-41e8-99e4-0a9e14b9e5d4",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "4e711110-2d1a-48fb-af10-89ae62798c44",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "556b73f2-6e9a-4df6-9113-8dd2dfa43e70",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "aada11c9-c6a2-4fc5-b5b7-51eb097c1119",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "0cca8fc7-91cf-4fae-977a-5fcf826af939",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "bcce776f-3b9f-4661-82ab-6664a1680dc2",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "6d712a31-c2d6-4e59-8289-75141f9a9f54",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "9ea1d7d3-bcd5-416c-a79e-6748df8933a2",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "b08d8009-a89f-44a0-87a6-676a208c5aec",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "23fac9c2-30ce-46b2-862d-afafd3df8ee1",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "86e14d83-5dc0-4605-b4c0-6a695cc4cbe6",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "e924eb4f-9740-4a44-a379-6dafa5cc91ad",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "1a7e9490-ab74-4f79-8e9f-4b83a3457499",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "33871052-3edb-4c27-add3-4d0b280ead6a",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "78bd77bd-d58b-4548-bdf9-a4e019b868a5",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              3
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "babacbcb-6b15-4128-a2f4-16a467faab3a",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "2e6eb7d7-4eab-4297-adc7-de9947af6719",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "ac7e3569-fb18-4bdc-9d28-9f03ff8d95e0",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "be16e815-b9da-4461-aead-306894816c63",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "a927c2b3-b06f-4a24-a456-ba4d45524961",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "40c436c8-1840-427c-8cc0-7e6301ba7475",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "f6fe7e9f-e7c5-40ef-9592-8a6adcf9e024",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "1ea0ee85-cbc8-4285-8c1a-7c2bbe3aac95",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "83e7e3e0-c3e7-4dc6-8fdb-a60707c08f73",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "faf4e66b-c0f6-4ef4-b4bd-f9ab6bcf1798",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "4523abbb-dd27-4481-b393-752fbd8102d5",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "813ec15e-0cec-4148-b973-fd9c279d48a6",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "69c440a3-ab61-4ca5-9514-1052fda03fb7",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "8812cfcc-fefd-477c-8a5e-9558913d0b9a",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "3b81c55c-6e15-46d0-b456-e338e3ec6f76",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "e63c9e5d-f08e-41cc-b924-9ffdefbc9bf1",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        },
+        {
+          "id": "717f3854-548f-4385-ac3e-5588ebf4dd20",
+          "templateStageConfigId": "c9fad00b-f3f4-413e-a753-8d9b183c2fd6",
+          "instrumentType": "PEER_ASSESSMENT",
+          "content": {
+            "answers": [
+              4
+            ]
+          },
+          "submittedAt": "2025-10-28T18:48:05.604Z",
+          "score": null,
+          "feedback": null
+        }
+      ]
+    }
+  }
+]

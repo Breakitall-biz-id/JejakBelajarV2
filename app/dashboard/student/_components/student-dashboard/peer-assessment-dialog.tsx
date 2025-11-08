@@ -34,6 +34,7 @@ export type PeerAssessmentDialogProps = {
   stageId: string
   projectId: string
   instrumentType: "PEER_ASSESSMENT"
+  templateStageConfigId?: string | null
   onSubmitSuccess?: () => void
 }
 
@@ -50,6 +51,7 @@ export function PeerAssessmentDialog({
   stageId,
   projectId,
   instrumentType,
+  templateStageConfigId,
   onSubmitSuccess,
 }: PeerAssessmentDialogProps) {
   // Filter out self from members
@@ -153,6 +155,7 @@ export function PeerAssessmentDialog({
           projectId,
           stageId,
           instrumentType,
+          templateStageConfigId,
           content,
           targetStudentId: member.id,
         })

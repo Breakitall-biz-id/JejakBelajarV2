@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm'
 
 /**
  * Generate email dari nama siswa
- * Format: {nama-sanitized}.{random-number}@jejakbelajar.sch.id
+ * Format: {nama-sanitized}.{random-number}@jejakbelajar.online
  */
 export function generateEmailFromName(name: string): string {
   // Sanitize nama: lowercase, remove special chars, replace spaces with dots
@@ -21,7 +21,7 @@ export function generateEmailFromName(name: string): string {
   // Generate random number untuk uniqueness
   const randomNum = Math.floor(Math.random() * 9999) + 1
 
-  return `${baseEmail}.${randomNum}@jejakbelajar.sch.id`
+  return `${baseEmail}.${randomNum}@jejakbelajar.online`
 }
 
 /**
@@ -55,7 +55,7 @@ export async function generateUniqueEmail(name: string): Promise<string> {
 
     const baseEmail = sanitized || 'siswa'
     const randomNum = Math.floor(Math.random() * 9999) + 1
-    email = `${baseEmail}.${randomNum}.${attempts + 1}@jejakbelajar.sch.id`
+    email = `${baseEmail}.${randomNum}.${attempts + 1}@jejakbelajar.online`
 
     attempts++
   }
@@ -70,7 +70,7 @@ export async function generateUniqueEmail(name: string): Promise<string> {
     .replace(/\.+/g, '.')
 
   const baseEmail = sanitized || 'siswa'
-  return `${baseEmail}.${timestamp}@jejakbelajar.sch.id`
+  return `${baseEmail}.${timestamp}@jejakbelajar.online`
 }
 
 /**

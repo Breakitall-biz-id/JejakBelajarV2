@@ -903,6 +903,13 @@ export default function ProjectDetailPage({
             stageId={dialog.stageId || ''}
             projectId={project.id}
             instrumentType="PEER_ASSESSMENT"
+            templateStageConfigId={(() => {
+              const stageObj = project.stages.find(s => s.id === dialog.stageId);
+              const instrumentObj = dialog.instrumentId
+                ? stageObj?.requiredInstruments.find(i => i.id === dialog.instrumentId)
+                : stageObj?.requiredInstruments.find(i => i.instrumentType === "PEER_ASSESSMENT");
+              return instrumentObj?.templateStageConfigId || null;
+            })()}
             onSubmitSuccess={() => {}}
           />
         ) : null

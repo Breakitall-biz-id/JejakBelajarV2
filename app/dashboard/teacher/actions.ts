@@ -1174,11 +1174,39 @@ export async function submitTeacherReport(
         .limit(1)
         .then((rows) => rows[0])
 
-      // Special handling for OBSERVATION - create fallback if not in template
+      // For OBSERVATION, find the correct template config using stage name matching
       if (!templateConfig && instrumentType === "OBSERVATION") {
-        // For OBSERVATION, we don't need template config - allow submission without it
-        templateConfig = { id: "observation-fallback" }
-      } else if (!templateConfig) {
+        console.log('🔍 OBSERVATION: Template config not found with direct join, trying stage name matching...')
+
+        // Get the stage name first
+        const stageInfo = await tx
+          .select({ name: projectStages.name })
+          .from(projectStages)
+          .where(eq(projectStages.id, stageId))
+          .limit(1)
+          .then((rows) => rows[0])
+
+        if (stageInfo) {
+          console.log('🔍 OBSERVATION: Looking for template config with stage name:', stageInfo.name)
+
+          // Find template config by stage name
+          templateConfig = await tx
+            .select({ id: templateStageConfigs.id })
+            .from(templateStageConfigs)
+            .where(
+              and(
+                eq(templateStageConfigs.instrumentType, "OBSERVATION"),
+                eq(templateStageConfigs.stageName, stageInfo.name)
+              )
+            )
+            .limit(1)
+            .then((rows) => rows[0])
+
+          console.log('🔍 OBSERVATION: Found template config:', templateConfig?.id)
+        }
+      }
+
+      if (!templateConfig) {
         throw new ForbiddenError("Instrument configuration not found for this stage.")
       }
 
