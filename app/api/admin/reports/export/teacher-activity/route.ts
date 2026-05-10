@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminUser } from '@/lib/auth/session'
 import { db } from '@/db'
 import {
-  users,
   classes,
   academicTerms,
   submissions,
@@ -10,7 +9,8 @@ import {
   projectStages,
   projectStageInstruments,
   userClassAssignments
-} from '@/drizzle/schema'
+} from '@/db/schema/jejak'
+import { user as users } from '@/db/schema/auth'
 import { eq, and, isNotNull, gte, lte } from 'drizzle-orm'
 
 export async function GET(request: NextRequest) {

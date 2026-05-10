@@ -3,14 +3,14 @@ import { requireAdminUser } from '@/lib/auth/session'
 import { db } from '@/db'
 import {
   classes,
-  users,
   projectStageInstruments,
   submissions,
   projects,
   projectStages,
   academicTerms,
   userClassAssignments
-} from '@/drizzle/schema'
+} from '@/db/schema/jejak'
+import { user as users } from '@/db/schema/auth'
 import { eq, and, isNotNull } from 'drizzle-orm'
 
 export async function GET(request: NextRequest) {
