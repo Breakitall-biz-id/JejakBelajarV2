@@ -310,7 +310,7 @@ export async function GET(
     ]
 
     // Add dynamic column widths for journal section
-    colWidths.push({ wch: 30 }) // Jawaban Murid column
+    colWidths.push({ wch: 30 }) // Jawaban Siswa column
 
     // Add widths for individual rubric columns
     const allRubricIds = statements.journalQuestions && Array.isArray(statements.journalQuestions)
@@ -699,7 +699,7 @@ async function getProjectExportData(classId: string, projectId: string, teacherI
       : []
 
     // Initialize journal columns
-    studentRow['Jawaban_Murid'] = '' // Default empty
+    studentRow['Jawaban_Siswa'] = '' // Default empty
     allRubricIds.forEach(rubricId => {
       studentRow[`Rubric_${rubricId}`] = 0 // Default score
     })
@@ -744,13 +744,13 @@ async function getProjectExportData(classId: string, projectId: string, teacherI
 
         // Extract student text/jawaban
         if (content.text) {
-          studentRow['Jawaban_Murid'] = content.text
+          studentRow['Jawaban_Siswa'] = content.text
         } else if (content.student_answers) {
-          studentRow['Jawaban_Murid'] = Array.isArray(content.student_answers)
+          studentRow['Jawaban_Siswa'] = Array.isArray(content.student_answers)
             ? content.student_answers.join('; ')
             : content.student_answers
         } else if (content.answers) {
-          studentRow['Jawaban_Murid'] = Array.isArray(content.answers)
+          studentRow['Jawaban_Siswa'] = Array.isArray(content.answers)
             ? content.answers.join('; ')
             : content.answers
         }

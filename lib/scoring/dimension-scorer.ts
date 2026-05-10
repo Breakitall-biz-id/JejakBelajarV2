@@ -139,10 +139,6 @@ async function calculateJournalDimensionScores(submission: any): Promise<Dimensi
   // Ambil semua score dari grades untuk formula baru
   const allScores = grades.map((g: any) => g.score).filter((s: any) => typeof s === 'number')
 
-  // Debug
-  console.log("\n[DEBUG] Journal Scores (New Formula):")
-  console.log(`  All Scores: ${JSON.stringify(allScores)}`)
-
   if (allScores.length === 0) {
     return []
   }
@@ -155,8 +151,6 @@ async function calculateJournalDimensionScores(submission: any): Promise<Dimensi
   // Gunakan dimension dari question pertama (asumsi journal punya satu dimension utama)
   const dimensionId = questions[0]?.dimensionId || 'default'
   const dimensionName = questions[0]?.dimensionName || 'Umum'
-
-  console.log(`  Formula: (${totalScore} / (${totalItems} x 4)) x 100 = ${percentageScore}`)
 
   const dimensionScores: DimensionScore[] = [{
     dimensionId,
@@ -187,10 +181,6 @@ async function calculateAssessmentDimensionScores(submission: any): Promise<Dime
     .where(eq(templateQuestions.configId, submission.templateStageConfigId))
     .orderBy(templateQuestions.createdAt) // Ensure consistent ordering
 
-  console.log("\n==================== [DEBUG] Assessment Dimension Calculation ====================")
-  console.log(`Submission ID: ${submission.id} | Config ID: ${submission.templateStageConfigId}`)
-  console.log(`Total Questions: ${questions.length}`)
-
   const content = submission.content as any
   const answers = content?.answers || []
 
@@ -203,15 +193,9 @@ async function calculateAssessmentDimensionScores(submission: any): Promise<Dime
     dimensionId: q.dimensionId,
     dimensionName: q.dimensionName
   }))
-  console.log("\n[DEBUG] Assessment Mapping for Submission:")
-  debugMapping.forEach((m, i) => {
-    console.log(`  [${i+1}] QID: ${m.questionId} | Dim: ${m.dimensionName} | Q: ${m.questionText}`)
-    console.log(`      Answer: ${JSON.stringify(m.answer)}`)
-  })
 
   // Validate answers length
   if (answers.length !== questions.length) {
-    console.warn(`Answer length (${answers.length}) doesn't match question count (${questions.length}) for submission ${submission.id}`)
     // Continue with available answers but log the mismatch
   }
 
@@ -244,16 +228,12 @@ async function calculateAssessmentDimensionScores(submission: any): Promise<Dime
         const score = typeof answer === 'number' ? answer : 0
         totalScore += score
         totalItems++
-      } else {
-        console.warn(`No answer found for question ${item.question.id} at index ${item.answerIndex}`)
       }
     }
 
     if (totalItems > 0) {
       // IMPLEMENTASI FORMULA BARU: X = ((jumlah skor pada seluruh item) / (jumlah item x 4)) x 100
       const percentageScore = (totalScore / (totalItems * 4)) * 100
-
-      console.log(`  [DEBUG] Dimension ${dimensionId}: (${totalScore} / (${totalItems} x 4)) x 100 = ${percentageScore}`)
 
       dimensionScores.push({
         dimensionId,
@@ -263,8 +243,6 @@ async function calculateAssessmentDimensionScores(submission: any): Promise<Dime
         maxScore: 100, // Updated to 100 scale
         qualitativeScore: convertToQualitativeScore(percentageScore).qualitativeScore
       })
-    } else {
-      console.warn(`No valid submissions found for dimension ${dimensionId}`)
     }
   }
 
@@ -294,7 +272,6 @@ async function calculateObservationDimensionScores(submission: any): Promise<Dim
 
   // Validate answers length
   if (answers.length !== questions.length) {
-    console.warn(`Answer length (${answers.length}) doesn't match question count (${questions.length}) for observation submission ${submission.id}`)
     // Continue with available answers but log the mismatch
   }
 
@@ -327,16 +304,12 @@ async function calculateObservationDimensionScores(submission: any): Promise<Dim
         const score = typeof answer === 'number' ? answer : 0
         totalScore += score
         totalItems++
-      } else {
-        console.warn(`No answer found for observation question ${item.question.id} at index ${item.answerIndex}`)
       }
     }
 
     if (totalItems > 0) {
       // IMPLEMENTASI FORMULA BARU: X = ((jumlah skor pada seluruh item) / (jumlah item x 4)) x 100
       const percentageScore = (totalScore / (totalItems * 4)) * 100
-
-      console.log(`  [DEBUG] Observation Dimension ${dimensionId}: (${totalScore} / (${totalItems} x 4)) x 100 = ${percentageScore}`)
 
       dimensionScores.push({
         dimensionId,
@@ -346,8 +319,6 @@ async function calculateObservationDimensionScores(submission: any): Promise<Dim
         maxScore: 100, // Updated to 100 scale
         qualitativeScore: convertToQualitativeScore(percentageScore).qualitativeScore
       })
-    } else {
-      console.warn(`No valid observation submissions found for dimension ${dimensionId}`)
     }
   }
 
@@ -482,25 +453,11 @@ export async function calculateStudentDimensionScores(
     ...otherSubmissions
   ]
 
-  console.log("\n==================== [DEBUG] Student Dimension Calculation ====================")
-  console.log(`Student ID: ${studentId} | Project ID: ${projectId}`)
-  console.log(`SELF_ASSESSMENT submissions: ${selfSubmissions.length}`)
-  console.log(`PEER_ASSESSMENT submissions (target): ${peerSubmissions.length}`)
-  console.log(`OBSERVATION submissions (target): ${obsSubmissions.length}`)
-  console.log(`Other submissions: ${otherSubmissions.length}`)
-  console.log("All Submissions IDs:", studentSubmissions.map(s => s.id))
-  studentSubmissions.forEach((s, i) => {
-    console.log(`  [${i+1}] SubmissionID: ${s.id}, config: ${s.templateStageConfigId}`)
-  })
-  console.log("=============================================================================\n")
-
   const allDimensionScores: DimensionScore[] = []
 
   // Calculate dimension scores for each submission
   for (const submission of studentSubmissions) {
-    console.log(`Processing submission ${submission.id}...`)
     const dimensionScores = await calculateDimensionScoresForSubmission(submission.id)
-    console.log(dimensionScores)
     allDimensionScores.push(...dimensionScores)
   }
 

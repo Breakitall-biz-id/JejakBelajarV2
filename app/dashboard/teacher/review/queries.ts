@@ -592,8 +592,6 @@ export async function getProjectDetail(classId: string, projectId: string, teach
   const submissionRows = [...studentSubmissionRows, ...teacherSubmissionRows]
 
   // Process submission rows to handle NULL instrumentType
-  console.log("🔍 BACKEND DEBUG - Raw submission rows:", submissionRows.length, submissionRows);
-
   const processedSubmissionRows = submissionRows.map(row => {
     // Determine instrument type if it's null
     let instrumentType = row.instrumentType;
@@ -611,8 +609,6 @@ export async function getProjectDetail(classId: string, projectId: string, teach
       instrumentType: instrumentType || "UNKNOWN"
     };
   });
-
-  console.log("🔍 BACKEND DEBUG - Processed submission rows:", processedSubmissionRows.length, processedSubmissionRows);
 
   // Get group data
   let groupRows: Array<{
@@ -674,12 +670,6 @@ export async function getProjectDetail(classId: string, projectId: string, teach
     const teacherSubmissions = processedSubmissionRows.filter(
       s => s.projectStageId === stage.id && s.submittedById === teacher?.id && s.submittedBy === 'TEACHER'
     )
-
-    console.log("🔍 BACKEND DEBUG - Teacher submissions for stage:", stage.name, {
-      teacherId: teacher?.id,
-      teacherSubmissions: teacherSubmissions,
-      totalSubmissions: processedSubmissionRows.filter(s => s.projectStageId === stage.id).length
-    })
 
     const students = studentRows.map(student => {
       const progress = progressRows.find(
@@ -788,12 +778,6 @@ export async function getProjectDetail(classId: string, projectId: string, teach
         score: submission.score,
         feedback: submission.feedback,
       })
-    })
-
-    console.log("🔍 BACKEND DEBUG - Final submissionsByInstrument for stage:", stage.name, {
-      submissionsByInstrument,
-      instrumentTypes: Object.keys(submissionsByInstrument),
-      observationCount: submissionsByInstrument["OBSERVATION"]?.length || 0
     })
 
     return {

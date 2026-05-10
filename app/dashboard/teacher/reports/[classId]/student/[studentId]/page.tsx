@@ -184,7 +184,7 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
                 <div className="text-center">
                   <div className="text-sm text-muted-foreground">Nilai Rata-rata</div>
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold">{studentData.averageGrade.toFixed(1)}/100</span>
+                    <span className="text-2xl font-bold">{studentData.averageGrade.toFixed(1)}</span>
                     <GradeBadge grade={studentData.averageGrade} />
                   </div>
                 </div>
@@ -319,7 +319,7 @@ export default function StudentDetailPage({ params }: StudentDetailPageProps) {
                           <TableCell>
                             {submission.score !== null ? (
                               <div className="flex items-center gap-2">
-                                <span className="font-medium">{((submission.score / 4) * 100).toFixed(1)}/100</span>
+                                <span className="font-medium">{((submission.score / 4) * 100).toFixed(1)}</span>
                                 <IndividualScoreBadge score={submission.score} />
                               </div>
                             ) : (

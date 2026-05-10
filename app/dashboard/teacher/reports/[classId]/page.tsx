@@ -259,7 +259,7 @@ function ClassDetailPageContent({ classId }: { classId: string }) {
                       <TableCell className="text-center">
                         <div className="flex flex-col items-center gap-1">
                           <span className="font-medium">
-                            {student.averageGrade.toFixed(1)}/100
+                            {student.averageGrade.toFixed(1)}
                           </span>
                           <GradeBadge grade={student.averageGrade} />
                         </div>

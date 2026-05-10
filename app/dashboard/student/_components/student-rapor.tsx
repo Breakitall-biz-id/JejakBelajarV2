@@ -15,7 +15,9 @@ import {
   Lightbulb,
   User,
   BookOpen,
-  Calendar
+  Calendar,
+  MessageSquare,
+  Users
 } from "lucide-react"
 import type { CurrentUser } from "@/lib/auth/session"
 import type { RaporData } from "@/app/api/student/rapor/[projectId]/route"
@@ -197,7 +199,7 @@ export function StudentRapor({ student, projectId }: StudentRaporProps) {
               </div>
               <div className="flex items-center gap-2">
                 <span className={`font-bold text-lg ${getScoreColor(raporData.overallAverageScore)}`}>
-                  {raporData.overallAverageScore.toFixed(1)}/100
+                  {raporData.overallAverageScore.toFixed(1)}
                 </span>
                 <Badge variant={getScoreVariant(raporData.overallAverageScore)}>
                   {raporData.overallQualitativeCode}
@@ -222,21 +224,18 @@ export function StudentRapor({ student, projectId }: StudentRaporProps) {
               <div className="flex justify-between items-center">
                 <span className="font-medium">Nilai Rata-rata Keseluruhan</span>
                 <span className={`font-bold ${getScoreColor(raporData.overallAverageScore)}`}>
-                  {raporData.overallAverageScore.toFixed(1)}/100
+                  {raporData.overallAverageScore.toFixed(1)}
                 </span>
               </div>
               <Progress value={getProgressValue(raporData.overallAverageScore)} className="h-3" />
             </div>
 
             <div className="bg-muted/50 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2">
                 <Badge variant={getScoreVariant(raporData.overallAverageScore)} className="text-sm">
                   {raporData.overallQualitativeScore}
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground">
-                {raporData.overallQualitativeDescription}
-              </p>
             </div>
           </div>
         </CardContent>
@@ -270,7 +269,7 @@ export function StudentRapor({ student, projectId }: StudentRaporProps) {
                     </div>
                     <div className="text-right">
                       <div className={`font-bold ${getScoreColor(dimension.averageScore)}`}>
-                        {dimension.averageScore.toFixed(1)}/100
+                        {dimension.averageScore.toFixed(1)}
                       </div>
                       <Badge variant={getScoreVariant(dimension.averageScore)} className="text-xs mt-1">
                         {dimension.qualitativeScore}
@@ -279,12 +278,6 @@ export function StudentRapor({ student, projectId }: StudentRaporProps) {
                   </div>
 
                   <Progress value={getProgressValue(dimension.averageScore)} className="h-2" />
-
-                  <div className="bg-muted/30 rounded-lg p-3">
-                    <p className="text-sm text-muted-foreground">
-                      {dimension.qualitativeDescription}
-                    </p>
-                  </div>
                 </div>
               ))}
           </div>
@@ -363,6 +356,64 @@ export function StudentRapor({ student, projectId }: StudentRaporProps) {
               </li>
             ))}
           </ul>
+        </CardContent>
+      </Card>
+
+      {/* Teacher Feedback */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5" />
+            Catatan Guru
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {raporData.teacherFeedback ? (
+            <div className="space-y-2">
+              <p className="text-sm">{raporData.teacherFeedback.feedback}</p>
+              <p className="text-xs text-muted-foreground">
+                — {raporData.teacherFeedback.teacherName || "Guru"},{" "}
+                {new Date(raporData.teacherFeedback.createdAt).toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Belum ada catatan dari guru.</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Peer Feedback */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Penilaian Teman Sebaya
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {raporData.peerFeedback && raporData.peerFeedback.length > 0 ? (
+            <ul className="space-y-3">
+              {raporData.peerFeedback.map((pf, index) => (
+                <li key={index} className="border-l-2 border-muted pl-3 space-y-1">
+                  <p className="text-sm">{pf.comment}</p>
+                  <p className="text-xs text-muted-foreground">
+                    — {pf.authorName || "Teman"},{" "}
+                    {new Date(pf.createdAt).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">Belum ada penilaian dari teman sebaya.</p>
+          )}
         </CardContent>
       </Card>
 

@@ -6,10 +6,14 @@ import {
   projects,
   classes,
   academicTerms,
-  userClassAssignments
+  userClassAssignments,
+  teacherFeedbacks,
+  groupComments,
+  groups,
+  groupMembers,
 } from "@/db/schema/jejak"
 import { user } from "@/db/schema/auth"
-import { eq, and } from "drizzle-orm"
+import { eq, and, desc } from "drizzle-orm"
 import type { CurrentUser } from "@/lib/auth/session"
 import { convertToQualitativeScore } from "@/lib/scoring/qualitative-converter"
 
@@ -44,17 +48,25 @@ export type RaporData = {
     maxScore: number
     qualitativeScore: string
     qualitativeCode: string
-    qualitativeDescription: string
   }>
   overallAverageScore: number
   overallQualitativeScore: string
   overallQualitativeCode: string
-  overallQualitativeDescription: string
   performanceInsights: {
     strengths: string[]
     areasForImprovement: string[]
     recommendations: string[]
   }
+  teacherFeedback: {
+    teacherName: string | null
+    feedback: string
+    createdAt: string
+  } | null
+  peerFeedback: Array<{
+    authorName: string | null
+    comment: string
+    createdAt: string
+  }>
   generatedAt: string
 }
 
@@ -116,7 +128,6 @@ export async function GET(
         ...dimension,
         qualitativeScore: qualitativeResult.qualitativeScore,
         qualitativeCode: qualitativeResult.qualitativeCode,
-        qualitativeDescription: getPerformanceDescription(qualitativeResult.qualitativeCode),
       }
     })
 
@@ -124,6 +135,33 @@ export async function GET(
 
     // Generate performance insights
     const performanceInsights = generatePerformanceInsights(dimensionScores)
+
+    // Fetch teacher feedback for this student and project
+    const teacherFeedbackResult = await db
+      .select({
+        feedback: teacherFeedbacks.feedback,
+        createdAt: teacherFeedbacks.createdAt,
+        teacherName: user.name,
+      })
+      .from(teacherFeedbacks)
+      .leftJoin(user, eq(teacherFeedbacks.teacherId, user.id))
+      .where(and(
+        eq(teacherFeedbacks.studentId, student.id),
+        eq(teacherFeedbacks.projectId, projectId)
+      ))
+      .limit(1)
+
+    // Fetch peer feedback (group comments targeting this student)
+    const peerFeedbackResult = await db
+      .select({
+        comment: groupComments.comment,
+        createdAt: groupComments.createdAt,
+        authorName: user.name,
+      })
+      .from(groupComments)
+      .leftJoin(user, eq(groupComments.authorId, user.id))
+      .where(eq(groupComments.targetMemberId, student.id))
+      .orderBy(desc(groupComments.createdAt))
 
     const raporData: RaporData = {
       student: {
@@ -142,8 +180,17 @@ export async function GET(
       overallAverageScore: dimensionScoresData.overallAverageScore,
       overallQualitativeScore: overallQualitativeResult.qualitativeScore,
       overallQualitativeCode: overallQualitativeResult.qualitativeCode,
-      overallQualitativeDescription: getPerformanceDescription(overallQualitativeResult.qualitativeCode),
       performanceInsights,
+      teacherFeedback: teacherFeedbackResult.length > 0 ? {
+        teacherName: teacherFeedbackResult[0].teacherName,
+        feedback: teacherFeedbackResult[0].feedback,
+        createdAt: teacherFeedbackResult[0].createdAt.toISOString(),
+      } : null,
+      peerFeedback: peerFeedbackResult.map(pf => ({
+        authorName: pf.authorName,
+        comment: pf.comment,
+        createdAt: pf.createdAt.toISOString(),
+      })),
       generatedAt: new Date().toISOString(),
     }
 
@@ -154,23 +201,6 @@ export async function GET(
       { error: "Failed to generate rapor" },
       { status: 500 }
     )
-  }
-}
-
-function getPerformanceDescription(qualitativeCode: string): string {
-  switch (qualitativeCode) {
-    case "SB":
-      return "Pencapaian sangat baik, melebihi harapan dengan konsistensi tinggi"
-    case "B":
-      return "Pencapaian baik, memenuhi harapan dengan performa stabil"
-    case "C":
-      return "Pencapaian cukup, memerlukan perhatian untuk peningkatan"
-    case "R":
-      return "Pencapaian kurang, perlu bimbingan dan dukungan tambahan"
-    case "SR":
-      return "Pencapaian sangat rendah, memerlukan intervensi intensif"
-    default:
-      return "Tidak dapat dievaluasi"
   }
 }
 

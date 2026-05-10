@@ -1,17 +1,37 @@
 {
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://exo-openclaw.dialox.id/kiro-gateway",
+    "ANTHROPIC_AUTH_TOKEN": "40fc2d82fe159b10f2712e1a0de7e741929660e6"
+  },
   "permissions": {
     "allow": [
-      "WebSearch",
-      "Bash(npm run build:*)",
-      "Bash(npx next:*)",
-      "Bash(node:*)",
-      "Bash(task-manager:*)",
-      "Bash(npm run lint:*)",
-      "mcp__neon__describe_project",
-      "mcp__neon__describe_branch",
-      "mcp__neon__run_sql"
-    ],
-    "deny": [],
-    "ask": []
-  }
+      "Grep(**)",
+      "Bash(::)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(openspec new *)",
+      "Bash(openspec status *)",
+      "Bash(openspec instructions *)",
+      "PowerShell(fly auth *)",
+      "PowerShell(flyctl auth *)",
+      "PowerShell(flyctl apps *)",
+      "PowerShell(flyctl deploy *)",
+      "PowerShell(flyctl version *)",
+      "PowerShell(flyctl launch *)",
+      "PowerShell(flyctl config *)",
+      "PowerShell(docker --version)",
+      "PowerShell(flyctl logs *)",
+      "PowerShell(flyctl secrets *)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('labelling/electronics_label.py'\\).read\\(\\)\\); print\\('Syntax OK'\\)\")",
+      "Bash(python *)",
+      "Bash(set ANTHROPIC_BASE_URL=https://exo-openclaw.dialox.id/kiro-gateway)",
+      "Bash(set ANTHROPIC_AUTH_TOKEN=40fc2d82fe159b10f2712e1a0de7e741929660e6)",
+      "Bash(set TOTAL_ROW=100)",
+      "Bash(set \"ANTHROPIC_BASE_URL=https://exo-openclaw.dialox.id/kiro-gateway\")",
+      "Bash(set \"ANTHROPIC_AUTH_TOKEN=40fc2d82fe159b10f2712e1a0de7e741929660e6\")",
+      "Bash(set \"TOTAL_ROW=100\")",
+      "Bash(python3 *)"
+    ]
+  },
+  "model": "claude-opus-4.6",
+  "skipDangerousModePermissionPrompt": true
 }

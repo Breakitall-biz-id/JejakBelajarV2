@@ -97,7 +97,6 @@ export async function GET(
         ...dimension,
         qualitativeScore: qualitativeResult.qualitativeScore,
         qualitativeCode: qualitativeResult.qualitativeCode,
-        qualitativeDescription: getPerformanceDescription(qualitativeResult.qualitativeCode),
       }
     })
 
@@ -123,8 +122,9 @@ export async function GET(
       overallAverageScore: dimensionScoresData.overallAverageScore,
       overallQualitativeScore: overallQualitativeResult.qualitativeScore,
       overallQualitativeCode: overallQualitativeResult.qualitativeCode,
-      overallQualitativeDescription: getPerformanceDescription(overallQualitativeResult.qualitativeCode),
       performanceInsights,
+      teacherFeedback: null,
+      peerFeedback: [],
       generatedAt: new Date().toISOString(),
     }
 
@@ -135,23 +135,6 @@ export async function GET(
       { error: "Failed to generate rapor" },
       { status: 500 }
     )
-  }
-}
-
-function getPerformanceDescription(qualitativeCode: string): string {
-  switch (qualitativeCode) {
-    case "SB":
-      return "Pencapaian sangat baik, melebihi harapan dengan konsistensi tinggi"
-    case "B":
-      return "Pencapaian baik, memenuhi harapan dengan performa stabil"
-    case "C":
-      return "Pencapaian cukup, memerlukan perhatian untuk peningkatan"
-    case "R":
-      return "Pencapaian kurang, perlu bimbingan dan dukungan tambahan"
-    case "SR":
-      return "Pencapaian sangat rendah, memerlukan intervensi intensif"
-    default:
-      return "Tidak dapat dievaluasi"
   }
 }
 

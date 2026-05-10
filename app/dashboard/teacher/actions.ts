@@ -1065,6 +1065,7 @@ const teacherReportSchema = z.object({
   projectId: z.string().uuid(),
   stageId: z.string().uuid(),
   instrumentType: z.enum(["OBSERVATION"]),
+  templateStageConfigId: z.string().uuid().optional(), // Add this to fix template mapping
   content: z.object({ answers: z.array(z.number().min(1).max(4)).min(1) }),
   targetStudentId: z.string().uuid().optional().nullable(),
 })
@@ -1082,7 +1083,7 @@ export async function submitTeacherReport(
     }
   }
 
-  const { projectId, stageId, instrumentType, content, targetStudentId } = parsed.data
+  const { projectId, stageId, instrumentType, templateStageConfigId, content, targetStudentId } = parsed.data
 
   try {
     const teacher = await requireTeacherUser()
@@ -1160,49 +1161,63 @@ export async function submitTeacherReport(
         }
       }
 
-      let templateConfig = await tx
-        .select({ id: templateStageConfigs.id })
-        .from(templateStageConfigs)
-        .innerJoin(projects, eq(templateStageConfigs.templateId, projects.templateId))
-        .innerJoin(projectStages, eq(projects.id, projectStages.projectId))
-        .where(
-          and(
-            eq(projectStages.id, stageId),
-            eq(templateStageConfigs.instrumentType, instrumentType),
-          ),
-        )
-        .limit(1)
-        .then((rows) => rows[0])
+      let templateConfig = null
 
-      // For OBSERVATION, find the correct template config using stage name matching
-      if (!templateConfig && instrumentType === "OBSERVATION") {
-        console.log('🔍 OBSERVATION: Template config not found with direct join, trying stage name matching...')
-
-        // Get the stage name first
-        const stageInfo = await tx
-          .select({ name: projectStages.name })
-          .from(projectStages)
-          .where(eq(projectStages.id, stageId))
+      // If templateStageConfigId is provided, use it directly
+      if (templateStageConfigId) {
+        templateConfig = await tx
+          .select({ id: templateStageConfigs.id })
+          .from(templateStageConfigs)
+          .where(eq(templateStageConfigs.id, templateStageConfigId))
+          .limit(1)
+          .then((rows) => rows[0])
+      } else {
+        // Fallback logic for backward compatibility
+        templateConfig = await tx
+          .select({ id: templateStageConfigs.id })
+          .from(templateStageConfigs)
+          .innerJoin(projects, eq(templateStageConfigs.templateId, projects.templateId))
+          .innerJoin(projectStages, eq(projects.id, projectStages.projectId))
+          .where(
+            and(
+              eq(projectStages.id, stageId),
+              eq(templateStageConfigs.instrumentType, instrumentType),
+            ),
+          )
           .limit(1)
           .then((rows) => rows[0])
 
-        if (stageInfo) {
-          console.log('🔍 OBSERVATION: Looking for template config with stage name:', stageInfo.name)
+        // For OBSERVATION, find the correct template config using stage name matching
+        if (!templateConfig && instrumentType === "OBSERVATION") {
+          console.log('🔍 OBSERVATION: Template config not found with direct join, trying stage name matching...')
 
-          // Find template config by stage name
-          templateConfig = await tx
-            .select({ id: templateStageConfigs.id })
-            .from(templateStageConfigs)
-            .where(
-              and(
-                eq(templateStageConfigs.instrumentType, "OBSERVATION"),
-                eq(templateStageConfigs.stageName, stageInfo.name)
-              )
-            )
+          // Get the stage name first
+          const stageInfo = await tx
+            .select({ name: projectStages.name })
+            .from(projectStages)
+            .where(eq(projectStages.id, stageId))
             .limit(1)
             .then((rows) => rows[0])
 
-          console.log('🔍 OBSERVATION: Found template config:', templateConfig?.id)
+          if (stageInfo) {
+            console.log('🔍 OBSERVATION: Looking for template config with stage name:', stageInfo.name)
+
+            // Find template config by stage name (deterministic ordering)
+            templateConfig = await tx
+              .select({ id: templateStageConfigs.id })
+              .from(templateStageConfigs)
+              .where(
+                and(
+                  eq(templateStageConfigs.instrumentType, "OBSERVATION"),
+                  eq(templateStageConfigs.stageName, stageInfo.name)
+                )
+              )
+              .orderBy(templateStageConfigs.displayOrder) // Use consistent ordering
+              .limit(1)
+              .then((rows) => rows[0])
+
+            console.log('🔍 OBSERVATION: Found template config:', templateConfig?.id)
+          }
         }
       }
 

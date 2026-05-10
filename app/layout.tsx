@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Mona_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   robots: "index, follow",
   openGraph: {
     title: "JejakBelajar",
-    description: "Platform pembelajaran interaktif untuk guru dan murid",
+    description: "Platform pembelajaran interaktif untuk guru dan siswa",
     url: "https://jejakbelajar.online",
     siteName: "JejakBelajar",
     locale: "id_ID",

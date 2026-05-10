@@ -116,7 +116,7 @@ export function StudentDimensionScores({ student, projectId }: StudentDimensionS
         <CardTitle className="flex items-center justify-between">
           Progres Dimensi
           <Badge variant={getScoreVariant(dimensionScores.overallAverageScore)}>
-            Rata-rata: {dimensionScores.overallAverageScore.toFixed(1)}/100
+            Rata-rata: {dimensionScores.overallAverageScore.toFixed(1)}
           </Badge>
         </CardTitle>
         <CardDescription>
@@ -130,7 +130,7 @@ export function StudentDimensionScores({ student, projectId }: StudentDimensionS
             <div className="flex justify-between items-center">
               <span className="font-medium">Rata-rata Keseluruhan</span>
               <span className={`font-semibold ${getScoreColor(dimensionScores.overallAverageScore)}`}>
-                {dimensionScores.overallAverageScore.toFixed(1)}/100
+                {dimensionScores.overallAverageScore.toFixed(1)}
               </span>
             </div>
             <Progress value={getProgressValue(dimensionScores.overallAverageScore)} className="h-3" />
@@ -150,7 +150,7 @@ export function StudentDimensionScores({ student, projectId }: StudentDimensionS
                     <span className="font-medium text-sm">{dimension.dimensionName}</span>
                     <div className="flex items-center gap-2">
                       <span className={`font-semibold text-sm ${getScoreColor(dimension.averageScore)}`}>
-                        {dimension.averageScore.toFixed(1)}/100
+                        {dimension.averageScore.toFixed(1)}
                       </span>
                       <Badge variant="outline" className="text-xs">
                         {dimension.qualitativeScore?.qualitativeScore || dimension.qualitativeScore}

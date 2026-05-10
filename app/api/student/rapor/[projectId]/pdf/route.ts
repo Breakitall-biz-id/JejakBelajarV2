@@ -287,7 +287,7 @@ function generatePDFHTML(data: RaporData): string {
         <div class="score-header">
             <h2>📊 Overall Performance Summary</h2>
             <div class="score-value" style="background-color: ${getScoreColor(data.overallAverageScore)};">
-                ${data.overallAverageScore.toFixed(1)}/4.0
+                ${data.overallAverageScore.toFixed(1)}
             </div>
         </div>
 
@@ -300,8 +300,6 @@ function generatePDFHTML(data: RaporData): string {
                 ${data.overallQualitativeScore} (${data.overallQualitativeCode})
             </span>
         </p>
-
-        <p><em>${data.overallQualitativeDescription}</em></p>
     </div>
 
     <div class="score-section">
@@ -319,7 +317,7 @@ function generatePDFHTML(data: RaporData): string {
                         </span>
                     </div>
                     <div class="dimension-score" style="background-color: ${getScoreColor(dimension.averageScore)};">
-                        ${dimension.averageScore.toFixed(1)}/100
+                        ${dimension.averageScore.toFixed(1)}
                     </div>
                 </div>
 
@@ -327,7 +325,6 @@ function generatePDFHTML(data: RaporData): string {
                     <div class="progress-fill" style="width: ${getProgressValue(dimension.averageScore)}%; background-color: ${getScoreColor(dimension.averageScore)};"></div>
                 </div>
 
-                <p><em>${dimension.qualitativeDescription}</em></p>
                 <p><small>Based on ${dimension.totalSubmissions} assessment${dimension.totalSubmissions !== 1 ? 's' : ''}</small></p>
             </div>
           `).join('')}

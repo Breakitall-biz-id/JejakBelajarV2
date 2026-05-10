@@ -144,6 +144,7 @@ export default function ProjectDetailPage({
     open: boolean;
     stageId?: string;
     instrument?: InstrumentWithQuestions;
+    templateStageConfigId?: string;
     students?: { id: string; name: string }[];
     initialValue?: Array<{ [studentId: string]: number }>;
     isEdit?: boolean;
@@ -240,22 +241,6 @@ export default function ProjectDetailPage({
       const response = await fetch(`/api/teacher/project-detail?classId=${classId}&projectId=${projectId}`)
       if (response.ok) {
         const data = await response.json()
-        console.log("🔍 DEBUG - Raw project data:", data);
-        console.log("🔍 DEBUG - Observation submissions check:", {
-          stages: data.stages?.map((s: any) => ({
-            stageName: s.name,
-            submissionsByInstrument: s.submissionsByInstrument,
-            hasObservationSubmissions: s.submissionsByInstrument,
-            observationSubmissions: s.submissionsByInstrument?.["OBSERVATION"],
-            observationSubmissionsDetail: s.submissionsByInstrument?.["OBSERVATION"]?.map((sub: any) => ({
-              id: sub.id,
-              instrumentType: sub.instrumentType,
-              studentId: sub.studentId,
-              targetStudentId: sub.targetStudentId,
-              content: sub.content
-            }))
-          }))
-        });
         setProject(data)
       }
     } finally {
@@ -395,7 +380,7 @@ export default function ProjectDetailPage({
         <TabsList className="mb-6 w-full flex">
           <TabsTrigger value="tentang" className="flex-1">Tentang</TabsTrigger>
           <TabsTrigger value="tahapan" className="flex-1">Tahapan</TabsTrigger>
-          <TabsTrigger value="murid" className="flex-1">Murid</TabsTrigger>
+          <TabsTrigger value="siswa" className="flex-1">Siswa</TabsTrigger>
         </TabsList>
 
         <TabsContent value="tentang">
@@ -420,10 +405,10 @@ export default function ProjectDetailPage({
                   )}
                   <div className="space-y-4">
                     {stage.requiredInstruments.map((instrument) => {
-                      // Ambil SEMUA submissions murid untuk instrumen ini (bisa lebih dari satu, misal peer assessment)
+                      // Ambil SEMUA submissions siswa untuk instrumen ini (bisa lebih dari satu, misal peer assessment)
                       let submissions;
                       if (instrument.instrumentType === "PEER_ASSESSMENT") {
-                        // Hanya tampilkan murid yang sudah submit peer assessment (minimal satu submission)
+                        // Hanya tampilkan siswa yang sudah submit peer assessment (minimal satu submission)
                         const submittedStudents = [];
                         const seen = new Set();
                         for (const student of stage.students) {
@@ -480,7 +465,7 @@ export default function ProjectDetailPage({
                               </span>
                             )}
                           </div>
-                          {/* Accordion submissions murid, default collapsed */}
+                          {/* Accordion submissions siswa, default collapsed */}
                           <div className="ml-4">
                             <details className="group" open={false}>
                               <summary className="flex items-center gap-2 cursor-pointer py-2 px-3 select-none rounded border focus:outline-none focus:ring-2 focus:ring-primary/30">
@@ -607,6 +592,7 @@ export default function ProjectDetailPage({
                                     open: true,
                                     stageId: stage.id,
                                     instrument,
+                                    templateStageConfigId: (instrument as InstrumentWithQuestions).templateStageConfigId || undefined,
                                     students,
                                     initialValue,
                                     isEdit: hasExistingSubmission,
@@ -638,7 +624,7 @@ export default function ProjectDetailPage({
           </div>
         </TabsContent>
 
-        <TabsContent value="murid">
+        <TabsContent value="siswa">
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {allStudents.map((student) => (
@@ -942,6 +928,7 @@ export default function ProjectDetailPage({
                     projectId: project.id,
                     stageId: observationDialog.stageId || '',
                     instrumentType: "OBSERVATION",
+                    templateStageConfigId: observationDialog.templateStageConfigId,
                     content: { answers: studentScores },
                     targetStudentId: student.id,
                   });

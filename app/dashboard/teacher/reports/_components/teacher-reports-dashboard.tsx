@@ -145,7 +145,7 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{aggregate.averageGrade.toFixed(1)}/100</div>
+            <div className="text-2xl font-bold">{aggregate.averageGrade.toFixed(1)}</div>
             <p className="text-xs text-muted-foreground">Skala 0-100</p>
           </CardContent>
         </Card>
@@ -245,7 +245,7 @@ export function TeacherReportsDashboard({ data }: TeacherReportsDashboardProps) 
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <span className="font-medium">
-                                {calculateOverallGrade(cls).toFixed(1)}/100
+                                {calculateOverallGrade(cls).toFixed(1)}
                               </span>
                               <GradeBadge grade={calculateOverallGrade(cls)} />
                             </div>

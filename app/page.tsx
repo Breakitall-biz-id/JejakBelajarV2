@@ -42,7 +42,7 @@ export default function Home() {
             </h1>
 
             <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-8 leading-relaxed px-2">
-              Platform pembelajaran yang membantu guru dan murid melacak progres pembelajaran
+              Platform pembelajaran yang membantu guru dan siswa melacak progres pembelajaran
               <br className="hidden sm:inline" />
               <span className="sm:hidden"> </span>
               dengan sistem penilaian yang komprehensif dan transparan.
@@ -80,7 +80,7 @@ export default function Home() {
               </li>
               <li className="flex items-start gap-2">
                 <Target className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                <span className="text-xs sm:text-sm">Monitor progres murid secara real-time</span>
+                <span className="text-xs sm:text-sm">Monitor progres siswa secara real-time</span>
               </li>
               <li className="flex items-start gap-2">
                 <ClipboardCheck className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
@@ -93,13 +93,13 @@ export default function Home() {
             </ul>
           </Card>
 
-          {/* Untuk Murid */}
+          {/* Untuk Siswa */}
           <Card className="p-4 sm:p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200/50 dark:border-green-700/30 hover:shadow-lg transition-all duration-300">
             <div className="flex items-center gap-3 mb-3 sm:mb-4">
               <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg">
                 <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
               </div>
-              <h3 className="font-semibold text-lg sm:text-xl">Untuk Murid</h3>
+              <h3 className="font-semibold text-lg sm:text-xl">Untuk Siswa</h3>
             </div>
             <ul className="space-y-2 sm:space-y-3 text-muted-foreground">
               <li className="flex items-start gap-2">
@@ -136,7 +136,7 @@ export default function Home() {
               </li>
               <li className="flex items-start gap-2">
                 <Users className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
-                <span className="text-xs sm:text-sm"><strong>Peer Assessment</strong> - Penilaian antar murid</span>
+                <span className="text-xs sm:text-sm"><strong>Peer Assessment</strong> - Penilaian antar siswa</span>
               </li>
               <li className="flex items-start gap-2">
                 <Target className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
@@ -173,9 +173,9 @@ export default function Home() {
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
               <span className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">2</span>
             </div>
-            <h3 className="font-semibold text-base sm:text-lg mb-2">Murid Mengerjakan</h3>
+            <h3 className="font-semibold text-base sm:text-lg mb-2">Siswa Mengerjakan</h3>
             <p className="text-muted-foreground text-xs sm:text-sm px-4">
-              Murid mengerjakan tugas sesuai tahapan yang ditentukan dengan instrumen yang bervariasi
+              Siswa mengerjakan tugas sesuai tahapan yang ditentukan dengan instrumen yang bervariasi
             </p>
           </div>
 
