@@ -64,7 +64,11 @@ export function PeerAssessmentDialog({
   const [answers, setAnswers] = React.useState<(number|null)[][]>(() => {
     const memberCount = currentUserId ? members.filter(m => m.id !== currentUserId).length : members.length
     if (initialValue && initialValue.length === statements.length) {
-      return initialValue.map(row => [...row])
+      // Validate that initialValue is actually a 2D array
+      if (Array.isArray(initialValue[0])) {
+        return initialValue.map(row => [...row])
+      }
+      // If it's a flat array (legacy format), ignore it
     }
     return Array.from({ length: statements.length }, () =>
       Array.from({ length: memberCount }, () => null)
@@ -80,7 +84,7 @@ export function PeerAssessmentDialog({
   React.useEffect(() => {
     if (!open) return
 
-    const newAnswers = initialValue && initialValue.length === statements.length
+    const newAnswers = initialValue && initialValue.length === statements.length && Array.isArray(initialValue[0])
       ? initialValue.map(row => [...row])
       : Array.from({ length: statements.length }, () =>
           Array.from({ length: filteredMembers.length }, () => null)

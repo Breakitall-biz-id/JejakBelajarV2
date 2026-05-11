@@ -72,24 +72,24 @@ const studentInstrumentSchema = z.enum([
 ] as const)
 
 const questionnaireSchema = z.object({
-  projectId: z.string().uuid(),
-  stageId: z.string().uuid(),
+  projectId: z.string().min(1),
+  stageId: z.string().min(1),
   instrumentType: studentInstrumentSchema,
-  targetStudentId: z.string().uuid().optional().nullable(),
+  targetStudentId: z.string().min(1).optional().nullable(),
   answers: z.record(z.string(), z.number().min(1).max(4)),
 })
 
 const submissionSchema = z.object({
-  projectId: z.string().uuid(),
-  stageId: z.string().uuid(),
+  projectId: z.string().min(1),
+  stageId: z.string().min(1),
   instrumentType: studentInstrumentSchema,
-  templateStageConfigId: z.string().uuid().optional().nullable(),
+  templateStageConfigId: z.string().min(1).optional().nullable(),
   content: z.union([
     z.object({ text: z.string().trim().min(1, "Response is required") }),
     z.object({ answers: z.array(z.number().min(1).max(4)).min(1) }),
     z.object({ texts: z.array(z.string().trim().min(1, "Response is required")).min(1) })
   ]),
-  targetStudentId: z.string().uuid().optional().nullable(),
+  targetStudentId: z.string().min(1).optional().nullable(),
 })
 
 

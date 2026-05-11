@@ -7,7 +7,7 @@ import { teacherFeedbacks } from '@/db/schema/jejak'
 import { requireTeacherUser } from '@/lib/auth/session'
 
 const listFeedbacksSchema = z.object({
-  projectId: z.string().uuid(),
+  projectId: z.string().min(1),
 })
 
 export async function GET(request: NextRequest) {

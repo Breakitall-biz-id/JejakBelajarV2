@@ -132,6 +132,19 @@ export function ClassWizardForm({
       handleStepChange(0)
       onCancel()
     }
+  }, (errors) => {
+    // Log validation errors that might be on other steps
+    console.error("Form validation errors:", errors)
+    console.error("Current form values:", form.getValues())
+    // Find which step has the error and navigate there
+    for (let i = 0; i < STEP_DEFINITIONS.length; i++) {
+      const stepFields = STEP_DEFINITIONS[i].fields
+      const hasError = stepFields.some(f => errors[f])
+      if (hasError) {
+        handleStepChange(i)
+        break
+      }
+    }
   })
 
   const currentConfig = STEP_DEFINITIONS[currentStep]
@@ -289,9 +302,12 @@ export function ClassWizardForm({
           )}
           {isLastStep && (
             <Button
-              type="submit"
+              type="button"
               className="rounded-full px-7 py-2 text-base font-bold shadow-sm"
               disabled={isSubmitting || disableStudentStep}
+              onClick={() => {
+                submitHandler()
+              }}
             >
               {isSubmitting ? "Menyimpan…" : submitLabel ?? (mode === "create" ? "Buat Kelas" : "Simpan Perubahan")}
             </Button>

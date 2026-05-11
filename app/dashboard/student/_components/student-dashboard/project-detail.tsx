@@ -574,12 +574,15 @@ export function ProjectDetail({
         initialValue={journalDialog.initialValue}
         loading={journalLoading}
         readOnly={(() => {
+          if (!journalDialog.stageName || !journalDialog.instrumentId) return false
           const stage = groupedStages.find(s => s.name === journalDialog.stageName)
+          if (!stage) return false
           const instrument = stage?.requiredInstruments.find(i => i.id === journalDialog.instrumentId)
+          if (!instrument) return false
           // For journals, use unique key with templateStageConfigId
-          const submissionKey = instrument?.instrumentType === 'JOURNAL' && instrument?.templateStageConfigId
+          const submissionKey = instrument.instrumentType === 'JOURNAL' && instrument.templateStageConfigId
             ? `${instrument.instrumentType}_${instrument.templateStageConfigId}`
-            : instrument?.instrumentType || ""
+            : instrument.instrumentType
           const submission = stage?.submissionsByInstrument[submissionKey]?.[0]
           return !!submission
         })()}

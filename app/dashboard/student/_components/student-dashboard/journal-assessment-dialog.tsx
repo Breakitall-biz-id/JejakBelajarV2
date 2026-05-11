@@ -27,15 +27,21 @@ export function JournalAssessmentDialog({
   onSubmit,
 }: JournalAssessmentDialogProps) {
   // Multi-prompt support: answers[index] for each prompt
-  const [answers, setAnswers] = React.useState<string[]>(initialValue || prompts.map(() => ""))
+  const [answers, setAnswers] = React.useState<string[]>(() => initialValue || prompts.map(() => ""))
   const [currentPrompt, setCurrentPrompt] = React.useState(0)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const prevOpenRef = React.useRef(false)
 
   React.useEffect(() => {
-    setAnswers(initialValue || prompts.map(() => ""))
-    setCurrentPrompt(0)
-  }, [initialValue, prompts.length, open])
+    // Only reset when dialog transitions from closed to open
+    if (open && !prevOpenRef.current) {
+      setAnswers(initialValue || prompts.map(() => ""))
+      setCurrentPrompt(0)
+      setError(null)
+    }
+    prevOpenRef.current = open
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const allAnswered = answers.length === prompts.length && answers.every(a => a.trim().length > 0)
 
@@ -71,7 +77,7 @@ export function JournalAssessmentDialog({
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg" key="journal-assessment-dialog"> 
+      <DialogContent className="max-w-lg"> 
         <DialogHeader>
           <DialogTitle className="text-lg font-medium text-center">
             {title || "Jurnal Refleksi"}
@@ -109,7 +115,10 @@ export function JournalAssessmentDialog({
             </Button>
           ) : (
             <Button
-              onClick={handleSubmit}
+              onClick={() => {
+                console.log('Submit clicked', { loading, allAnswered, readOnly, answers })
+                handleSubmit()
+              }}
               disabled={loading || !allAnswered || readOnly}
             >
               {isSubmitting ? "Menyimpan..." : "Simpan"}
