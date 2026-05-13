@@ -120,7 +120,7 @@ export function StudentDimensionScores({ student, projectId }: StudentDimensionS
           </Badge>
         </CardTitle>
         <CardDescription>
-          Progres Anda dalam berbagai dimensi Kokurikuler
+          Progres Anda dalam berbagai dimensi
         </CardDescription>
       </CardHeader>
       <CardContent>

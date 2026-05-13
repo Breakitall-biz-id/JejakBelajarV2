@@ -72,12 +72,12 @@ export type RaporData = {
 
 export async function GET(
   request: Request,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const session = await requireStudentUser()
     const student = session.user
-    const projectId = params.projectId
+    const { projectId } = await params
 
     // Get project details with class and teacher information
     const projectData = await db

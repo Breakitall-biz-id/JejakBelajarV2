@@ -87,7 +87,7 @@ export function AppSidebar({ initialRole, initialUser, ...props }: AppSidebarPro
     const fallback = {
       name: "Tamu",
       email: "tamu@example.com",
-      avatar: "/codeguide-logo.png",
+      avatar: "/jejak-belajar-logo.svg",
     }
 
     const activeUser = session?.user ?? initialUser
@@ -99,7 +99,7 @@ export function AppSidebar({ initialRole, initialUser, ...props }: AppSidebarPro
     return {
       name: activeUser.name || "Pengguna",
       email: activeUser.email,
-      avatar: activeUser.image || "/codeguide-logo.png",
+      avatar: activeUser.image || "/jejak-belajar-logo.svg",
     }
   }, [initialUser, session?.user])
 
@@ -110,7 +110,7 @@ export function AppSidebar({ initialRole, initialUser, ...props }: AppSidebarPro
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
               <Link href="/">
-                <Image src="/codeguide-logo.png" alt="JejakBelajar" width={32} height={32} className="rounded-lg" />
+                <Image src="/jejak-belajar-logo.svg" alt="JejakBelajar" width={32} height={32} className="rounded-lg" />
                 <span className="text-base font-semibold font-parkinsans">JejakBelajar</span>
               </Link>
             </SidebarMenuButton>

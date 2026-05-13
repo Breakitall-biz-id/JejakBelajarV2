@@ -33,8 +33,8 @@ export default function Home() {
           <div className="mb-6">
             <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium mb-4 sm:mb-6">
               <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">Platform Pembelajaran Interaktif</span>
-              <span className="sm:hidden">Platform Interaktif</span>
+              <span className="hidden sm:inline">Platform Asesmen Interaktif</span>
+              <span className="sm:hidden">Platform Asesmen</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 bg-clip-text text-transparent mb-4 sm:mb-6 leading-tight">
@@ -42,10 +42,10 @@ export default function Home() {
             </h1>
 
             <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-8 leading-relaxed px-2">
-              Platform pembelajaran yang membantu guru dan siswa melacak progres pembelajaran
+              Platform asesmen yang membantu guru dan siswa untuk merefleksikan tiap langkah pembelajaran,
               <br className="hidden sm:inline" />
               <span className="sm:hidden"> </span>
-              dengan sistem penilaian yang komprehensif dan transparan.
+              karena asesmen bukan sekedar angka, ada jejak belajar yang sarat makna.
             </p>
 
             <HeroAuthButtons />
@@ -59,7 +59,7 @@ export default function Home() {
           <div className="text-4xl sm:text-5xl lg:text-6xl mb-3 sm:mb-4">📚</div>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">Fitur Utama</h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-            Didesain khusus untuk mendukung proses belajar mengajar yang modern dan efektif
+            Didesain khusus untuk mendukung pembelajaran khususnya project-based learning
           </p>
         </div>
 
@@ -104,19 +104,19 @@ export default function Home() {
             <ul className="space-y-2 sm:space-y-3 text-muted-foreground">
               <li className="flex items-start gap-2">
                 <FileText className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-xs sm:text-sm">Kerjakan tugas dengan instruksi yang jelas</span>
+                <span className="text-xs sm:text-sm">Refleksikan proses belajar</span>
               </li>
               <li className="flex items-start gap-2">
                 <Award className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-xs sm:text-sm">Lihat progres pembelajaran secara visual</span>
+                <span className="text-xs sm:text-sm">Lakukan penilaian diri dan penilaian teman sebaya</span>
               </li>
               <li className="flex items-start gap-2">
                 <Star className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-xs sm:text-sm">Dapatkan feedback langsung dari guru</span>
+                <span className="text-xs sm:text-sm">Dapatkan feedback dari guru maupun teman</span>
               </li>
               <li className="flex items-start gap-2">
                 <Zap className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-xs sm:text-sm">Belajar dengan tempo yang sesuai</span>
+                <span className="text-xs sm:text-sm">Gunakan feedback untuk perbaikan</span>
               </li>
             </ul>
           </Card>
@@ -132,7 +132,7 @@ export default function Home() {
             <ul className="space-y-2 sm:space-y-3 text-muted-foreground">
               <li className="flex items-start gap-2">
                 <BookOpen className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
-                <span className="text-xs sm:text-sm"><strong>Jurnal Harian</strong> - Refleksi pembelajaran</span>
+                <span className="text-xs sm:text-sm"><strong>Jurnal Reflektif</strong> - Refleksi pembelajaran</span>
               </li>
               <li className="flex items-start gap-2">
                 <Users className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
@@ -144,7 +144,7 @@ export default function Home() {
               </li>
               <li className="flex items-start gap-2">
                 <Award className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
-                <span className="text-xs sm:text-sm"><strong>Observasi</strong> - Penilaian langsung guru</span>
+                <span className="text-xs sm:text-sm"><strong>Lembar Observasi</strong> - Penilaian langsung guru</span>
               </li>
             </ul>
           </Card>
@@ -154,7 +154,7 @@ export default function Home() {
         <div className="text-center mb-10 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">Cara Kerja</h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-            Proses pembelajaran yang terstruktur dan mudah diikuti
+            Asesmen terintegrasi dalam aktivitas pembelajaran dan bersifat <em>on going</em>
           </p>
         </div>
 
@@ -163,9 +163,9 @@ export default function Home() {
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
               <span className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">1</span>
             </div>
-            <h3 className="font-semibold text-base sm:text-lg mb-2">Guru Membuat Proyek</h3>
+            <h3 className="font-semibold text-base sm:text-lg mb-2">Rancang Proyek dan Kriteria</h3>
             <p className="text-muted-foreground text-xs sm:text-sm px-4">
-              Guru membuat proyek pembelajaran dengan tahapan dan instrumen penilaian yang jelas
+              Guru menyiapkan proyek, tujuan, kriteria keberhasilan, instrumen penilaian yang jelas
             </p>
           </div>
 
@@ -173,9 +173,9 @@ export default function Home() {
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
               <span className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">2</span>
             </div>
-            <h3 className="font-semibold text-base sm:text-lg mb-2">Siswa Mengerjakan</h3>
+            <h3 className="font-semibold text-base sm:text-lg mb-2">Belajar, Menilai & Merefleksi</h3>
             <p className="text-muted-foreground text-xs sm:text-sm px-4">
-              Siswa mengerjakan tugas sesuai tahapan yang ditentukan dengan instrumen yang bervariasi
+              Siswa mengerjakan proyek, melakukan penilaian diri dan teman, serta merefleksikan proses belajarnya
             </p>
           </div>
 
@@ -183,9 +183,9 @@ export default function Home() {
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-purple-100 dark:bg-purple-900/50 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
               <span className="text-xl sm:text-2xl font-bold text-purple-600 dark:text-purple-400">3</span>
             </div>
-            <h3 className="font-semibold text-base sm:text-lg mb-2">Monitor & Evaluasi</h3>
+            <h3 className="font-semibold text-base sm:text-lg mb-2">Terima Feedback & Perbaiki</h3>
             <p className="text-muted-foreground text-xs sm:text-sm px-4">
-              Guru memantau progres dan memberikan penilaian serta feedback yang konstruktif
+              Siswa menggunakan feedback dari guru dan teman untuk melakukan perbaikan secara berkelanjutan
             </p>
           </div>
         </div>
@@ -194,7 +194,7 @@ export default function Home() {
         <Card className="p-6 sm:p-8 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-center">
           <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Mulai Perjalanan Belajar Anda</h2>
           <p className="text-base sm:text-lg mb-4 sm:mb-6 opacity-90 max-w-2xl mx-auto px-4">
-            Bergabunglah dengan Jejak Belajar dan rasakan pengalaman pembelajaran yang lebih terstruktur dan menyenangkan.
+            Bergabunglah dengan Jejak Belajar dan rasakan pengalaman yang membantu Anda melihat perkembangan diri dan memahami hal yang perlu diperbaiki.
           </p>
           <HeroAuthButtons />
         </Card>

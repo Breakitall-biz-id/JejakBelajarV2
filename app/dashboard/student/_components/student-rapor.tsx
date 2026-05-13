@@ -89,7 +89,7 @@ export function StudentRapor({ student, projectId }: StudentRaporProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Rapor Kokurikuler</CardTitle>
+          <CardTitle>Rapor</CardTitle>
           <CardDescription>Memuat laporan Anda...</CardDescription>
         </CardHeader>
         <CardContent>
@@ -110,7 +110,7 @@ export function StudentRapor({ student, projectId }: StudentRaporProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Rapor Kokurikuler</CardTitle>
+          <CardTitle>Rapor</CardTitle>
           <CardDescription>Tidak dapat memuat laporan</CardDescription>
         </CardHeader>
         <CardContent>
@@ -155,9 +155,9 @@ export function StudentRapor({ student, projectId }: StudentRaporProps) {
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <CardTitle className="text-2xl font-bold">Rapor Kokurikuler</CardTitle>
+              <CardTitle className="text-2xl font-bold">Rapor</CardTitle>
               <CardDescription>
-                Laporan Penilaian Proyek Kokurikuler - {raporData.project.theme}
+                Laporan Penilaian Proyek - {raporData.project.theme}
               </CardDescription>
             </div>
             <Button onClick={handleDownloadPDF} className="print:hidden">
@@ -246,7 +246,7 @@ export function StudentRapor({ student, projectId }: StudentRaporProps) {
         <CardHeader>
           <CardTitle>Detail Performa Dimensi</CardTitle>
           <CardDescription>
-            Penilaian mendalam di berbagai dimensi Kokurikuler
+            Penilaian mendalam di berbagai dimensi
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -401,7 +401,7 @@ export function StudentRapor({ student, projectId }: StudentRaporProps) {
                 <li key={index} className="border-l-2 border-muted pl-3 space-y-1">
                   <p className="text-sm">{pf.comment}</p>
                   <p className="text-xs text-muted-foreground">
-                    — {pf.authorName || "Teman"},{" "}
+                    — Teman Sebaya,{" "}
                     {new Date(pf.createdAt).toLocaleDateString("id-ID", {
                       day: "numeric",
                       month: "long",
@@ -427,7 +427,7 @@ export function StudentRapor({ student, projectId }: StudentRaporProps) {
           hour: '2-digit',
           minute: '2-digit'
         })}</p>
-        <p className="mt-1">Rapor Kokurikuler - Sistem Penilaian Proyek Kokurikuler</p>
+        <p className="mt-1">Rapor - Sistem Penilaian Proyek</p>
       </div>
     </div>
   )

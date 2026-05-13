@@ -156,9 +156,9 @@ export function StudentRaporView({ classId, studentId }: StudentRaporViewProps) 
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <CardTitle className="text-2xl font-bold">Rapor Kokurikuler Siswa</CardTitle>
+              <CardTitle className="text-2xl font-bold">Rapor Siswa</CardTitle>
               <CardDescription>
-                Laporan Penilaian Proyek Kokurikuler - {raporData.project.theme}
+                Laporan Penilaian Proyek - {raporData.project.theme}
               </CardDescription>
             </div>
             <div className="flex gap-2">
@@ -267,7 +267,7 @@ export function StudentRaporView({ classId, studentId }: StudentRaporViewProps) 
             <CardHeader>
               <CardTitle>Detail Performa Dimensi</CardTitle>
               <CardDescription>
-                Penilaian mendalam di berbagai dimensi Kokurikuler
+                Penilaian mendalam di berbagai dimensi
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -452,7 +452,7 @@ export function StudentRaporView({ classId, studentId }: StudentRaporViewProps) 
           hour: '2-digit',
           minute: '2-digit'
         })}</p>
-        <p className="mt-1">Rapor Kokurikuler - Sistem Penilaian Proyek Kokurikuler</p>
+        <p className="mt-1">Rapor - Sistem Penilaian Proyek</p>
       </div>
     </div>
   )

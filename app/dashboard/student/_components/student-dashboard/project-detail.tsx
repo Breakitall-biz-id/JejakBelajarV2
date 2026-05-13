@@ -367,16 +367,16 @@ export function ProjectDetail({
             <Card>
               <CardContent className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
-                  <h3 className="text-lg font-semibold">Evaluasi Anggota Kelompok</h3>
+                  <h3 className="text-lg font-semibold">Feedback Anggota Kelompok</h3>
                   <div className="text-sm text-muted-foreground">
-                    {project.group?.members.filter(member => member.studentId !== project.currentStudentId).length || 0} anggota untuk dievaluasi
+                    {project.group?.members.filter(member => member.studentId !== project.currentStudentId).length || 0} anggota untuk diberi feedback
                   </div>
                 </div>
 
                 <div className="space-y-4 sm:space-y-6">
                   {/* Section for evaluations I gave to others */}
                   <div>
-                    <h4 className="text-md font-medium text-muted-foreground mb-3">Evaluasi yang saya berikan</h4>
+                    <h4 className="text-md font-medium text-muted-foreground mb-3">Feedback yang saya berikan</h4>
                     <div className="space-y-3 sm:space-y-4">
                       {project.group?.members
                         .filter((member) => member.studentId !== project.currentStudentId) // Filter current user
@@ -397,7 +397,7 @@ export function ProjectDetail({
 
                               <div className="w-full sm:w-80 bg-muted/30 rounded-lg border border-border/50">
                                 <div className="p-3 border-b border-border/50">
-                                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Evaluasi Kontribusi</div>
+                                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Feedback</div>
                                 </div>
                                 <div className="p-3">
                                   {editingComment?.memberId === member.studentId ? (
@@ -446,7 +446,7 @@ export function ProjectDetail({
                                                 })
                                               }
 
-                                              toast.success("Evaluasi berhasil disimpan!")
+                                              toast.success("Feedback berhasil disimpan!")
                                               // Clear editing state
                                               setEditingComment(null)
 
@@ -455,7 +455,7 @@ export function ProjectDetail({
                                               setGlobalLoading(false)
                                             } else {
                                               setGlobalLoading(false)
-                                              toast.error(result.error || "Gagal menyimpan evaluasi.")
+                                              toast.error(result.error || "Gagal menyimpan feedback.")
                                             }
                                           }}
                                           className="text-xs h-7 px-3"
@@ -476,7 +476,7 @@ export function ProjectDetail({
                                         {localComments[member.studentId] || member.comment ? (
                                           <span className="line-clamp-2">{localComments[member.studentId] || member.comment}</span>
                                         ) : (
-                                          <span className="italic text-muted-foreground/60 hover:text-primary transition-colors">Belum ada evaluasi</span>
+                                          <span className="italic text-muted-foreground/60 hover:text-primary transition-colors">Belum ada feedback</span>
                                         )}
                                       </div>
                                       <div className="flex justify-end">
@@ -489,7 +489,7 @@ export function ProjectDetail({
                                           })}
                                           className="text-xs h-7 px-3 hover:bg-primary/10 hover:text-primary"
                                         >
-                                          {localComments[member.studentId] || member.comment ? 'Edit Evaluasi' : 'Tambah Evaluasi'}
+                                          {localComments[member.studentId] || member.comment ? 'Edit Feedback' : 'Tambah Feedback'}
                                         </Button>
                                       </div>
                                     </div>
@@ -504,7 +504,7 @@ export function ProjectDetail({
 
                   {/* Section for evaluations I received from others */}
                   <div>
-                    <h4 className="text-md font-medium text-muted-foreground mb-3">Evaluasi dari teman kepada saya</h4>
+                    <h4 className="text-md font-medium text-muted-foreground mb-3">Feedback dari teman kepada saya</h4>
 
                     {/* Collect all feedback and display as anonymous cards */}
                     {(() => {
@@ -517,7 +517,7 @@ export function ProjectDetail({
                         return (
                           <div className="text-center py-4 sm:py-6">
                             <div className="text-muted-foreground text-sm">
-                              Belum ada evaluasi dari teman-teman kelompok Anda
+                              Belum ada feedback dari teman-teman kelompok Anda
                             </div>
                           </div>
                         )
